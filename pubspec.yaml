@@ -1,0 +1,37 @@
+name: motodashboard
+description: "A new Flutter project."
+
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0-99.0.dev
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_blue_plus: ^1.15.1  # สำหรับจัดการ BLE
+  syncfusion_flutter_gauges: ^25.1.39 # สำหรับสร้างมาตรวัดแบบเข็ม
+  provider: ^6.1.2            # สำหรับ State Management
+  flutter_launcher_icons: ^0.13.1
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints: ^6.0.0
+
+flutter:
+
+  
+  uses-material-design: true
+
+# เพิ่มส่วนนี้ที่ท้ายไฟล์ pubspec.yaml
+flutter_launcher_icons:
+  android: "launcher_icon"   # ตั้งชื่อไฟล์ไอคอนสำหรับ Android
+  ios: true                  # เปิดใช้งานสำหรับ iOS
+  image_path: "assets/icon/icon.png" # ระบุตำแหน่งไฟล์ไอคอนต้นฉบับของคุณ
+  min_sdk_android: 21 # (Optional) เพื่อรองรับ Adaptive Icons
