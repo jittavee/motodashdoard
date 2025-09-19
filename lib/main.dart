@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 1. Import package services
-import 'package:motodashboard/dashboard_provider.dart';
-import 'package:motodashboard/find_devices_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'core/constants.dart';
+import 'providers/dashboard_provider.dart';
+import 'screens/find_devices_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,7 +11,7 @@ void main() {
     DeviceOrientation.landscapeRight,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown, // บังคับให้เป็นแนวนอนด้านขวา
+    DeviceOrientation.portraitDown,
   ]).then((_) {
     runApp(const MyApp());
   });
@@ -25,10 +26,10 @@ class MyApp extends StatelessWidget {
       create: (context) => DashboardProvider(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'ApiTech Dashboard',
+        title: AppConstants.appTitle,
         theme: ThemeData.dark().copyWith(
           primaryColor: Colors.orange,
-          scaffoldBackgroundColor: const Color(0xFF1a1a1a),
+          scaffoldBackgroundColor: const Color(AppConstants.primaryColorHex),
         ),
         home: const FindDevicesScreen(),
       ),
