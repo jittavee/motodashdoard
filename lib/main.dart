@@ -6,6 +6,7 @@ import 'controllers/settings_controller.dart';
 import 'controllers/ecu_data_controller.dart';
 import 'controllers/bluetooth_controller.dart';
 import 'constants/app_themes.dart';
+import 'views/screens/splash_screen.dart';
 import 'views/screens/dashboard_screen.dart';
 import 'views/screens/bluetooth_screen.dart';
 import 'views/screens/settings_screen.dart';
@@ -34,25 +35,19 @@ class MyApp extends StatelessWidget {
     Get.put(ECUDataController());
     Get.put(BluetoothController());
 
-    return Obx(() => GetMaterialApp(
-          title: 'ECU Gauge',
-          debugShowCheckedModeBanner: false,
-          theme: AppThemes.getTheme(themeController.currentTheme.value),
-          initialRoute: '/',
-          getPages: [
-            GetPage(
-              name: '/',
-              page: () => const DashboardScreen(),
-            ),
-            GetPage(
-              name: '/bluetooth',
-              page: () => const BluetoothScreen(),
-            ),
-            GetPage(
-              name: '/settings',
-              page: () => const SettingsScreen(),
-            ),
-          ],
-        ));
+    return Obx(
+      () => GetMaterialApp(
+        title: 'ECU Gauge',
+        debugShowCheckedModeBanner: false,
+        theme: AppThemes.getTheme(themeController.currentTheme.value),
+        initialRoute: '/splash',
+        getPages: [
+          GetPage(name: '/splash', page: () => const SplashScreen()),
+          GetPage(name: '/', page: () => const DashboardScreen()),
+          GetPage(name: '/bluetooth', page: () => const BluetoothScreen()),
+          GetPage(name: '/settings', page: () => const SettingsScreen()),
+        ],
+      ),
+    );
   }
 }
