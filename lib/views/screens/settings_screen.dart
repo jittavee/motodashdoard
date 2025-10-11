@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/theme_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/language_controller.dart';
-import '../../constants/app_themes.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeController = Get.find<ThemeController>();
     final settingsController = Get.find<SettingsController>();
     final languageController = Get.find<LanguageController>();
 
@@ -20,10 +17,6 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          // Theme Selection
-          
-          
-
           // Speed Unit
           const ListTile(
             leading: Icon(Icons.speed),
