@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/theme_controller.dart';
 import '../../controllers/settings_controller.dart';
+import '../../controllers/language_controller.dart';
 import '../../constants/app_themes.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -11,70 +12,17 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
     final settingsController = Get.find<SettingsController>();
+    final languageController = Get.find<LanguageController>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text('settings'.tr),
       ),
       body: ListView(
         children: [
           // Theme Selection
-          const ListTile(
-            leading: Icon(Icons.palette),
-            title: Text(
-              'Theme',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ),
-          Obx(() => Column(
-                children: ThemeType.values.map((theme) {
-                  return RadioListTile<ThemeType>(
-                    title: Text(themeController.getThemeName(theme)),
-                    value: theme,
-                    groupValue: themeController.currentTheme.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        themeController.changeTheme(value);
-                      }
-                    },
-                  );
-                }).toList(),
-              )),
-          const Divider(),
-
-          // Temperature Unit
-          const ListTile(
-            leading: Icon(Icons.thermostat),
-            title: Text(
-              'Temperature Unit',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ),
-          Obx(() => Column(
-                children: [
-                  RadioListTile<TemperatureUnit>(
-                    title: const Text('Celsius (°C)'),
-                    value: TemperatureUnit.celsius,
-                    groupValue: settingsController.temperatureUnit.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        settingsController.setTemperatureUnit(value);
-                      }
-                    },
-                  ),
-                  RadioListTile<TemperatureUnit>(
-                    title: const Text('Fahrenheit (°F)'),
-                    value: TemperatureUnit.fahrenheit,
-                    groupValue: settingsController.temperatureUnit.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        settingsController.setTemperatureUnit(value);
-                      }
-                    },
-                  ),
-                ],
-              )),
-          const Divider(),
+          
+          
 
           // Speed Unit
           const ListTile(
@@ -111,32 +59,32 @@ class SettingsScreen extends StatelessWidget {
           const Divider(),
 
           // Language
-          const ListTile(
-            leading: Icon(Icons.language),
+          ListTile(
+            leading: const Icon(Icons.language),
             title: Text(
-              'Language',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              'language'.tr,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
           Obx(() => Column(
                 children: [
-                  RadioListTile<Language>(
-                    title: const Text('ไทย'),
-                    value: Language.thai,
-                    groupValue: settingsController.language.value,
+                  RadioListTile<Locale>(
+                    title: Text('thai'.tr),
+                    value: const Locale('th', 'TH'),
+                    groupValue: languageController.currentLocale.value,
                     onChanged: (value) {
                       if (value != null) {
-                        settingsController.setLanguage(value);
+                        languageController.changeLanguage(value);
                       }
                     },
                   ),
-                  RadioListTile<Language>(
-                    title: const Text('English'),
-                    value: Language.english,
-                    groupValue: settingsController.language.value,
+                  RadioListTile<Locale>(
+                    title: Text('english'.tr),
+                    value: const Locale('en', 'US'),
+                    groupValue: languageController.currentLocale.value,
                     onChanged: (value) {
                       if (value != null) {
-                        settingsController.setLanguage(value);
+                        languageController.changeLanguage(value);
                       }
                     },
                   ),
@@ -144,19 +92,7 @@ class SettingsScreen extends StatelessWidget {
               )),
           const Divider(),
 
-          // Auto Day/Night Mode
-          Obx(() => SwitchListTile(
-                title: const Text('Auto Day/Night Mode'),
-                subtitle: const Text('เปลี่ยนธีมอัตโนมัติตามเวลา'),
-                value: settingsController.autoDayNightMode.value,
-                onChanged: (value) {
-                  settingsController.setAutoDayNightMode(value);
-                },
-                secondary: const Icon(Icons.brightness_auto),
-              )),
-
-          const Divider(),
-
+         
           // Other Options
           ListTile(
             leading: const Icon(Icons.notifications),
