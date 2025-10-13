@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../controllers/bluetooth_controller.dart';
 
 class BluetoothScreen extends StatelessWidget {
-  const BluetoothScreen({Key? key}) : super(key: key);
+  const BluetoothScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,74 +11,94 @@ class BluetoothScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bluetooth Connection'),
+        title: Text('scan_devices'.tr),
+        actions: [
+          Row(
+            children: [
+              TextButton(
+                onPressed: btController.isScanning.value
+                    ? null
+                    : btController.startScan,
+                child: Text('add_devices'.tr),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: btController.isScanning.value
+                    ? null
+                    : btController.startScan,
+                tooltip: 'add_devices'.tr,
+              ),
+            ],
+          ),
+        ],
       ),
-      body: Column(
-        children: [
-          // Connection Status
-          Obx(() => Container(
+      body: Obx(() {
+        return Column(
+          children: [
+            // Connected Device
+            if (btController.connectedDevice != null)
+              Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
-                color: _getStatusColor(btController.connectionStatus.value),
-                child: Column(
+                color: Colors.green,
+                child: Row(
                   children: [
-                    Icon(
-                      _getStatusIcon(btController.connectionStatus.value),
-                      size: 48,
+                    const Icon(
+                      Icons.bluetooth_connected,
+                      size: 40,
                       color: Colors.white,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _getStatusText(btController.connectionStatus.value),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'เชื่อมต่ออยู่',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            btController.connectedDevice!.platformName.isEmpty
+                                ? 'Unknown Device'
+                                : btController.connectedDevice!.platformName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            btController.connectedDevice!.remoteId.toString(),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    if (btController.connectedDevice != null)
-                      Text(
-                        btController.connectedDevice!.platformName,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
+                    ElevatedButton(
+                      onPressed: btController.disconnect,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
                       ),
+                      child: const Text('ตัดการเชื่อมต่อ'),
+                    ),
                   ],
                 ),
-              )),
+              ),
 
-          // Scan Button
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Obx(() => ElevatedButton.icon(
-                  onPressed: btController.isScanning.value
-                      ? btController.stopScan
-                      : btController.startScan,
-                  icon: Icon(
-                    btController.isScanning.value
-                        ? Icons.stop
-                        : Icons.bluetooth_searching,
-                  ),
-                  label: Text(
-                    btController.isScanning.value
-                        ? 'หยุดสแกน'
-                        : 'สแกนอุปกรณ์',
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                )),
-          ),
-
-          // Error Message
-          Obx(() {
-            if (btController.errorMessage.value.isNotEmpty) {
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
+            // Error Message
+            if (btController.errorMessage.value.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.red),
                 ),
@@ -94,133 +114,108 @@ class BluetoothScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
+              ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // Device List
-          Expanded(
-            child: Obx(() {
-              if (btController.scanResults.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.bluetooth_disabled,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'ไม่พบอุปกรณ์',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'กดปุ่มสแกนเพื่อค้นหาอุปกรณ์',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                itemCount: btController.scanResults.length,
-                itemBuilder: (context, index) {
-                  final result = btController.scanResults[index];
-                  final device = result.device;
-
-                  return Card(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: ListTile(
-                      leading: const Icon(Icons.bluetooth),
-                      title: Text(
-                        device.platformName.isEmpty
-                            ? 'Unknown Device'
-                            : device.platformName,
-                      ),
-                      subtitle: Text(device.remoteId.toString()),
-                      trailing: Obx(() {
-                        final isConnected = btController.connectedDevice != null &&
-                            btController.connectedDevice!.remoteId ==
-                                device.remoteId;
-
-                        if (isConnected) {
-                          return ElevatedButton(
-                            onPressed: btController.disconnect,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            child: const Text('ตัดการเชื่อมต่อ'),
-                          );
-                        }
-
-                        return ElevatedButton(
-                          onPressed: () {
-                            btController.connectToDevice(device);
-                          },
-                          child: const Text('เชื่อมต่อ'),
-                        );
-                      }),
-                    ),
-                  );
+            // Device List with Pull to Refresh
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await btController.startScan();
                 },
-              );
-            }),
-          ),
-        ],
-      ),
+                child: btController.scanResults.isEmpty
+                    ? LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight,
+                              ),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      btController.isScanning.value
+                                          ? Icons.bluetooth_searching
+                                          : Icons.bluetooth_disabled,
+                                      size: 64,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      btController.isScanning.value
+                                          ? 'กำลังค้นหาอุปกรณ์...'
+                                          : 'ไม่พบอุปกรณ์',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'ลากลงเพื่อค้นหาอุปกรณ์',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: btController.scanResults.length,
+                        itemBuilder: (context, index) {
+                          final result = btController.scanResults[index];
+                          final device = result.device;
+                          final isConnected =
+                              btController.connectedDevice != null &&
+                              btController.connectedDevice!.remoteId ==
+                                  device.remoteId;
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: ListTile(
+                              leading: const Icon(Icons.bluetooth),
+                              title: Text(
+                                device.platformName.isEmpty
+                                    ? 'Unknown Device'
+                                    : device.platformName,
+                              ),
+                              subtitle: Text(device.remoteId.toString()),
+                              trailing: isConnected
+                                  ? ElevatedButton(
+                                      onPressed: btController.disconnect,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                      ),
+                                      child: const Text('ตัดการเชื่อมต่อ'),
+                                    )
+                                  : ElevatedButton(
+                                      onPressed: () {
+                                        btController.connectToDevice(device);
+                                      },
+                                      child: const Text('เชื่อมต่อ'),
+                                    ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ),
+          ],
+        );
+      }),
     );
-  }
-
-  Color _getStatusColor(BluetoothConnectionStatus status) {
-    switch (status) {
-      case BluetoothConnectionStatus.connected:
-        return Colors.green;
-      case BluetoothConnectionStatus.connecting:
-        return Colors.orange;
-      case BluetoothConnectionStatus.disconnected:
-        return Colors.grey;
-      case BluetoothConnectionStatus.error:
-        return Colors.red;
-    }
-  }
-
-  IconData _getStatusIcon(BluetoothConnectionStatus status) {
-    switch (status) {
-      case BluetoothConnectionStatus.connected:
-        return Icons.bluetooth_connected;
-      case BluetoothConnectionStatus.connecting:
-        return Icons.bluetooth_searching;
-      case BluetoothConnectionStatus.disconnected:
-        return Icons.bluetooth_disabled;
-      case BluetoothConnectionStatus.error:
-        return Icons.error;
-    }
-  }
-
-  String _getStatusText(BluetoothConnectionStatus status) {
-    switch (status) {
-      case BluetoothConnectionStatus.connected:
-        return 'เชื่อมต่อแล้ว';
-      case BluetoothConnectionStatus.connecting:
-        return 'กำลังเชื่อมต่อ...';
-      case BluetoothConnectionStatus.disconnected:
-        return 'ไม่ได้เชื่อมต่อ';
-      case BluetoothConnectionStatus.error:
-        return 'เกิดข้อผิดพลาด';
-    }
   }
 }

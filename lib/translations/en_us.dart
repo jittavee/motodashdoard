@@ -27,6 +27,7 @@ const Map<String, String> enUs = {
   // Bluetooth
   'bluetooth': 'Bluetooth',
   'scan_devices': 'Scan Devices',
+  'add_devices': 'Add Device',
   'available_devices': 'Available Devices',
   'connected_device': 'Connected Device',
   'connect': 'Connect',

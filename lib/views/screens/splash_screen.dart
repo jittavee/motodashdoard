@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -72,8 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
                   children: [
                     // โลโก้
                     SizedBox(
-                      width: 180,
-                      height: 180,
+                      width: 200,
                       child: Image.asset(
                         'assets/icon.jpg',
                         fit: BoxFit.fitWidth,
@@ -102,13 +101,6 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      'กำลังโหลด...',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue.shade600,
-                      ),
-                    ),
                   ],
                 ),
               ),

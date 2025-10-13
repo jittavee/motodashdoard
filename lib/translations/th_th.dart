@@ -27,6 +27,7 @@ const Map<String, String> thTh = {
   // Bluetooth
   'bluetooth': 'บลูทูธ',
   'scan_devices': 'ค้นหาอุปกรณ์',
+  'add_devices': 'เชื่อมต่ออุปกรณ์',
   'available_devices': 'อุปกรณ์ที่พบ',
   'connected_device': 'อุปกรณ์ที่เชื่อมต่อ',
   'connect': 'เชื่อมต่อ',
