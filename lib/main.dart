@@ -1,18 +1,27 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
 import 'controllers/theme_controller.dart';
 import 'controllers/settings_controller.dart';
 import 'controllers/ecu_data_controller.dart';
 import 'controllers/bluetooth_controller.dart';
 import 'controllers/language_controller.dart';
+
 import 'constants/app_themes.dart';
 import 'translations/app_translations.dart';
+
 import 'views/screens/splash_screen.dart';
-import 'views/screens/dashboard_screen.dart';
 import 'views/screens/bluetooth_screen.dart';
 import 'views/screens/settings_screen.dart';
 import 'views/screens/alert_settings_screen.dart';
+import 'views/screens/list_ui_screean.dart';
+import 'views/screens/template_1.dart';
+import 'views/screens/template_2.dart';
+import 'views/screens/template_3.dart';
+import 'views/screens/template_4.dart';
+import 'views/screens/template_5.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,10 +61,15 @@ class MyApp extends StatelessWidget {
         initialRoute: '/splash',
         getPages: [
           GetPage(name: '/splash', page: () => const SplashScreen()),
-          GetPage(name: '/', page: () => const DashboardScreen()),
+          GetPage(name: '/', page: () => const ListUiScreean()),
           GetPage(name: '/bluetooth', page: () => const BluetoothScreen()),
           GetPage(name: '/settings', page: () => const SettingsScreen()),
           GetPage(name: '/alert-settings', page: () => const AlertSettingsScreen()),
+          GetPage(name: '/template-1', page: () => const TemplateOneScreen()),
+          GetPage(name: '/template-2', page: () => const TemplateTwoScreen()),
+          GetPage(name: '/template-3', page: () => const TemplateThreeScreen()),
+          GetPage(name: '/template-4', page: () => const TemplateFourScreen()),
+          GetPage(name: '/template-5', page: () => const TemplateFiveScreen()),
         ],
       ),
     );

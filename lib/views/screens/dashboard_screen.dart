@@ -10,7 +10,7 @@ import '../widgets/speed_gauge.dart';
 import '../widgets/info_card.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

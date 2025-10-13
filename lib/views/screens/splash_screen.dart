@@ -79,17 +79,6 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     const SizedBox(height: 40),
-                    // ชื่อแอป
-                    const Text(
-                      'ECU GAUGE',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                        letterSpacing: 4,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                     // Loading indicator
                     SizedBox(
                       width: 200,
