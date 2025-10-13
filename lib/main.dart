@@ -17,9 +17,8 @@ import 'views/screens/alert_settings_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // กำหนดให้แอปรองรับทั้ง portrait และ landscape
+  // บังคับให้แอปใช้แนวนอนเท่านั้น (ทั้งซ้ายและขวา)
   await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
