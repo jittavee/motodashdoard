@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ListUiScreean extends StatelessWidget {
-  const ListUiScreean({super.key});
+class ListUiScreen extends StatelessWidget {
+  const ListUiScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
