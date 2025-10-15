@@ -4,15 +4,15 @@ import '../views/screens/list_ui_screen.dart';
 import '../views/screens/bluetooth_screen.dart';
 import '../views/screens/settings_screen.dart';
 import '../views/screens/alert_settings_screen.dart';
-import '../views/screens/templates/template_1.dart';
-import '../views/screens/templates/template_2.dart';
-import '../views/screens/templates/template_3.dart';
-import '../views/screens/templates/template_4.dart';
-import '../views/screens/templates/template_5.dart';
+import '../views/screens/dashboard/dashboard_1.dart';
+import '../views/screens/dashboard/template_2.dart';
+import '../views/screens/dashboard/template_3.dart';
+import '../views/screens/dashboard/template_4.dart';
+import '../views/screens/dashboard/template_5.dart';
 import 'app_routes.dart';
 
 class AppPages {
-  static const initial = AppRoutes.splash;
+  static const initial = AppRoutes.template1;
 
   static final routes = [
     GetPage(
