@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:api_tech_moto/models/ecu_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
@@ -47,9 +48,11 @@ class TemplateOneScreen extends StatelessWidget {
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
                     return _buildRotatingNeedleGauge(
-                      rpm: rpm,
-                      maxRpm: 15000,
+                      value: rpm,
+                      maxValue: 15000,
                       size: 85,
+                      offsetAngle: 150.0,
+                      rotationRange: 240.0,
                     );
                   }),
                 ),
@@ -64,14 +67,18 @@ class TemplateOneScreen extends StatelessWidget {
 
                 // Speed Gauge
                 Positioned(
-                  top: screenHeight * 0.53, // 53% จากด้านบน
-                  left: screenWidth * 0.5 - 225,
+                  top: screenHeight * 0.53 + 1, // 53% จากด้านบน
+                  left: screenWidth * 0.5 - 196,
                   child: Obx(() {
-                    final rpm = ecuController.currentData.value?.rpm ?? 0;
+                    final speed = ecuController.currentData.value?.speed ?? 0;
                     return _buildRotatingNeedleGauge(
-                      rpm: rpm,
-                      maxRpm: 15000,
-                      size: 50,
+                      value: speed, // ค่าปัจจุบันของความเร็ว
+                      maxValue: 250, // ความเร็วสูงสุด (km/h)
+                      size: 50, // ขนาด gauge (pixels)
+                      offsetAngle:
+                          100.0, // มุมเริ่มต้น (องศา) - ปรับตำแหน่งเข็มที่ 0 km/h
+                      rotationRange:
+                          247.0, // ช่วงการหมุน (องศา) - จาก 0 ถึง 250 km/h
                     );
                   }),
                 ),
@@ -85,6 +92,19 @@ class TemplateOneScreen extends StatelessWidget {
                 ),
 
                 // Data Display (Left Side)
+                Positioned(
+                  top: screenHeight * 0.5, // 53% จากด้านบน
+                  left:
+                      screenWidth * 0.1 + 50, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
+                  child: Container(
+                    height: 105,
+                    padding: const EdgeInsets.all(12),
+                    child: Obx(() {
+                      final data = ecuController.currentData.value;
+                      return _buildLeftSide(data);
+                    }),
+                  ),
+                ),
                 // Positioned(
                 //   left: 20,
                 //   top: 100,
@@ -134,6 +154,39 @@ class TemplateOneScreen extends StatelessWidget {
     );
   }
 
+  Column _buildLeftSide(ECUData? data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildDataRow(
+          'M4P',
+          data?.map.toStringAsFixed(0) ?? 'XXX',
+          'kPa.',
+          Colors.white,
+        ),
+        _buildDataRow(
+          'BATTERY',
+          data?.battery.toStringAsFixed(1) ?? 'XX',
+          'V.',
+          Colors.white,
+        ),
+        _buildDataRow(
+          'IAT',
+          data?.airTemp.toStringAsFixed(0) ?? 'XX',
+          'C.',
+          Colors.white,
+        ),
+        _buildDataRow(
+          'ECT',
+          data?.waterTemp.toStringAsFixed(0) ?? 'XX',
+          'C.',
+          Colors.white,
+        ),
+      ],
+    );
+  }
+
   /// RPM Number Display
   Widget _buildNumberRPM({required double rpm}) {
     return Container(
@@ -149,13 +202,21 @@ class TemplateOneScreen extends StatelessWidget {
   }
 
   /// Main RPM Gauge with rotating needle
+  ///
+  /// [value] ค่าปัจจุบัน (RPM)
+  /// [maxValue] ค่าสูงสุด
+  /// [size] ขนาดของ gauge
+  /// [offsetAngle] มุม offset เฉพาะของ gauge นี้
+  /// [rotationRange] ช่วงการหมุนเฉพาะของ gauge นี้
   Widget _buildRotatingNeedleGauge({
-    required double rpm,
-    required double maxRpm,
+    required double value, // ค่าปัจจุบัน (RPM, Speed, etc.)
+    required double maxValue, // ค่าสูงสุด
     required double size,
+    required double offsetAngle, // ค่า offset เฉพาะของ gauge นี้
+    required double rotationRange, // ช่วงการหมุนเฉพาะของ gauge นี้
   }) {
-    // คำนวณมุม: RPM 0 = -135°, RPM max = +135° (รวม 270°)
-    final angle = _rpmToAngle(rpm, maxRpm);
+    // คำนวณมุม
+    final angle = _rpmToAngle(value, maxValue, offsetAngle, rotationRange);
 
     return Stack(
       children: [
@@ -182,11 +243,14 @@ class TemplateOneScreen extends StatelessWidget {
   }
 
   /// Convert RPM to angle in degrees
-  double _rpmToAngle(double rpm, double maxRpm) {
+  double _rpmToAngle(
+    double rpm,
+    double maxRpm,
+    double offsetAngle,
+    double rotationRange,
+  ) {
     // RPM 0 → เลข 1 บน gauge, RPM max → เลข 15 บน gauge
     final normalizedRpm = rpm.clamp(0, maxRpm);
-    const offsetAngle = 135.0; // ปรับตำแหน่งเริ่มต้น
-    const rotationRange = 230.0; // ช่วงการหมุน (องศา) - ลดให้หมุนน้อยลง
     return (normalizedRpm / maxRpm) * rotationRange - 135 + offsetAngle;
   }
 
@@ -203,50 +267,6 @@ class TemplateOneScreen extends StatelessWidget {
           fontSize: 25,
           fontWeight: FontWeight.bold,
         ),
-      ),
-    );
-  }
-
-  /// Left Data Panel
-  Widget _buildDataPanel(dynamic data) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildDataRow(
-            'M4P',
-            data?.map.toStringAsFixed(0) ?? 'XXX',
-            'kPa.',
-            Colors.orange,
-          ),
-          const SizedBox(height: 8),
-          _buildDataRow(
-            'BATTERY',
-            data?.battery.toStringAsFixed(1) ?? 'XX',
-            'V.',
-            Colors.orange,
-          ),
-          const SizedBox(height: 8),
-          _buildDataRow(
-            'IAT',
-            data?.airTemp.toStringAsFixed(0) ?? 'XX',
-            'C.',
-            Colors.orange,
-          ),
-          const SizedBox(height: 8),
-          _buildDataRow(
-            'ECT',
-            data?.waterTemp.toStringAsFixed(0) ?? 'XX',
-            'C.',
-            Colors.orange,
-          ),
-        ],
       ),
     );
   }
@@ -300,26 +320,13 @@ class TemplateOneScreen extends StatelessWidget {
     return Row(
       children: [
         Text(
-          '$label ',
-          style: TextStyle(
-            color: color,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Text(
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
           ),
         ),
-        if (unit.isNotEmpty)
-          Text(
-            ' $unit',
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
-          ),
       ],
     );
   }
