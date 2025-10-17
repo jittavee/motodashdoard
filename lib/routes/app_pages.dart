@@ -5,7 +5,7 @@ import '../views/screens/bluetooth_screen.dart';
 import '../views/screens/settings_screen.dart';
 import '../views/screens/alert_settings_screen.dart';
 import '../views/screens/dashboard/dashboard_1.dart';
-import '../views/screens/dashboard/template_2.dart';
+import '../views/screens/dashboard/dashboard_2.dart';
 import '../views/screens/dashboard/template_3.dart';
 import '../views/screens/dashboard/template_4.dart';
 import '../views/screens/dashboard/template_5.dart';
