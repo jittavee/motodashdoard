@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../utils/logger.dart';
 import 'ecu_data_controller.dart';
 
 enum BluetoothConnectionStatus {
@@ -20,7 +21,7 @@ class BluetoothController extends GetxController {
   final RxBool isScanning = false.obs;
   final RxString errorMessage = ''.obs;
 
-  BluetoothDevice? connectedDevice;
+  final Rx<BluetoothDevice?> connectedDevice = Rx<BluetoothDevice?>(null);
   BluetoothCharacteristic? dataCharacteristic;
   StreamSubscription? connectionSubscription;
   StreamSubscription? dataSubscription;
@@ -119,15 +120,17 @@ class BluetoothController extends GetxController {
         timeout: const Duration(seconds: 15),
         mtu: null,
       );
-      connectedDevice = device;
+      connectedDevice.value = device;
 
       // ฟังสถานะการเชื่อมต่อ
       connectionSubscription = device.connectionState.listen((state) {
         if (state == BluetoothConnectionState.connected) {
           connectionStatus.value = BluetoothConnectionStatus.connected;
+          logger.i('Bluetooth Connected: ${device.platformName} (${device.remoteId})');
           _discoverServices();
         } else if (state == BluetoothConnectionState.disconnected) {
           connectionStatus.value = BluetoothConnectionStatus.disconnected;
+          logger.w('Bluetooth Disconnected');
           _handleDisconnection();
         }
       });
@@ -139,38 +142,56 @@ class BluetoothController extends GetxController {
 
   Future<void> _discoverServices() async {
     try {
-      if (connectedDevice == null) return;
+      if (connectedDevice.value == null) return;
+
+      logger.i('Discovering services...');
 
       // ค้นหา services และ characteristics
       List<BluetoothService> services =
-          await connectedDevice!.discoverServices();
+          await connectedDevice.value!.discoverServices();
+
+      logger.i('Found ${services.length} services');
 
       // หา characteristic ที่ใช้รับข้อมูล (ปรับตาม UUID ของกล่อง ECU)
       for (var service in services) {
+        logger.d('Service UUID: ${service.uuid}');
+        logger.d('Characteristics: ${service.characteristics.length}');
+
         for (var characteristic in service.characteristics) {
-          // ตรวจสอบว่า characteristic รองรับ notify หรือ read
-          if (characteristic.properties.notify ||
-              characteristic.properties.read) {
+          logger.d('└─ Characteristic UUID: ${characteristic.uuid}');
+          logger.d('   Properties: Read=${characteristic.properties.read}, '
+                'Write=${characteristic.properties.write}, '
+                'Notify=${characteristic.properties.notify}, '
+                'Indicate=${characteristic.properties.indicate}');
+
+          // ตรวจสอบว่า characteristic รองรับ notify (ให้ความสำคัญกับ notify ก่อน)
+          if (characteristic.properties.notify) {
             dataCharacteristic = characteristic;
+            logger.i('Selected for data reception (Notify): ${characteristic.uuid}');
 
             // เปิดการแจ้งเตือนเมื่อมีข้อมูลเข้ามา
-            if (characteristic.properties.notify) {
-              await characteristic.setNotifyValue(true);
-              dataSubscription = characteristic.lastValueStream.listen(
-                (value) {
-                  _handleReceivedData(value);
-                },
-              );
-            }
+            await characteristic.setNotifyValue(true);
+            dataSubscription = characteristic.lastValueStream.listen(
+              (value) {
+                _handleReceivedData(value);
+              },
+            );
+            logger.i('Notification enabled');
             break;
           }
         }
         if (dataCharacteristic != null) break;
       }
+
+      if (dataCharacteristic == null) {
+        logger.w('No suitable characteristic found for data reception');
+      }
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการค้นหา services: $e';
+      logger.e('Error discovering services', error: e);
     }
   }
+
 
   void _handleReceivedData(List<int> data) {
     try {
@@ -178,16 +199,21 @@ class BluetoothController extends GetxController {
       String dataString = utf8.decode(data);
       lastReceivedData.value = dataString;
 
+      // Log ข้อมูลที่รับได้
+      logger.d('Bluetooth Data Received: $dataString');
+
       // ส่งข้อมูลไปยัง ECU Data Controller
       try {
         final ecuController = Get.find<ECUDataController>();
         ecuController.updateDataFromBluetooth(dataString);
+        logger.d('Data updated to ECU Controller');
       } catch (e) {
         // ECUDataController ยังไม่ถูก initialize
-        print('ECUDataController not found: $e');
+        logger.w('ECUDataController not found', error: e);
       }
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการอ่านข้อมูล: $e';
+      logger.e('Error handling data', error: e);
     }
   }
 
@@ -206,9 +232,9 @@ class BluetoothController extends GetxController {
     try {
       await dataSubscription?.cancel();
       await connectionSubscription?.cancel();
-      await connectedDevice?.disconnect();
+      await connectedDevice.value?.disconnect();
 
-      connectedDevice = null;
+      connectedDevice.value = null;
       dataCharacteristic = null;
       connectionStatus.value = BluetoothConnectionStatus.disconnected;
     } catch (e) {

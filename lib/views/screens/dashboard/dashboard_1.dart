@@ -3,6 +3,7 @@ import 'package:api_tech_moto/models/ecu_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
+import '../../../controllers/bluetooth_controller.dart';
 
 class TemplateOneScreen extends StatelessWidget {
   const TemplateOneScreen({super.key});
@@ -10,10 +11,11 @@ class TemplateOneScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
+    final btController = Get.find<BluetoothController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
-      
+
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -129,6 +131,31 @@ class TemplateOneScreen extends StatelessWidget {
                         ),
                       ),
                       child: _buildTPSProgressBar(tps),
+                    );
+                  }),
+                ),
+
+                // Bluetooth Button
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Obx(() {
+                    final isConnected = btController.connectionStatus.value == BluetoothConnectionStatus.connected;
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isConnected ? Colors.green : Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.bluetooth,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                        onPressed: () {
+                          Get.toNamed('/bluetooth');
+                        },
+                      ),
                     );
                   }),
                 ),
