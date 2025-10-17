@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:logger/logger.dart';
+import '../utils/logger.dart';
 import 'ecu_data_controller.dart';
 
 enum BluetoothConnectionStatus {
@@ -14,16 +14,6 @@ enum BluetoothConnectionStatus {
 }
 
 class BluetoothController extends GetxController {
-  final logger = Logger(
-    printer: PrettyPrinter(
-      methodCount: 0,
-      errorMethodCount: 5,
-      lineLength: 80,
-      colors: true,
-      printEmojis: true,
-    ),
-  );
-
   final Rx<BluetoothConnectionStatus> connectionStatus =
       BluetoothConnectionStatus.disconnected.obs;
 
@@ -31,7 +21,7 @@ class BluetoothController extends GetxController {
   final RxBool isScanning = false.obs;
   final RxString errorMessage = ''.obs;
 
-  BluetoothDevice? connectedDevice;
+  final Rx<BluetoothDevice?> connectedDevice = Rx<BluetoothDevice?>(null);
   BluetoothCharacteristic? dataCharacteristic;
   StreamSubscription? connectionSubscription;
   StreamSubscription? dataSubscription;
@@ -130,7 +120,7 @@ class BluetoothController extends GetxController {
         timeout: const Duration(seconds: 15),
         mtu: null,
       );
-      connectedDevice = device;
+      connectedDevice.value = device;
 
       // ฟังสถานะการเชื่อมต่อ
       connectionSubscription = device.connectionState.listen((state) {
@@ -152,13 +142,13 @@ class BluetoothController extends GetxController {
 
   Future<void> _discoverServices() async {
     try {
-      if (connectedDevice == null) return;
+      if (connectedDevice.value == null) return;
 
       logger.i('Discovering services...');
 
       // ค้นหา services และ characteristics
       List<BluetoothService> services =
-          await connectedDevice!.discoverServices();
+          await connectedDevice.value!.discoverServices();
 
       logger.i('Found ${services.length} services');
 
@@ -242,9 +232,9 @@ class BluetoothController extends GetxController {
     try {
       await dataSubscription?.cancel();
       await connectionSubscription?.cancel();
-      await connectedDevice?.disconnect();
+      await connectedDevice.value?.disconnect();
 
-      connectedDevice = null;
+      connectedDevice.value = null;
       dataCharacteristic = null;
       connectionStatus.value = BluetoothConnectionStatus.disconnected;
     } catch (e) {

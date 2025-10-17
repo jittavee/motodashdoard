@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:api_tech_moto/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import '../models/ecu_data.dart';
@@ -72,7 +73,7 @@ class ECUDataController extends GetxController {
         _dbHelper.insertECUData(newData);
       }
     } catch (e) {
-      print('Error parsing ECU data: $e');
+      logger.e('Error parsing ECU data: $e');
     }
   }
 
@@ -123,7 +124,7 @@ class ECUDataController extends GetxController {
 
           // แสดง popup
           if (threshold.popupAlert) {
-            _showAlertPopup(paramName, value, threshold);
+            // _showAlertPopup(paramName, value, threshold);
           }
 
           break;
@@ -143,7 +144,7 @@ class ECUDataController extends GetxController {
       '$paramName: ${value.toStringAsFixed(1)} (ควรอยู่ระหว่าง ${threshold.minValue}-${threshold.maxValue})',
       snackPosition: SnackPosition.TOP,
       duration: const Duration(seconds: 3),
-      backgroundColor: Get.theme.colorScheme.error.withOpacity(0.9),
+      backgroundColor: Get.theme.colorScheme.error.withValues(alpha: .9),
       colorText: Get.theme.colorScheme.onError,
     );
   }

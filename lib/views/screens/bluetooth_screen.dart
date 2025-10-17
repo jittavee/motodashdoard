@@ -2,9 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/bluetooth_controller.dart';
 
-class BluetoothScreen extends StatelessWidget {
+class BluetoothScreen extends StatefulWidget {
   const BluetoothScreen({super.key});
 
+  @override
+  State<BluetoothScreen> createState() => _BluetoothScreenState();
+}
+
+class _BluetoothScreenState extends State<BluetoothScreen> {
+  @override
+  void initState() {
+    final btController = Get.find<BluetoothController>();
+    btController.startScan();
+
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final btController = Get.find<BluetoothController>();
@@ -36,7 +48,7 @@ class BluetoothScreen extends StatelessWidget {
         return Column(
           children: [
             // Connected Device
-            if (btController.connectedDevice != null)
+            if (btController.connectedDevice.value != null)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -61,9 +73,9 @@ class BluetoothScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            btController.connectedDevice!.platformName.isEmpty
+                            btController.connectedDevice.value!.platformName.isEmpty
                                 ? 'Unknown Device'
-                                : btController.connectedDevice!.platformName,
+                                : btController.connectedDevice.value!.platformName,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -71,7 +83,7 @@ class BluetoothScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            btController.connectedDevice!.remoteId.toString(),
+                            btController.connectedDevice.value!.remoteId.toString(),
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -176,8 +188,8 @@ class BluetoothScreen extends StatelessWidget {
                           final result = btController.scanResults[index];
                           final device = result.device;
                           final isConnected =
-                              btController.connectedDevice != null &&
-                              btController.connectedDevice!.remoteId ==
+                              btController.connectedDevice.value != null &&
+                              btController.connectedDevice.value!.remoteId ==
                                   device.remoteId;
 
                           return Card(
