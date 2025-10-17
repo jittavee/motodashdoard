@@ -42,41 +42,13 @@ class TemplateOneScreen extends StatelessWidget {
                 // Main Gauge (RPM) - ใช้สัดส่วนจากขนาดจอ
                 Positioned(
                   top: screenHeight * 0.53 , // 40% จากด้านบน
-                  left: screenWidth * 0.5 - 36, // ตรงกลางแนวนอน (75 = size/2)
+                  left: screenWidth * 0.5 - 35, // ตรงกลางแนวนอน (75 = size/2)
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
-                    print('RPM: $rpm');
-                    // double rpm = 13000;
-                    final angle = _rpmToAngle(rpm, 15000);
-                    return Container(
-                      width: 85,
-                      height: 85,
-                      color: Colors.red.withValues(alpha: 0.3),
-                      child: 
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end:angle),
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.easeOut,
-                        builder: (context, value, child) {
-                          return Transform.rotate(
-                            angle: value * (pi / 180),
-                            alignment: Alignment(
-                              0,
-                              -1,
-                            ), // หมุนรอบจุดฐานของเข็ม
-                            child: child,
-                          );
-                        },
-                        child: Image.asset(
-                          'assets/ui-1/needle.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      // _buildRotatingNeedleGauge(
-                      //   rpm: rpm,
-                      //   maxRpm: 13000,
-                      //   size: 150,
-                      // ),
+                    return _buildRotatingNeedleGauge(
+                      rpm: rpm,
+                      maxRpm: 15000,
+                      size: 85,
                     );
                   }),
                 ),
@@ -158,19 +130,24 @@ class TemplateOneScreen extends StatelessWidget {
         children: [
           // Rotating Needle with smooth animation
           TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: angle),
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            builder: (context, value, child) {
-              return Transform.rotate(
-                angle: value * (pi / 180),
-                alignment: Alignment(1, 0.5), // หมุนรอบจุดฐานของเข็ม
-                child: child,
-              );
-            },
-            child: Image.asset('assets/ui-1/needle.png', fit: BoxFit.contain),
-          ),
-
+                        tween: Tween(begin: 0, end:angle),
+                        duration: const Duration(milliseconds: 150),
+                        curve: Curves.easeOut,
+                        builder: (context, value, child) {
+                          return Transform.rotate(
+                            angle: value * (pi / 180),
+                            alignment: Alignment(
+                              0,
+                              -1,
+                            ), // หมุนรอบจุดฐานของเข็ม
+                            child: child,
+                          );
+                        },
+                        child: Image.asset(
+                          'assets/ui-1/needle.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
           // RPM Text Display (Center)
           // Column(
           //   mainAxisAlignment: MainAxisAlignment.center,
@@ -210,7 +187,7 @@ class TemplateOneScreen extends StatelessWidget {
     // RPM 0 → เลข 1 บน gauge, RPM max → เลข 15 บน gauge
     final normalizedRpm = rpm.clamp(0, maxRpm);
     const offsetAngle = 135.0; // ปรับตำแหน่งเริ่มต้น
-    const rotationRange = 240.0; // ช่วงการหมุน (องศา) - ลดให้หมุนน้อยลง
+    const rotationRange = 230.0; // ช่วงการหมุน (องศา) - ลดให้หมุนน้อยลง
     return (normalizedRpm / maxRpm) * rotationRange - 135 + offsetAngle;
   }
 
