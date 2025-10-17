@@ -13,18 +13,7 @@ class TemplateOneScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: const Text('Dashboard Template 1'),
-        backgroundColor: Colors.black,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ecuController.generateDummyData();
-            },
-          ),
-        ],
-      ),
+      
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -57,8 +46,8 @@ class TemplateOneScreen extends StatelessWidget {
                   }),
                 ),
                 Positioned(
-                  top: screenHeight * 0.7, // 40% จากด้านบน
-                  left: screenWidth * 0.5 + 150, // ตรงกลางแนวนอนไปทางขวา 150
+                  bottom: screenHeight * 0.24,
+                  right: screenWidth * 0.2-10, // ตรงกลางแนวนอนไปทางขวา 150
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
                     return _buildNumberRPM(rpm: rpm);
@@ -108,13 +97,12 @@ class TemplateOneScreen extends StatelessWidget {
 
                 // Data Display (Right Side)
                 Positioned(
-                  top: screenHeight * 0.09, // 53% จากด้านบน
+                  bottom: screenHeight * 0.5 -10, // 53% จากด้านบน
                   right:
                       screenWidth * 0.1 +
-                      100, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
-                  child: Container(
-                    height: screenHeight * 0.5 + 5,
-                    padding: const EdgeInsets.all(12),
+                      120, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
+                  child: SizedBox(
+                    height: 100,
                     child: Obx(() {
                       final data = ecuController.currentData.value;
                       return _buildSecondaryDataPanel(data);
@@ -124,7 +112,7 @@ class TemplateOneScreen extends StatelessWidget {
 
                 // TPS Progress Bar
                 Positioned(
-                  bottom: screenHeight * 0.11, // 11% จากด้านล่าง
+                  bottom: screenHeight * 0.17, // 11% จากด้านล่าง
                   right:
                       screenWidth * 0.2 -
                       21,
@@ -132,7 +120,7 @@ class TemplateOneScreen extends StatelessWidget {
                     final tps = ecuController.currentData.value?.tps ?? 0;
                     return Container(
                       width: screenWidth * .140, // ความกว้าง
-                      height: screenHeight * .054, // ความสูง (เรียวกว่าเดิม)
+                      height: 15, // ความสูง (เรียวกว่าเดิม)
                       decoration: BoxDecoration(
                         color: Colors.red.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.only(
@@ -144,18 +132,6 @@ class TemplateOneScreen extends StatelessWidget {
                     );
                   }),
                 ),
-
-                // Debug Button (Top Left)
-                // Positioned(
-                //   top: 20,
-                //   left: 20,
-                //   child: IconButton(
-                //     icon: const Icon(Icons.bug_report, color: Colors.white),
-                //     onPressed: () {
-                //       ecuController.generateDummyData();
-                //     },
-                //   ),
-                // ),
               ],
             );
           },
@@ -264,18 +240,15 @@ class TemplateOneScreen extends StatelessWidget {
 
   /// Right Data Panel
   Widget _buildSecondaryDataPanel(dynamic data) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildDataRow(data?.ignition.toStringAsFixed(1) ?? 'XXX'),
-          _buildDataRow(data?.inject.toStringAsFixed(1) ?? 'XXX'),
-          _buildDataRow(data?.tps.toStringAsFixed(0) ?? 'XX'),
-          _buildDataRow(data?.afr.toStringAsFixed(1) ?? 'XX'),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildDataRow(data?.ignition.toStringAsFixed(1) ?? 'XXX'),
+        _buildDataRow(data?.inject.toStringAsFixed(1) ?? 'XXX'),
+        _buildDataRow(data?.tps.toStringAsFixed(0) ?? 'XX'),
+        _buildDataRow(data?.afr.toStringAsFixed(1) ?? 'XX'),
+      ],
     );
   }
 
@@ -288,45 +261,6 @@ class TemplateOneScreen extends StatelessWidget {
           style: const TextStyle(
             color: Colors.white,
             fontSize: 13,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Bottom Information Bar
-  Widget _buildBottomInfo(dynamic data) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildBottomInfoItem('AFR', (data?.afr ?? 0).toStringAsFixed(1)),
-          Container(width: 1, height: 30, color: Colors.white30),
-          _buildBottomInfoItem('TPS', '${(data?.tps ?? 0).toInt()}%'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomInfoItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 10,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
