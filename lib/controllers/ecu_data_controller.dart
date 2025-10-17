@@ -18,7 +18,12 @@ class ECUDataController extends GetxController {
   final RxString activeAlertMessage = ''.obs;
 
   Timer? loggingTimer;
+  Timer? _debounceTimer;
+  final Map<String, double> _dataBuffer = {}; // Buffer สำหรับเก็บข้อมูลที่รับมาทีละตัว
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
+  // จำนวนฟิลด์ทั้งหมดที่ต้องรับครบ
+  static const int _expectedFieldCount = 13;
 
   @override
   void onInit() {
@@ -29,6 +34,7 @@ class ECUDataController extends GetxController {
   @override
   void onClose() {
     loggingTimer?.cancel();
+    _debounceTimer?.cancel();
     super.onClose();
   }
 
@@ -36,25 +42,44 @@ class ECUDataController extends GetxController {
     alertThresholds.value = await _dbHelper.getAllAlertThresholds();
   }
 
-  // รับข้อมูลจาก Bluetooth
+  // รับข้อมูลจาก Bluetooth (มาทีละตัว เช่น "TECHO=290")
   void updateDataFromBluetooth(String rawData) {
     try {
-      // แปลงข้อมูลจาก String เป็น Map
-      // รูปแบบตัวอย่าง: "TECHO=15000,SPEED=255,WATER=150,..."
-      Map<String, dynamic> dataMap = {};
+      // แยก key=value
+      List<String> keyValue = rawData.trim().split('=');
+      if (keyValue.length == 2) {
+        String key = keyValue[0].trim();
+        double value = double.tryParse(keyValue[1].trim()) ?? 0.0;
 
-      List<String> pairs = rawData.split(',');
-      for (var pair in pairs) {
-        List<String> keyValue = pair.split('=');
-        if (keyValue.length == 2) {
-          String key = keyValue[0].trim();
-          double value = double.tryParse(keyValue[1].trim()) ?? 0.0;
-          dataMap[key] = value;
+        // เก็บค่าลง buffer
+        _dataBuffer[key] = value;
+
+        logger.d('Buffer: ${_dataBuffer.length}/$_expectedFieldCount fields');
+
+        // ถ้าครบ 13 ค่าแล้ว -> อัพเดท UI
+        if (_dataBuffer.length >= _expectedFieldCount) {
+          _updateUI();
+        } else {
+          // ยังไม่ครบ -> ตั้ง timeout กันข้อมูลค้าง
+          _debounceTimer?.cancel();
+          _debounceTimer = Timer(const Duration(milliseconds: 200), () {
+            // ถ้าเกิน 200ms ยังไม่มีข้อมูลใหม่ -> อัพเดทแม้ยังไม่ครบ
+            if (_dataBuffer.isNotEmpty) {
+              _updateUI();
+            }
+          });
         }
       }
+    } catch (e) {
+      logger.e('Error parsing ECU data: $e');
+    }
+  }
 
-      // สร้าง ECU Data object
-      ECUData newData = ECUData.fromJson(dataMap);
+  // อัพเดท UI เมื่อรับข้อมูลครบแล้ว
+  void _updateUI() {
+    try {
+      // สร้าง ECU Data object จาก buffer
+      ECUData newData = ECUData.fromJson(_dataBuffer);
       currentData.value = newData;
 
       // เพิ่มลงใน history
@@ -72,8 +97,14 @@ class ECUDataController extends GetxController {
       if (isLogging.value) {
         _dbHelper.insertECUData(newData);
       }
+
+      logger.d('UI updated with complete data');
+
+      // ล้าง buffer เพื่อรอรับชุดใหม่
+      _dataBuffer.clear();
+      _debounceTimer?.cancel();
     } catch (e) {
-      logger.e('Error parsing ECU data: $e');
+      logger.e('Error updating UI: $e');
     }
   }
 
