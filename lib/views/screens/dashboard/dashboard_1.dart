@@ -101,7 +101,7 @@ class TemplateOneScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     child: Obx(() {
                       final data = ecuController.currentData.value;
-                      return _buildLeftSide(data);
+                      return _buildLedtDataPanel(data);
                     }),
                   ),
                 ),
@@ -154,7 +154,8 @@ class TemplateOneScreen extends StatelessWidget {
     );
   }
 
-  Column _buildLeftSide(ECUData? data) {
+  /// Left Data Panel
+  Column _buildLedtDataPanel(ECUData? data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
