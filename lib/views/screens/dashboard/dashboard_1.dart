@@ -43,8 +43,7 @@ class TemplateOneScreen extends StatelessWidget {
                 Positioned(
                   top: screenHeight * 0.53, // 53% จากด้านบน
                   left:
-                      screenWidth * 0.5 -
-                      35, // ดึงจากตรงกลางแนวนอนไปทางซ้าย (75 = size/2)
+                      screenWidth * 0.5 - 35, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
                     return _buildRotatingNeedleGauge(
@@ -56,24 +55,34 @@ class TemplateOneScreen extends StatelessWidget {
                 ),
                 Positioned(
                   top: screenHeight * 0.7, // 40% จากด้านบน
-                  left:
-                      screenWidth * 0.5 +
-                      150, // ตรงกลางแนวนอนไปทางขวา (75 = size/2)
+                  left: screenWidth * 0.5 + 150, // ตรงกลางแนวนอนไปทางขวา 150
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
                     return _buildNumberRPM(rpm: rpm);
                   }),
                 ),
 
-                // Speed Gauge (Top Right)
-                // Positioned(
-                //   top: 20,
-                //   right: 20,
-                //   child: Obx(() {
-                //     final speed = ecuController.currentData.value?.speed ?? 0;
-                //     return _buildSpeedometer(speed);
-                //   }),
-                // ),
+                // Speed Gauge
+                Positioned(
+                  top: screenHeight * 0.53, // 53% จากด้านบน
+                  left: screenWidth * 0.5 - 225,
+                  child: Obx(() {
+                    final rpm = ecuController.currentData.value?.rpm ?? 0;
+                    return _buildRotatingNeedleGauge(
+                      rpm: rpm,
+                      maxRpm: 15000,
+                      size: 50,
+                    );
+                  }),
+                ),
+                Positioned(
+                  top: screenHeight * 0.43,
+                  right: screenWidth * 0.5 + 270,
+                  child: Obx(() {
+                    final speed = ecuController.currentData.value?.speed ?? 0;
+                    return _buildSpeedometer(speed);
+                  }),
+                ),
 
                 // Data Display (Left Side)
                 // Positioned(
@@ -124,6 +133,7 @@ class TemplateOneScreen extends StatelessWidget {
       ),
     );
   }
+
   /// RPM Number Display
   Widget _buildNumberRPM({required double rpm}) {
     return Container(
@@ -132,7 +142,7 @@ class TemplateOneScreen extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         " ${rpm.toInt()}",
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
     );
@@ -183,36 +193,16 @@ class TemplateOneScreen extends StatelessWidget {
   /// Speedometer Display
   Widget _buildSpeedometer(double speed) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.cyan.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'TOPSPEED',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              letterSpacing: 1.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            speed.toInt().toString(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Text(
-            'km/h',
-            style: TextStyle(color: Colors.white70, fontSize: 10),
-          ),
-        ],
+      width: 70,
+      height: 40,
+      alignment: Alignment.center,
+      child: Text(
+        speed.toInt().toString(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 25,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
