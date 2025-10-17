@@ -246,9 +246,12 @@ class ECUDataController extends GetxController {
         return;
       }
 
-      // สร้างข้อมูลแบบสุ่ม
+      // RPM เพิ่มทีละ 500 (0, 500, 1000, 1500, ...)
+      int rpm = timer.tick * 500;
+
+      // สร้างข้อมูลแบบเรียงลำดับ
       String dummyData =
-        'TECHO=${(3000 + (timer.tick * 100)).toString()},'
+        'TECHO=$rpm,'
         'SPEED=${(timer.tick * 5).toString()},'
         'WATER=${(80 + timer.tick).toString()},'
         'AIR.T=${(30 + timer.tick).toString()},'

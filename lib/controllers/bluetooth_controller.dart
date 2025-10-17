@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'ecu_data_controller.dart';
 
 enum BluetoothConnectionStatus {
   disconnected,
@@ -178,7 +179,13 @@ class BluetoothController extends GetxController {
       lastReceivedData.value = dataString;
 
       // ส่งข้อมูลไปยัง ECU Data Controller
-      // จะเชื่อมต่อกับ ECUDataController ในขั้นตอนถัดไป
+      try {
+        final ecuController = Get.find<ECUDataController>();
+        ecuController.updateDataFromBluetooth(dataString);
+      } catch (e) {
+        // ECUDataController ยังไม่ถูก initialize
+        print('ECUDataController not found: $e');
+      }
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการอ่านข้อมูล: $e';
     }
