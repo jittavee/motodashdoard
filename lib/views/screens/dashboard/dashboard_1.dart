@@ -41,8 +41,10 @@ class TemplateOneScreen extends StatelessWidget {
 
                 // Main Gauge (RPM) - ใช้สัดส่วนจากขนาดจอ
                 Positioned(
-                  top: screenHeight * 0.53 , // 40% จากด้านบน
-                  left: screenWidth * 0.5 - 35, // ตรงกลางแนวนอน (75 = size/2)
+                  top: screenHeight * 0.53, // 53% จากด้านบน
+                  left:
+                      screenWidth * 0.5 -
+                      35, // ดึงจากตรงกลางแนวนอนไปทางซ้าย (75 = size/2)
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
                     return _buildRotatingNeedleGauge(
@@ -50,6 +52,16 @@ class TemplateOneScreen extends StatelessWidget {
                       maxRpm: 15000,
                       size: 85,
                     );
+                  }),
+                ),
+                Positioned(
+                  top: screenHeight * 0.7, // 40% จากด้านบน
+                  left:
+                      screenWidth * 0.5 +
+                      150, // ตรงกลางแนวนอนไปทางขวา (75 = size/2)
+                  child: Obx(() {
+                    final rpm = ecuController.currentData.value?.rpm ?? 0;
+                    return _buildNumberRPM(rpm: rpm);
                   }),
                 ),
 
@@ -113,6 +125,19 @@ class TemplateOneScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildNumberRPM({required double rpm}) {
+    return Container(
+      width: 120,
+      height: 30,
+      alignment: Alignment.center,
+      child: Text(
+        " ${rpm.toInt()}",
+        style: TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   /// Main RPM Gauge with rotating needle
   Widget _buildRotatingNeedleGauge({
     required double rpm,
@@ -122,63 +147,56 @@ class TemplateOneScreen extends StatelessWidget {
     // คำนวณมุม: RPM 0 = -135°, RPM max = +135° (รวม 270°)
     final angle = _rpmToAngle(rpm, maxRpm);
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Rotating Needle with smooth animation
-          TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end:angle),
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.easeOut,
-                        builder: (context, value, child) {
-                          return Transform.rotate(
-                            angle: value * (pi / 180),
-                            alignment: Alignment(
-                              0,
-                              -1,
-                            ), // หมุนรอบจุดฐานของเข็ม
-                            child: child,
-                          );
-                        },
-                        child: Image.asset(
-                          'assets/ui-1/needle.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-          // RPM Text Display (Center)
-          // Column(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     const SizedBox(height: 80),
-          //     Text(
-          //       rpm.toInt().toString(),
-          //       style: const TextStyle(
-          //         color: Colors.white,
-          //         fontSize: 48,
-          //         fontWeight: FontWeight.bold,
-          //         shadows: [
-          //           Shadow(
-          //             color: Colors.black,
-          //             blurRadius: 10,
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //     const Text(
-          //       'RPM',
-          //       style: TextStyle(
-          //         color: Colors.white70,
-          //         fontSize: 16,
-          //         letterSpacing: 2,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-        ],
-      ),
+    return Stack(
+      children: [
+        // Rotating Needle with smooth animation
+        SizedBox(
+          width: size,
+          height: size,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: angle),
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            builder: (context, value, child) {
+              return Transform.rotate(
+                angle: value * (pi / 180),
+                alignment: Alignment(0, -1), // หมุนรอบจุดฐานของเข็ม
+                child: child,
+              );
+            },
+            child: Image.asset('assets/ui-1/needle.png', fit: BoxFit.contain),
+          ),
+        ),
+        // RPM Text Display (Center)
+        // Column(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     const SizedBox(height: 80),
+        //     Text(
+        //       rpm.toInt().toString(),
+        //       style: const TextStyle(
+        //         color: Colors.white,
+        //         fontSize: 48,
+        //         fontWeight: FontWeight.bold,
+        //         shadows: [
+        //           Shadow(
+        //             color: Colors.black,
+        //             blurRadius: 10,
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //     const Text(
+        //       'RPM',
+        //       style: TextStyle(
+        //         color: Colors.white70,
+        //         fontSize: 16,
+        //         letterSpacing: 2,
+        //       ),
+        //     ),
+        //   ],
+        // ),
+      ],
     );
   }
 
