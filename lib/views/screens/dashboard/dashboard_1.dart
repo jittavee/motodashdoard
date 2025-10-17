@@ -124,7 +124,7 @@ class TemplateOneScreen extends StatelessWidget {
       ),
     );
   }
-
+  /// RPM Number Display
   Widget _buildNumberRPM({required double rpm}) {
     return Container(
       width: 120,
@@ -167,35 +167,6 @@ class TemplateOneScreen extends StatelessWidget {
             child: Image.asset('assets/ui-1/needle.png', fit: BoxFit.contain),
           ),
         ),
-        // RPM Text Display (Center)
-        // Column(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        //   children: [
-        //     const SizedBox(height: 80),
-        //     Text(
-        //       rpm.toInt().toString(),
-        //       style: const TextStyle(
-        //         color: Colors.white,
-        //         fontSize: 48,
-        //         fontWeight: FontWeight.bold,
-        //         shadows: [
-        //           Shadow(
-        //             color: Colors.black,
-        //             blurRadius: 10,
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //     const Text(
-        //       'RPM',
-        //       style: TextStyle(
-        //         color: Colors.white70,
-        //         fontSize: 16,
-        //         letterSpacing: 2,
-        //       ),
-        //     ),
-        //   ],
-        // ),
       ],
     );
   }
