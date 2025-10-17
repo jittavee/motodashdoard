@@ -107,31 +107,43 @@ class TemplateOneScreen extends StatelessWidget {
                 ),
 
                 // Data Display (Right Side)
-                  Positioned(
+                Positioned(
                   top: screenHeight * 0.09, // 53% จากด้านบน
                   right:
-                      screenWidth * 0.1 + 100, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
+                      screenWidth * 0.1 +
+                      100, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
                   child: Container(
                     height: screenHeight * 0.5 + 5,
                     padding: const EdgeInsets.all(12),
-                        child: Obx(() {
-                    final data = ecuController.currentData.value;
-                    return _buildSecondaryDataPanel(data);
-                  }),
+                    child: Obx(() {
+                      final data = ecuController.currentData.value;
+                      return _buildSecondaryDataPanel(data);
+                    }),
                   ),
                 ),
-               
 
-                // Bottom Info
-                // Positioned(
-                //   bottom: 20,
-                //   left: 0,
-                //   right: 0,
-                //   child: Obx(() {
-                //     final data = ecuController.currentData.value;
-                //     return _buildBottomInfo(data);
-                //   }),
-                // ),
+                // TPS Progress Bar
+                Positioned(
+                  bottom: screenHeight * 0.11, // 11% จากด้านล่าง
+                  right:
+                      screenWidth * 0.2 -
+                      21,
+                  child: Obx(() {
+                    final tps = ecuController.currentData.value?.tps ?? 0;
+                    return Container(
+                      width: screenWidth * .140, // ความกว้าง
+                      height: screenHeight * .054, // ความสูง (เรียวกว่าเดิม)
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(300.0),
+                          bottomRight: Radius.circular(300.0),
+                        ),
+                      ),
+                      child: _buildTPSProgressBar(tps),
+                    );
+                  }),
+                ),
 
                 // Debug Button (Top Left)
                 // Positioned(
@@ -158,18 +170,10 @@ class TemplateOneScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildDataRow(
-          data?.map.toStringAsFixed(0) ?? 'XXX',
-        ),
-        _buildDataRow(
-          data?.battery.toStringAsFixed(1) ?? 'XX',
-        ),
-        _buildDataRow(
-          data?.airTemp.toStringAsFixed(0) ?? 'XX',
-        ),
-        _buildDataRow(
-          data?.waterTemp.toStringAsFixed(0) ?? 'XX',
-        ),
+        _buildDataRow(data?.map.toStringAsFixed(0) ?? 'XXX'),
+        _buildDataRow(data?.battery.toStringAsFixed(1) ?? 'XX'),
+        _buildDataRow(data?.airTemp.toStringAsFixed(0) ?? 'XX'),
+        _buildDataRow(data?.waterTemp.toStringAsFixed(0) ?? 'XX'),
       ],
     );
   }
@@ -266,25 +270,17 @@ class TemplateOneScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildDataRow(
-            data?.ignition.toStringAsFixed(1) ?? 'XXX',
-          ),
-          _buildDataRow(
-            data?.inject.toStringAsFixed(1) ?? 'XXX',
-          ),
-          _buildDataRow(
-            data?.tps.toStringAsFixed(0) ?? 'XX',
-          ),
-          _buildDataRow(
-            data?.afr.toStringAsFixed(1) ?? 'XX',
-          ),
+          _buildDataRow(data?.ignition.toStringAsFixed(1) ?? 'XXX'),
+          _buildDataRow(data?.inject.toStringAsFixed(1) ?? 'XXX'),
+          _buildDataRow(data?.tps.toStringAsFixed(0) ?? 'XX'),
+          _buildDataRow(data?.afr.toStringAsFixed(1) ?? 'XX'),
         ],
       ),
     );
   }
 
   /// Data Row Widget
-  Widget _buildDataRow( String value) {
+  Widget _buildDataRow(String value) {
     return Row(
       children: [
         Text(
@@ -309,8 +305,6 @@ class TemplateOneScreen extends StatelessWidget {
           _buildBottomInfoItem('AFR', (data?.afr ?? 0).toStringAsFixed(1)),
           Container(width: 1, height: 30, color: Colors.white30),
           _buildBottomInfoItem('TPS', '${(data?.tps ?? 0).toInt()}%'),
-          Container(width: 1, height: 30, color: Colors.white30),
-          _buildBottomInfoItem('IACV', (data?.iacv ?? 0).toStringAsFixed(0)),
         ],
       ),
     );
@@ -334,6 +328,41 @@ class TemplateOneScreen extends StatelessWidget {
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// TPS Progress Bar (Linear Gauge) - รูปแบบตามรูป
+  Widget _buildTPSProgressBar(double tps) {
+    return Stack(
+      children: [
+        // Progress Fill (หลอดที่เต็ม)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: (tps / 100).clamp(0.0, 1.0), // TPS 0-100%
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF00BFFF), // Cyan สว่าง
+                    Color(0xFF1E90FF), // น้ำเงินสด
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(300.0),
+                        ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.cyan.withValues(alpha: 0.5),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
