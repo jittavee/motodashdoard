@@ -125,9 +125,11 @@ class BluetoothController extends GetxController {
       connectionSubscription = device.connectionState.listen((state) {
         if (state == BluetoothConnectionState.connected) {
           connectionStatus.value = BluetoothConnectionStatus.connected;
+          print('✅ Bluetooth Connected: ${device.platformName} (${device.remoteId})');
           _discoverServices();
         } else if (state == BluetoothConnectionState.disconnected) {
           connectionStatus.value = BluetoothConnectionStatus.disconnected;
+          print('❌ Bluetooth Disconnected');
           _handleDisconnection();
         }
       });
@@ -138,6 +140,7 @@ class BluetoothController extends GetxController {
   }
 
   Future<void> _discoverServices() async {
+    print('🔍 Discovering services...');
     try {
       if (connectedDevice == null) return;
 
@@ -178,16 +181,21 @@ class BluetoothController extends GetxController {
       String dataString = utf8.decode(data);
       lastReceivedData.value = dataString;
 
+      // Print ข้อมูลที่รับได้
+      print('📡 Bluetooth Data Received: $dataString');
+
       // ส่งข้อมูลไปยัง ECU Data Controller
       try {
         final ecuController = Get.find<ECUDataController>();
         ecuController.updateDataFromBluetooth(dataString);
+        print('✅ Data updated to ECU Controller');
       } catch (e) {
         // ECUDataController ยังไม่ถูก initialize
         print('ECUDataController not found: $e');
       }
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการอ่านข้อมูล: $e';
+      print('❌ Error handling data: $e');
     }
   }
 

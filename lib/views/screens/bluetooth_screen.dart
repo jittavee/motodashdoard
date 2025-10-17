@@ -13,7 +13,7 @@ class BluetoothScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('scan_devices'.tr),
         actions: [
-          Row(
+          Obx(() => Row(
             children: [
               TextButton(
                 onPressed: btController.isScanning.value
@@ -29,7 +29,7 @@ class BluetoothScreen extends StatelessWidget {
                 tooltip: 'add_devices'.tr,
               ),
             ],
-          ),
+          )),
         ],
       ),
       body: Obx(() {
