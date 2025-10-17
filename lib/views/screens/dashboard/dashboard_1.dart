@@ -105,24 +105,22 @@ class TemplateOneScreen extends StatelessWidget {
                     }),
                   ),
                 ),
-                // Positioned(
-                //   left: 20,
-                //   top: 100,
-                //   child: Obx(() {
-                //     final data = ecuController.currentData.value;
-                //     return _buildDataPanel(data);
-                //   }),
-                // ),
 
                 // Data Display (Right Side)
-                // Positioned(
-                //   right: 20,
-                //   top: 100,
-                //   child: Obx(() {
-                //     final data = ecuController.currentData.value;
-                //     return _buildSecondaryDataPanel(data);
-                //   }),
-                // ),
+                  Positioned(
+                  top: screenHeight * 0.09, // 53% จากด้านบน
+                  right:
+                      screenWidth * 0.1 + 100, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
+                  child: Container(
+                    height: screenHeight * 0.5 + 5,
+                    padding: const EdgeInsets.all(12),
+                        child: Obx(() {
+                    final data = ecuController.currentData.value;
+                    return _buildSecondaryDataPanel(data);
+                  }),
+                  ),
+                ),
+               
 
                 // Bottom Info
                 // Positioned(
@@ -161,28 +159,16 @@ class TemplateOneScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildDataRow(
-          'M4P',
           data?.map.toStringAsFixed(0) ?? 'XXX',
-          'kPa.',
-          Colors.white,
         ),
         _buildDataRow(
-          'BATTERY',
           data?.battery.toStringAsFixed(1) ?? 'XX',
-          'V.',
-          Colors.white,
         ),
         _buildDataRow(
-          'IAT',
           data?.airTemp.toStringAsFixed(0) ?? 'XX',
-          'C.',
-          Colors.white,
         ),
         _buildDataRow(
-          'ECT',
           data?.waterTemp.toStringAsFixed(0) ?? 'XX',
-          'C.',
-          Colors.white,
         ),
       ],
     );
@@ -276,40 +262,21 @@ class TemplateOneScreen extends StatelessWidget {
   Widget _buildSecondaryDataPanel(dynamic data) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildDataRow(
-            'IGN',
             data?.ignition.toStringAsFixed(1) ?? 'XXX',
-            'Deg.',
-            Colors.orange,
           ),
-          const SizedBox(height: 8),
           _buildDataRow(
-            'INJ',
             data?.inject.toStringAsFixed(1) ?? 'XXX',
-            'Pw.(ms.)',
-            Colors.orange,
           ),
-          const SizedBox(height: 8),
           _buildDataRow(
-            'TPS',
             data?.tps.toStringAsFixed(0) ?? 'XX',
-            '%',
-            Colors.orange,
           ),
-          const SizedBox(height: 8),
           _buildDataRow(
-            'AFR',
             data?.afr.toStringAsFixed(1) ?? 'XX',
-            '',
-            Colors.orange,
           ),
         ],
       ),
@@ -317,7 +284,7 @@ class TemplateOneScreen extends StatelessWidget {
   }
 
   /// Data Row Widget
-  Widget _buildDataRow(String label, String value, String unit, Color color) {
+  Widget _buildDataRow( String value) {
     return Row(
       children: [
         Text(
