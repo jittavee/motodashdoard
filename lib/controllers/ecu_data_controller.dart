@@ -271,7 +271,7 @@ class ECUDataController extends GetxController {
   }
 
   // สร้างข้อมูล dummy สำหรับ testing (สามารถลบได้)
-  void generateDummyData() {
+  void startGeneratingData() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
       if (timer.tick > 30) {
         timer.cancel();
@@ -281,23 +281,27 @@ class ECUDataController extends GetxController {
       // RPM เพิ่มทีละ 500 (0, 500, 1000, 1500, ...)
       int rpm = timer.tick * 500;
 
-      // สร้างข้อมูลแบบเรียงลำดับ
-      String dummyData =
-        'TECHO=$rpm,'
-        'SPEED=${(timer.tick * 5).toString()},'
-        'WATER=${(80 + timer.tick).toString()},'
-        'AIR.T=${(30 + timer.tick).toString()},'
-        'MAP=${(100 + timer.tick).toString()},'
-        'TPS=${(timer.tick * 2).toString()},'
-        'BATT=13.5,'
-        'IGNITI=${(15 + timer.tick * 0.5).toString()},'
-        'INJECT=${(5 + timer.tick * 0.2).toString()},'
-        'AFR=14.7,'
-        'S.TRIM=100,'
-        'L.TRIM=100,'
-        'IACV=50';
+      // สร้างข้อมูลแบบเรียงลำดับและส่งทีละคู่
+      List<String> dataList = [
+        'TECHO=$rpm',
+        'SPEED=${(timer.tick * 5).toString()}',
+        'WATER=${(80 + timer.tick).toString()}',
+        'AIR.T=${(30 + timer.tick).toString()}',
+        'MAP=${(100 + timer.tick).toString()}',
+        'TPS=${(timer.tick * 2).toString()}',
+        'BATT=13.5',
+        'IGNITI=${(15 + timer.tick * 0.5).toString()}',
+        'INJECT=${(5 + timer.tick * 0.2).toString()}',
+        'AFR=14.7',
+        'S.TRIM=100',
+        'L.TRIM=100',
+        'IACV=50',
+      ];
 
-      updateDataFromBluetooth(dummyData);
+      // ส่งข้อมูลทีละคู่ไปที่ updateDataFromBluetooth
+      for (var data in dataList) {
+        updateDataFromBluetooth(data);
+      }
     });
   }
 

@@ -153,7 +153,7 @@ class TemplateOneScreen extends StatelessWidget {
                           size: 30,
                         ),
                         onPressed: () {
-                          Get.toNamed('/bluetooth');
+                          ecuController.startGeneratingData();
                         },
                       ),
                     );

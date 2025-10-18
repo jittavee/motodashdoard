@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../controllers/bluetooth_controller.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../models/ecu_data.dart';
 
@@ -9,6 +10,7 @@ class TemplateTwoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
+    final btController = Get.find<BluetoothController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -32,32 +34,42 @@ class TemplateTwoScreen extends StatelessWidget {
                 Positioned(
                   top: screenHeight * 0.06,
                   right: screenWidth * 0.084,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.bluetooth,
-                        color: Colors.white,
-                        size: 30,
+                  child: Obx(
+                    () {
+                    final isConnected = btController.connectionStatus.value == BluetoothConnectionStatus.connected;
+                      
+                      return Container(
+                      decoration: BoxDecoration(
+                        color: isConnected ? Colors.green : Colors.transparent,
+                        shape: BoxShape.circle,
                       ),
-                      onPressed: () {
-                        ecuController.generateDummyData();
-                      },
-                    ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.bluetooth,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                        onPressed: () {
+                          ecuController.startGeneratingData();
+
+                          // Get.toNamed('/bluetooth');
+                        },
+                      ),
+                    );}
                   ),
                 ),
 
                 // Left Panel Data
                 Positioned(
-                  top: screenHeight * 0,
-                  left: screenWidth * 0.05,
-                  child: Obx(() {
-                    final data = ecuController.currentData.value;
-                    return _buildLeftPanel(data);
-                  }),
+                  top: screenHeight * .2+ 9,
+                  left: screenWidth * 0.25,
+                  child: SizedBox(
+                    height: screenHeight * 0.3 - 18,
+                    child: Obx(() {
+                      final data = ecuController.currentData.value;
+                      return _buildLeftPanel(data);
+                    }),
+                  ),
                 ),
 
                 // TOPSPEED Label
@@ -126,17 +138,12 @@ class TemplateTwoScreen extends StatelessWidget {
   Widget _buildLeftPanel(ECUData? data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildDataItem(data?.map.toStringAsFixed(0) ?? '--'),
-        const SizedBox(height: 8),
         _buildDataItem(data?.battery.toStringAsFixed(1) ?? '--'),
-        const SizedBox(height: 8),
         _buildDataItem(data?.airTemp.toStringAsFixed(0) ?? '--'),
-        const SizedBox(height: 8),
         _buildDataItem(data?.waterTemp.toStringAsFixed(0) ?? '--'),
-        const SizedBox(height: 8),
-        _buildDataItem(data?.ignition.toStringAsFixed(0) ?? '--'),
       ],
     );
   }

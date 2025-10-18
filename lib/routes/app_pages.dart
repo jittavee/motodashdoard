@@ -12,7 +12,7 @@ import '../views/screens/dashboard/template_5.dart';
 import 'app_routes.dart';
 
 class AppPages {
-  static const initial = AppRoutes.template1;
+  static const initial = AppRoutes.splash;
 
   static final routes = [
     GetPage(

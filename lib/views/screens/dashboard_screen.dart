@@ -69,7 +69,7 @@ class DashboardScreen extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: () {
                         // สร้างข้อมูล dummy สำหรับ testing
-                        ecuController.generateDummyData();
+                        ecuController.startGeneratingData();
                       },
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('สร้างข้อมูลทดสอบ'),
