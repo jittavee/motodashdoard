@@ -72,29 +72,15 @@ class TemplateTwoScreen extends StatelessWidget {
                   ),
                 ),
 
-                // TOPSPEED Label
-                // Positioned(
-                //   top: screenHeight * 0.15,
-                //   left: screenWidth * 0.5 - 100,
-                //   child: const Text(
-                //     'TOPSPEED',
-                //     style: TextStyle(
-                //       color: Colors.white,
-                //       fontSize: 32,
-                //       fontWeight: FontWeight.bold,
-                //     ),
-                //   ),
-                // ),
-
                 // Speed Display (km/h)
-                // Positioned(
-                //   top: screenHeight * 0.4,
-                //   left: screenWidth * 0.5 - 80,
-                //   child: Obx(() {
-                //     final speed = ecuController.currentData.value?.speed ?? 0;
-                //     return _buildSpeedDisplay(speed);
-                //   }),
-                // ),
+                Positioned(
+                  top: screenHeight * 0.25,
+                  left: screenWidth * 0.5 - 80,
+                  child: Obx(() {
+                    final speed = ecuController.currentData.value?.speed ?? 0;
+                    return _buildSpeedDisplay(speed);
+                  }),
+                ),
 
                 // RPM Linear Gauge
                 // Positioned(
@@ -206,26 +192,13 @@ class TemplateTwoScreen extends StatelessWidget {
 
   /// Speed Display (km/h)
   Widget _buildSpeedDisplay(double speed) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          speed.toInt().toString(),
-          style: const TextStyle(
-            color: Color(0xFF00E5FF),
-            fontSize: 80,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const Text(
-          'km/h',
-          style: TextStyle(
-            color: Color(0xFF00E5FF),
-            fontSize: 32,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+    return Text(
+      speed.toInt().toString(),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 50,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 
