@@ -34,11 +34,12 @@ class TemplateTwoScreen extends StatelessWidget {
                 Positioned(
                   top: screenHeight * 0.06,
                   right: screenWidth * 0.084,
-                  child: Obx(
-                    () {
-                    final isConnected = btController.connectionStatus.value == BluetoothConnectionStatus.connected;
-                      
-                      return Container(
+                  child: Obx(() {
+                    final isConnected =
+                        btController.connectionStatus.value ==
+                        BluetoothConnectionStatus.connected;
+
+                    return Container(
                       decoration: BoxDecoration(
                         color: isConnected ? Colors.green : Colors.transparent,
                         shape: BoxShape.circle,
@@ -55,13 +56,13 @@ class TemplateTwoScreen extends StatelessWidget {
                           // Get.toNamed('/bluetooth');
                         },
                       ),
-                    );}
-                  ),
+                    );
+                  }),
                 ),
 
                 // Left Panel Data
                 Positioned(
-                  top: screenHeight * .2+ 9,
+                  top: screenHeight * .2 + 9,
                   left: screenWidth * 0.25,
                   child: SizedBox(
                     height: screenHeight * 0.3 - 18,
@@ -83,15 +84,15 @@ class TemplateTwoScreen extends StatelessWidget {
                 ),
 
                 // RPM Linear Gauge
-                // Positioned(
-                //   bottom: screenHeight * 0.15,
-                //   left: screenWidth * 0.1,
-                //   right: screenWidth * 0.1,
-                //   child: Obx(() {
-                //     final rpm = ecuController.currentData.value?.rpm ?? 0;
-                //     return _buildRPMGauge(rpm);
-                //   }),
-                // ),
+                Positioned(
+                  bottom: screenHeight * 0.1 - 10,
+                  left: screenWidth * 0.1 + 10,
+                  right: screenWidth * 0.1,
+                  child: Obx(() {
+                    final rpm = ecuController.currentData.value?.rpm ?? 0;
+                    return _buildRPMGauge(rpm);
+                  }),
+                ),
 
                 // Center Bottom Data
                 // Positioned(
@@ -205,7 +206,6 @@ class TemplateTwoScreen extends StatelessWidget {
   /// RPM Linear Gauge
   Widget _buildRPMGauge(double rpm) {
     final normalizedRpm = (rpm / 16000).clamp(0.0, 1.0);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -219,29 +219,24 @@ class TemplateTwoScreen extends StatelessWidget {
           child: Stack(
             children: [
               // Filled portion
-              FractionallySizedBox(
-                widthFactor: normalizedRpm,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors:
-                          normalizedRpm >
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: normalizedRpm,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color:
+                          normalizedRpm <
                               0.875 // 14000/16000 = 0.875
-                          ? [const Color(0xFF00E5FF), Colors.red]
-                          : [const Color(0xFF00E5FF), const Color(0xFF00E5FF)],
+                          ? const Color(0xFF00E5FF)
+                          : Colors.red,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 8),
-        // RPM Value
-        Text(
-          'x1000r/min',
-          style: TextStyle(color: Colors.grey[500], fontSize: 16),
         ),
       ],
     );

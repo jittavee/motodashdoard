@@ -54,8 +54,6 @@ class ECUDataController extends GetxController {
         // เก็บค่าลง buffer
         _dataBuffer[key] = value;
 
-        logger.d('Buffer: ${_dataBuffer.length}/$_expectedFieldCount fields');
-
         // ถ้าครบ 13 ค่าแล้ว -> อัพเดท UI
         if (_dataBuffer.length >= _expectedFieldCount) {
           _updateUI();
@@ -98,7 +96,6 @@ class ECUDataController extends GetxController {
         _dbHelper.insertECUData(newData);
       }
 
-      logger.d('UI updated with complete data');
 
       // ล้าง buffer เพื่อรอรับชุดใหม่
       _dataBuffer.clear();
