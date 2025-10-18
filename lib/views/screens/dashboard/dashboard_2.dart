@@ -95,14 +95,16 @@ class TemplateTwoScreen extends StatelessWidget {
                 ),
 
                 // Center Bottom Data
-                // Positioned(
-                //   bottom: screenHeight * 0.25,
-                //   left: screenWidth * 0.25,
-                //   child: Obx(() {
-                //     final data = ecuController.currentData.value;
-                //     return _buildCenterBottomData(data);
-                //   }),
-                // ),
+                Positioned(
+                  bottom: screenHeight * 0.2 +5,
+                  left: screenWidth * 0.13,
+                  child: Obx(() {
+                    final data = ecuController.currentData.value;
+                    return SizedBox(
+                      width: screenWidth * 0.6,
+                     child:   _buildCenterBottomData(data));
+                  }),
+                ),
 
                 // Right Panel Data
                 // Positioned(
@@ -159,14 +161,16 @@ class TemplateTwoScreen extends StatelessWidget {
     );
   }
 
-  /// Center Bottom Data: IGN Pw., INJ Deg.
+  /// Center Bottom Data: IGN Deg., IGN Pw.(ms.), INJ Deg., INJ Pw.
   Widget _buildCenterBottomData(ECUData? data) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildDataItem(data?.ignition.toStringAsFixed(1) ?? '--'),
-        const SizedBox(width: 40),
-        _buildDataItem(data?.inject.toStringAsFixed(0) ?? '--'),
+        _buildDataItem(data?.ignition.toStringAsFixed(1) ?? '--'), // IGN Deg.
+        const SizedBox(width: 100),
+        const SizedBox(width: 100),
+        const SizedBox(width: 100),
+        _buildDataItem(data?.inject.toStringAsFixed(1) ?? '--'), // INJ Pw.
       ],
     );
   }
