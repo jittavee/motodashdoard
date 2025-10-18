@@ -107,14 +107,14 @@ class TemplateTwoScreen extends StatelessWidget {
                 ),
 
                 // Right Panel Data
-                // Positioned(
-                //   top: screenHeight * 0.25,
-                //   right: screenWidth * 0.05,
-                //   child: Obx(() {
-                //     final data = ecuController.currentData.value;
-                //     return _buildRightPanel(data);
-                //   }),
-                // ),
+                Positioned(
+                  top: screenHeight * 0.2,
+                  right: screenWidth * 0.15,
+                  child: Obx(() {
+                    final data = ecuController.currentData.value;
+                    return _buildRightPanel(data);
+                  }),
+                ),
               ],
             );
           },
@@ -147,14 +147,9 @@ class TemplateTwoScreen extends StatelessWidget {
           data?.afr.toStringAsFixed(1) ?? '--',
           isRightAlign: true,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 25),
         _buildDataItem(
           data?.tps.toStringAsFixed(0) ?? '--',
-          isRightAlign: true,
-        ),
-        const SizedBox(height: 20),
-        _buildDataItem(
-          data?.inject.toStringAsFixed(1) ?? '--',
           isRightAlign: true,
         ),
       ],
