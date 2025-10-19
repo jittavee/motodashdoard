@@ -91,19 +91,28 @@ class TemplateFourScreen extends StatelessWidget {
                   }),
                 ),
 
-                // Settings Button
+                // Settings Button (Top Left)
                 Positioned(
                   top: 10,
-                  right: 60,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.settings,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                    onPressed: () {
-                      // TODO: Implement settings functionality
+                  left: 10,
+                  child: GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/settings');
                     },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white70, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.settings,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
                   ),
                 ),
               ],

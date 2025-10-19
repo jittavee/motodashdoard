@@ -48,6 +48,31 @@ class TemplateThreeScreen extends StatelessWidget {
                   ),
                 ),
                 
+                // Settings Button (Top Left)
+                Positioned(
+                  top: screenHeight * 0.06,
+                  left: screenWidth * 0.084,
+                  child: GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/settings');
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white70, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.settings,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ),
+
                 // Bluetooth Button
                 Positioned(
                   top: screenHeight * 0.06,
