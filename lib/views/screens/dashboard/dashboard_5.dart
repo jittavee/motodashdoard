@@ -83,7 +83,7 @@ class TemplateFiveScreen extends StatelessWidget {
                   }),
                 ),
 
-                // // Center Data Panel
+                // Center Data Panel
                 // Positioned(
                 //   top: screenHeight * 0.25,
                 //   left: screenWidth * 0.5 - 60,
@@ -92,6 +92,24 @@ class TemplateFiveScreen extends StatelessWidget {
                 //     return _buildCenterDataPanel(data);
                 //   }),
                 // ),
+
+                // AFR and TPS Display (Top Left)
+                Positioned(
+                  bottom: screenHeight * 0.1 +10,
+                  left: screenWidth * 0.45+20,
+                  child: Obx(() {
+                    final data = ecuController.currentData.value;
+                    final afr = data?.afr ?? 0;
+                    final tps = data?.tps ?? 0;
+                    return Row(
+                      children: [
+                        _buildDataLabel('AFR', afr.toStringAsFixed(1)),
+                        SizedBox(width:50),
+                        _buildDataLabel('TPS', tps.toInt().toString()),
+                      ],
+                    );
+                  }),
+                ),
 
                 // Bluetooth Button (Bottom Right)
                 Positioned(
@@ -126,41 +144,6 @@ class TemplateFiveScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Rotating Needle Widget
-  Widget _buildRotatingNeedle({
-    required double value,
-    required double maxValue,
-    required double offsetAngle,
-    required double rotationRange,
-  }) {
-    final angle = _valueToAngle(value, maxValue, offsetAngle, rotationRange);
-
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: angle),
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.easeOut,
-      builder: (context, value, child) {
-        return Transform.rotate(
-          angle: value * (pi / 180),
-          alignment: Alignment.center,
-          child: child,
-        );
-      },
-      child: CustomPaint(painter: NeedlePainter()),
-    );
-  }
-
-  /// Convert value to angle
-  double _valueToAngle(
-    double value,
-    double maxValue,
-    double offsetAngle,
-    double rotationRange,
-  ) {
-    final normalizedValue = value.clamp(0, maxValue);
-    return (normalizedValue / maxValue) * rotationRange + offsetAngle;
   }
 
   /// Center Display Widget
@@ -270,6 +253,22 @@ class TemplateFiveScreen extends StatelessWidget {
     );
   }
 
+  /// Data Label Widget (for AFR, TPS display)
+  Widget _buildDataLabel(String label, String value) {
+    return Row(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Main RPM Gauge with rotating needle
   ///
   /// [value] ค่าปัจจุบัน (RPM)
@@ -325,29 +324,4 @@ class TemplateFiveScreen extends StatelessWidget {
     final normalizedRpm = rpm.clamp(0, maxRpm);
     return (normalizedRpm / maxRpm) * rotationRange - 135 + offsetAngle;
   }
-}
-
-/// Custom Needle Painter
-class NeedlePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.red
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final needleLength = size.width / 2.5;
-
-    canvas.drawLine(center, Offset(center.dx, center.dy - needleLength), paint);
-
-    // Draw center circle
-    final circlePaint = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, 5, circlePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
