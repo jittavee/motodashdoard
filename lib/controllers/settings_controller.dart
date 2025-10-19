@@ -4,17 +4,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum TemperatureUnit { celsius, fahrenheit }
 enum SpeedUnit { kmh, mph }
 enum Language { thai, english }
+enum DashboardTemplate { template1, template2, template3, template4, template5 }
 
 class SettingsController extends GetxController {
   final Rx<TemperatureUnit> temperatureUnit = TemperatureUnit.celsius.obs;
   final Rx<SpeedUnit> speedUnit = SpeedUnit.kmh.obs;
   final Rx<Language> language = Language.thai.obs;
+  final Rx<DashboardTemplate> dashboardTemplate = DashboardTemplate.template1.obs;
   final RxBool autoDayNightMode = false.obs;
   final RxBool isDarkMode = true.obs;
 
   static const String _tempUnitKey = 'temperature_unit';
   static const String _speedUnitKey = 'speed_unit';
   static const String _languageKey = 'language';
+  static const String _dashboardTemplateKey = 'dashboard_template';
   static const String _autoDayNightKey = 'auto_day_night';
   static const String _darkModeKey = 'dark_mode';
 
@@ -36,6 +39,9 @@ class SettingsController extends GetxController {
     final lang = prefs.getInt(_languageKey) ?? 0;
     language.value = Language.values[lang];
 
+    final dashTemplate = prefs.getInt(_dashboardTemplateKey) ?? 0;
+    dashboardTemplate.value = DashboardTemplate.values[dashTemplate];
+
     autoDayNightMode.value = prefs.getBool(_autoDayNightKey) ?? false;
     isDarkMode.value = prefs.getBool(_darkModeKey) ?? true;
   }
@@ -56,6 +62,27 @@ class SettingsController extends GetxController {
     language.value = lang;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_languageKey, lang.index);
+  }
+
+  Future<void> setDashboardTemplate(DashboardTemplate template) async {
+    dashboardTemplate.value = template;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_dashboardTemplateKey, template.index);
+  }
+
+  String getDashboardRoute() {
+    switch (dashboardTemplate.value) {
+      case DashboardTemplate.template1:
+        return '/template-1';
+      case DashboardTemplate.template2:
+        return '/template-2';
+      case DashboardTemplate.template3:
+        return '/template-3';
+      case DashboardTemplate.template4:
+        return '/template-4';
+      case DashboardTemplate.template5:
+        return '/template-5';
+    }
   }
 
   Future<void> setAutoDayNightMode(bool enabled) async {

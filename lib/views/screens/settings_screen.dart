@@ -85,7 +85,76 @@ class SettingsScreen extends StatelessWidget {
               )),
           const Divider(),
 
-         
+          // Dashboard Template
+          const ListTile(
+            leading: Icon(Icons.dashboard),
+            title: Text(
+              'Dashboard Template',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
+          Obx(() => Column(
+                children: [
+                  RadioListTile<DashboardTemplate>(
+                    title: const Text('Template 1 - Default'),
+                    value: DashboardTemplate.template1,
+                    groupValue: settingsController.dashboardTemplate.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settingsController.setDashboardTemplate(value);
+                        Get.offAllNamed(settingsController.getDashboardRoute());
+                      }
+                    },
+                  ),
+                  RadioListTile<DashboardTemplate>(
+                    title: const Text('Template 2'),
+                    value: DashboardTemplate.template2,
+                    groupValue: settingsController.dashboardTemplate.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settingsController.setDashboardTemplate(value);
+                        Get.offAllNamed(settingsController.getDashboardRoute());
+                      }
+                    },
+                  ),
+                  RadioListTile<DashboardTemplate>(
+                    title: const Text('Template 3'),
+                    value: DashboardTemplate.template3,
+                    groupValue: settingsController.dashboardTemplate.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settingsController.setDashboardTemplate(value);
+                        Get.offAllNamed(settingsController.getDashboardRoute());
+                      }
+                    },
+                  ),
+                  RadioListTile<DashboardTemplate>(
+                    title: const Text('Template 4'),
+                    value: DashboardTemplate.template4,
+                    groupValue: settingsController.dashboardTemplate.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settingsController.setDashboardTemplate(value);
+                        Get.offAllNamed(settingsController.getDashboardRoute());
+                      }
+                    },
+                  ),
+                  RadioListTile<DashboardTemplate>(
+                    title: const Text('Template 5'),
+                    value: DashboardTemplate.template5,
+                    groupValue: settingsController.dashboardTemplate.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settingsController.setDashboardTemplate(value);
+                        Get.offAllNamed(settingsController.getDashboardRoute());
+                      }
+                    },
+                  ),
+                ],
+              )),
+          const Divider(),
+
+
           // Other Options
           ListTile(
             leading: const Icon(Icons.notifications),

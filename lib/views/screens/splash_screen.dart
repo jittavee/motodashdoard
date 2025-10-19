@@ -43,9 +43,9 @@ class _SplashScreenState extends State<SplashScreen>
     // เริ่ม animation
     _animationController.forward();
 
-    // เปลี่ยนไปหน้า Dashboard หลังจาก 3 วินาที
+    // เปลี่ยนไปหน้า Dashboard 1 หลังจาก 3 วินาที
     Future.delayed(const Duration(seconds: 3), () {
-      Get.offAllNamed('/');
+      Get.offAllNamed('/template-1');
     });
   }
 

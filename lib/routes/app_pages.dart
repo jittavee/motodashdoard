@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import '../views/screens/splash_screen.dart';
-import '../views/screens/list_ui_screen.dart';
 import '../views/screens/bluetooth_screen.dart';
 import '../views/screens/settings_screen.dart';
 import '../views/screens/alert_settings_screen.dart';
@@ -18,10 +17,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.splash,
       page: () => const SplashScreen(),
-    ),
-    GetPage(
-      name: AppRoutes.home,
-      page: () => const ListUiScreen(),
     ),
     GetPage(
       name: AppRoutes.bluetooth,
