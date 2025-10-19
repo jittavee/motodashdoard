@@ -34,8 +34,7 @@ class TemplateFiveScreen extends StatelessWidget {
                   right: screenWidth * 0.21, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
                   child: Obx(() {
                     final speed = ecuController.currentData.value?.speed ?? 0;
-                    return
-                    _buildRotatingNeedleGauge(
+                    return _buildRotatingNeedleGauge(
                       value: speed,
                       maxValue: 270,
                       size: 85,
@@ -45,17 +44,17 @@ class TemplateFiveScreen extends StatelessWidget {
                         'assets/ui-5/Component 2.png',
                         fit: BoxFit.contain,
                       ),
-                      alignment: Alignment.bottomLeft
+                      alignment: Alignment.bottomLeft,
                     );
                   }),
                 ),
                 Positioned(
                   top: screenHeight * 0.3 - 10, // 53% จากด้านบน
-                  left: screenWidth * 0.3 - 35,  // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
+                  left:
+                      screenWidth * 0.3 - 35, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
-                    return 
-                    _buildRotatingNeedleGauge(
+                    return _buildRotatingNeedleGauge(
                       value: rpm,
                       maxValue: 15000,
                       size: 100,
@@ -65,11 +64,11 @@ class TemplateFiveScreen extends StatelessWidget {
                         'assets/ui-5/Component 3.png',
                         fit: BoxFit.contain,
                       ),
-                      alignment: Alignment.bottomLeft
+                      alignment: Alignment.bottomLeft,
                     );
                   }),
                 ),
-               
+
                 // Speed Number Display (Center of right gauge)
                 Positioned(
                   top: screenHeight * 0.5,
@@ -93,21 +92,25 @@ class TemplateFiveScreen extends StatelessWidget {
                 //   }),
                 // ),
 
-                // AFR and TPS Display (Top Left)
+                // IGN & INJ Data Panel (Left Side)
                 Positioned(
-                  bottom: screenHeight * 0.1 +10,
-                  left: screenWidth * 0.45+20,
+                  bottom: screenHeight * 0.25 -5,
+                  left: screenWidth * 0.55,
+                  child: Obx(() {
+                    final data = ecuController.currentData.value;
+                    return _buildCenterDataPanel(data);
+                  }),
+                ),
+
+                // AFR and TPS Display (Bottom Center)
+                Positioned(
+                  bottom: screenHeight * 0.1 + 10,
+                  left: screenWidth * 0.45 + 20,
                   child: Obx(() {
                     final data = ecuController.currentData.value;
                     final afr = data?.afr ?? 0;
                     final tps = data?.tps ?? 0;
-                    return Row(
-                      children: [
-                        _buildDataLabel('AFR', afr.toStringAsFixed(1)),
-                        SizedBox(width:50),
-                        _buildDataLabel('TPS', tps.toInt().toString()),
-                      ],
-                    );
+                    return _buildBottomDataPanel(afr, tps);
                   }),
                 ),
 
@@ -131,7 +134,6 @@ class TemplateFiveScreen extends StatelessWidget {
                           size: 30,
                         ),
                         onPressed: () {
-                          print(" Bluetooth Button Pressed");
                           ecuController.startGeneratingData();
                         },
                       ),
@@ -143,6 +145,16 @@ class TemplateFiveScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  Row _buildBottomDataPanel(double afr, double tps) {
+    return Row(
+      children: [
+        _buildDataLabel('AFR', afr.toStringAsFixed(1)),
+        SizedBox(width: 50),
+        _buildDataLabel('TPS', tps.toInt().toString()),
+      ],
     );
   }
 
@@ -158,59 +170,6 @@ class TemplateFiveScreen extends StatelessWidget {
           fontSize: 28,
           fontWeight: FontWeight.bold,
         ),
-      ),
-    );
-  }
-
-  /// Center Data Panel
-  Widget _buildCenterDataPanel(ECUData? data) {
-    return SizedBox(
-      width: 120,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Top section
-          _buildDataRow('MAP', data?.map.toStringAsFixed(0) ?? 'XX', 'kPa'),
-          const SizedBox(height: 8),
-          _buildDataRow('IAT', data?.airTemp.toStringAsFixed(0) ?? 'XX', '°C'),
-          const SizedBox(height: 8),
-          _buildDataRow(
-            'ECT',
-            data?.waterTemp.toStringAsFixed(0) ?? 'XX',
-            '°C',
-          ),
-          const SizedBox(height: 8),
-          _buildDataRow(
-            'BATTERY',
-            data?.battery.toStringAsFixed(1) ?? 'XX',
-            'V',
-          ),
-          const SizedBox(height: 20),
-
-          // Bottom section
-          _buildDataRow(
-            'IGN',
-            data?.ignition.toStringAsFixed(1) ?? 'XX',
-            'Deg',
-          ),
-          const SizedBox(height: 8),
-          _buildDataRow(
-            'IGN',
-            data?.ignition.toStringAsFixed(1) ?? 'XX',
-            'Pw.(ms.)',
-          ),
-          const SizedBox(height: 8),
-          _buildDataRow('INJ', data?.inject.toStringAsFixed(1) ?? 'XX', 'Deg'),
-          const SizedBox(height: 8),
-          _buildDataRow('INJ', data?.inject.toStringAsFixed(1) ?? 'XX', 'Pw.'),
-          const SizedBox(height: 20),
-
-          // AFR and TPS
-          _buildDataRow('AFR', data?.afr.toStringAsFixed(1) ?? 'XX', ''),
-          const SizedBox(height: 8),
-          _buildDataRow('TPS', data?.tps.toStringAsFixed(0) ?? 'XX', ''),
-        ],
       ),
     );
   }
@@ -269,6 +228,56 @@ class TemplateFiveScreen extends StatelessWidget {
     );
   }
 
+  /// Top Left Data Panel (IGN, INJ display)
+  Widget _buildCenterDataPanel(ECUData? data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0'),
+        const SizedBox(height: 4),
+        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0'),
+        const SizedBox(height: 4),
+        _buildDataLabel('INJ', data?.inject.toStringAsFixed(1) ?? '0'),
+        const SizedBox(height: 4),
+        _buildDataLabel('INJ', data?.inject.toStringAsFixed(0) ?? '0'),
+      ],
+    );
+  }
+
+  /// Compact Data Row for Top Left Panel
+  Widget _buildCompactDataRow(String label, String unit, String value) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 35,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 55,
+          child: Text(
+            unit,
+            style: const TextStyle(color: Colors.white70, fontSize: 10),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Main RPM Gauge with rotating needle
   ///
   /// [value] ค่าปัจจุบัน (RPM)
@@ -302,7 +311,7 @@ class TemplateFiveScreen extends StatelessWidget {
             builder: (context, value, child) {
               return Transform.rotate(
                 angle: value * (pi / 180),
-                alignment:  alignment , // หมุนรอบจุดซ้ายล่าง
+                alignment: alignment, // หมุนรอบจุดซ้ายล่าง
                 child: child,
               );
             },
