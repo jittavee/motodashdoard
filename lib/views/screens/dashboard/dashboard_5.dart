@@ -92,9 +92,20 @@ class TemplateFiveScreen extends StatelessWidget {
                 //   }),
                 // ),
 
+                // MAP, BATTERY, IAT, ECT Data Panel (Top Right)
+                Positioned(
+                  top: screenHeight * 0.2 + 10,
+                  left: screenWidth * 0.5 - 30,
+                  child: Obx(() {
+                    final data = ecuController.currentData.value;
+                    return Container(
+                      child: _buildTopRightDataPanel(data));
+                  }),
+                ),
+
                 // IGN & INJ Data Panel (Left Side)
                 Positioned(
-                  bottom: screenHeight * 0.25 -5,
+                  bottom: screenHeight * 0.25 - 5,
                   left: screenWidth * 0.55,
                   child: Obx(() {
                     final data = ecuController.currentData.value;
@@ -175,43 +186,6 @@ class TemplateFiveScreen extends StatelessWidget {
   }
 
   /// Data Row Widget
-  Widget _buildDataRow(String label, String value, String unit) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Row(
-          children: [
-            Text(
-              unit,
-              style: const TextStyle(
-                color: Color(0xFF00FFFF),
-                fontSize: 8,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   /// Data Label Widget (for AFR, TPS display)
   Widget _buildDataLabel(String label, String value) {
     return Row(
@@ -244,28 +218,46 @@ class TemplateFiveScreen extends StatelessWidget {
     );
   }
 
-  /// Compact Data Row for Top Left Panel
-  Widget _buildCompactDataRow(String label, String unit, String value) {
-    return Row(
+  /// Top Right Data Panel (MAP, BATTERY, IAT, ECT display)
+  Widget _buildTopRightDataPanel(ECUData? data) {
+    return Column(
       children: [
-        SizedBox(
-          width: 35,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _buildTopRightDataItem('MAP', data?.map.toInt().toString() ?? '0'),
+            SizedBox(width: 80),
+            _buildTopRightDataItem(
+              'BATTERY',
+              data?.battery.toStringAsFixed(1) ?? '0',
             ),
-          ),
+          ],
         ),
-        SizedBox(
-          width: 55,
-          child: Text(
-            unit,
-            style: const TextStyle(color: Colors.white70, fontSize: 10),
-          ),
+        const SizedBox(height: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(width: 10),
+            _buildTopRightDataItem(
+              'IAT',
+              data?.airTemp.toInt().toString() ?? '0',
+            ),
+            const SizedBox(width: 70),
+            _buildTopRightDataItem(
+              'ECT',
+              data?.waterTemp.toInt().toString() ?? '0',
+            ),
+          ],
         ),
+      ],
+    );
+  }
+
+  /// Top Right Data Item
+  Widget _buildTopRightDataItem(String label, String value) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
         Text(
           value,
           style: const TextStyle(
@@ -294,15 +286,12 @@ class TemplateFiveScreen extends StatelessWidget {
     required Image needleImage,
     required Alignment alignment,
   }) {
-    print(value);
     // คำนวณมุม
     final angle = _rpmToAngle(value, maxValue, offsetAngle, rotationRange);
-    print(angle);
     return Stack(
       children: [
         // Rotating Needle with smooth animation
-        Container(
-          color: Colors.green.withValues(alpha: .3),
+        SizedBox(
           height: size,
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: angle),
