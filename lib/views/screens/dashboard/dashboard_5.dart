@@ -41,6 +41,31 @@ class TemplateFiveScreen extends StatelessWidget {
                       size: 85,
                       offsetAngle: -15,
                       rotationRange: 270,
+                      needleImage: Image.asset(
+                        'assets/ui-5/Component 2.png',
+                        fit: BoxFit.contain,
+                      ),
+                      alignment: Alignment.bottomLeft
+                    );
+                  }),
+                ),
+                Positioned(
+                  top: screenHeight * 0.3 - 10, // 53% จากด้านบน
+                  left: screenWidth * 0.3 - 35,  // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
+                  child: Obx(() {
+                    final rpm = ecuController.currentData.value?.rpm ?? 0;
+                    return 
+                    _buildRotatingNeedleGauge(
+                      value: rpm,
+                      maxValue: 15000,
+                      size: 100,
+                      offsetAngle: -65,
+                      rotationRange: 320,
+                      needleImage: Image.asset(
+                        'assets/ui-5/Component 3.png',
+                        fit: BoxFit.contain,
+                      ),
+                      alignment: Alignment.bottomLeft
                     );
                   }),
                 ),
@@ -322,6 +347,8 @@ class TemplateFiveScreen extends StatelessWidget {
     required double size,
     required double offsetAngle, // ค่า offset เฉพาะของ gauge นี้
     required double rotationRange, // ช่วงการหมุนเฉพาะของ gauge นี้
+    required Image needleImage,
+    required Alignment alignment,
   }) {
     print(value);
     // คำนวณมุม
@@ -340,14 +367,11 @@ class TemplateFiveScreen extends StatelessWidget {
             builder: (context, value, child) {
               return Transform.rotate(
                 angle: value * (pi / 180),
-                alignment: Alignment.bottomLeft, // หมุนรอบจุดซ้ายล่าง
+                alignment:  alignment , // หมุนรอบจุดซ้ายล่าง
                 child: child,
               );
             },
-            child: Image.asset(
-              'assets/ui-5/Component 2.png',
-              fit: BoxFit.contain,
-            ),
+            child: needleImage,
           ),
         ),
       ],
