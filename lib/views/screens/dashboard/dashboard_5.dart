@@ -69,69 +69,19 @@ class TemplateFiveScreen extends StatelessWidget {
                     );
                   }),
                 ),
-                // RPM Needle (Left)
-                // Positioned(
-                //   top: screenHeight * 0.2,
-                //   left: screenWidth * 0.05,
-                //   child: Obx(() {
-                //     final rpm = ecuController.currentData.value?.rpm ?? 0;
-                //     return SizedBox(
-                //       width: screenWidth * 0.35,
-                //       height: screenWidth * 0.35,
-                //       child: _buildRotatingNeedle(
-                //         value: rpm,
-                //         maxValue: 15000,
-                //         offsetAngle: -45.0, // Start at 7 o'clock
-                //         rotationRange: 270.0, // Rotate to 5 o'clock
-                //       ),
-                //     );
-                //   }),
-                // ),
-
-                // // Speed Needle (Right)
-                // Positioned(
-                //   top: screenHeight * 0.2,
-                //   right: screenWidth * 0.05,
-                //   child: Obx(() {
-                //     final speed = ecuController.currentData.value?.speed ?? 0;
-                //     return SizedBox(
-                //       width: screenWidth * 0.35,
-                //       height: screenWidth * 0.35,
-                //       child: _buildRotatingNeedle(
-                //         value: speed,
-                //         maxValue: 280,
-                //         offsetAngle: -45.0,
-                //         rotationRange: 270.0,
-                //       ),
-                //     );
-                //   }),
-                // ),
-
-                // // RPM Number Display (Center of left gauge)
-                // Positioned(
-                //   top: screenHeight * 0.4,
-                //   left: screenWidth * 0.225 - 40,
-                //   child: Obx(() {
-                //     final rpm = ecuController.currentData.value?.rpm ?? 0;
-                //     return _buildCenterDisplay(
-                //       value: (rpm / 1000).toStringAsFixed(1),
-                //       label: 'RPM x 1000',
-                //     );
-                //   }),
-                // ),
-
-                // // Speed Number Display (Center of right gauge)
-                // Positioned(
-                //   top: screenHeight * 0.4,
-                //   right: screenWidth * 0.225 - 40,
-                //   child: Obx(() {
-                //     final speed = ecuController.currentData.value?.speed ?? 0;
-                //     return _buildCenterDisplay(
-                //       value: speed.toInt().toString(),
-                //       label: 'KM/H',
-                //     );
-                //   }),
-                // ),
+               
+                // Speed Number Display (Center of right gauge)
+                Positioned(
+                  top: screenHeight * 0.5,
+                  right: screenWidth * 0.25 - 45,
+                  child: Obx(() {
+                    final speed = ecuController.currentData.value?.speed ?? 0;
+                    return _buildCenterDisplay(
+                      value: speed.toInt().toString(),
+                      label: 'KM/H',
+                    );
+                  }),
+                ),
 
                 // // Center Data Panel
                 // Positioned(
@@ -218,27 +168,13 @@ class TemplateFiveScreen extends StatelessWidget {
     return Container(
       width: 80,
       alignment: Alignment.center,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+      child: Text(
+        value,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
