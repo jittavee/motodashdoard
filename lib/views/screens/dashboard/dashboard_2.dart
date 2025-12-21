@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../controllers/bluetooth_controller.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../models/ecu_data.dart';
+import '../../widgets/bluetooth_button.dart';
+import '../../widgets/settings_button.dart';
 
 class TemplateTwoScreen extends StatelessWidget {
   const TemplateTwoScreen({super.key});
@@ -10,7 +11,6 @@ class TemplateTwoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
-    final btController = Get.find<BluetoothController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -34,53 +34,14 @@ class TemplateTwoScreen extends StatelessWidget {
                 Positioned(
                   top: screenHeight * 0.06,
                   left: screenWidth * 0.084,
-                  child: GestureDetector(
-                    onTap: () {
-                      Get.toNamed('/settings');
-                    },
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white70, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.settings,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                  ),
+                  child: const SettingsButton(),
                 ),
 
                 // Bluetooth Button
                 Positioned(
                   top: screenHeight * 0.06,
                   right: screenWidth * 0.084,
-                  child: Obx(() {
-                    final isConnected =
-                        btController.connectionStatus.value ==
-                        BluetoothConnectionStatus.connected;
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: isConnected ? Colors.green : Colors.transparent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.bluetooth,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                        onPressed: () {
-                          Get.toNamed('/bluetooth');
-                        },
-                      ),
-                    );
-                  }),
+                  child: const BluetoothButton(),
                 ),
 
                 // Left Panel Data

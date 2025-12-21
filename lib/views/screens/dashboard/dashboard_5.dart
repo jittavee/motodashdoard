@@ -3,7 +3,8 @@ import 'package:api_tech_moto/models/ecu_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
-import '../../../controllers/bluetooth_controller.dart';
+import '../../widgets/bluetooth_button.dart';
+import '../../widgets/settings_button.dart';
 
 class TemplateFiveScreen extends StatelessWidget {
   const TemplateFiveScreen({super.key});
@@ -11,7 +12,6 @@ class TemplateFiveScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
-    final btController = Get.find<BluetoothController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -96,25 +96,7 @@ class TemplateFiveScreen extends StatelessWidget {
                 Positioned(
                   top: screenHeight * 0.05,
                   left: screenWidth * 0.05,
-                  child: GestureDetector(
-                    onTap: () {
-                      Get.toNamed('/settings');
-                    },
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white70, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.settings,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                  ),
+                  child: const SettingsButton(),
                 ),
 
                 // MAP, BATTERY, IAT, ECT Data Panel (Top Right)
@@ -154,27 +136,7 @@ class TemplateFiveScreen extends StatelessWidget {
                 Positioned(
                   bottom: screenHeight * 0.15,
                   right: screenWidth * 0.05,
-                  child: Obx(() {
-                    final isConnected =
-                        btController.connectionStatus.value ==
-                        BluetoothConnectionStatus.connected;
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: isConnected ? Colors.green : Colors.transparent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.bluetooth,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                        onPressed: () {
-                          Get.toNamed('/bluetooth');
-                        },
-                      ),
-                    );
-                  }),
+                  child: const BluetoothButton(),
                 ),
               ],
             );
