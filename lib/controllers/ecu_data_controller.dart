@@ -17,13 +17,20 @@ class ECUDataController extends GetxController {
   final RxBool isAlertActive = false.obs;
   final RxString activeAlertMessage = ''.obs;
 
-  Timer? loggingTimer;
+  Timer? _loggingTimer;
   Timer? _debounceTimer;
   final Map<String, double> _dataBuffer = {}; // Buffer สำหรับเก็บข้อมูลที่รับมาทีละตัว
+  bool _isProcessing = false; // Thread-safety flag
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // จำนวนฟิลด์ทั้งหมดที่ต้องรับครบ
   static const int _expectedFieldCount = 13;
+
+  // Valid ECU parameter keys
+  static const Set<String> _validKeys = {
+    'TECHO', 'SPEED', 'WATER', 'AIR.T', 'MAP', 'TPS',
+    'BATT', 'IGNITI', 'INJECT', 'AFR', 'S.TRIM', 'L.TRIM', 'IACV'
+  };
 
   @override
   void onInit() {
@@ -33,7 +40,7 @@ class ECUDataController extends GetxController {
 
   @override
   void onClose() {
-    loggingTimer?.cancel();
+    _loggingTimer?.cancel();
     _debounceTimer?.cancel();
     super.onClose();
   }
@@ -44,37 +51,105 @@ class ECUDataController extends GetxController {
 
   // รับข้อมูลจาก Bluetooth (มาทีละตัว เช่น "TECHO=290")
   void updateDataFromBluetooth(String rawData) {
+    // Prevent concurrent access
+    if (_isProcessing) {
+      logger.w('Skipping data update - already processing');
+      return;
+    }
+
     try {
+      // Validate input
+      if (rawData.isEmpty) {
+        logger.w('Empty data received');
+        return;
+      }
+
       // แยก key=value
       List<String> keyValue = rawData.trim().split('=');
-      if (keyValue.length == 2) {
-        String key = keyValue[0].trim();
-        double value = double.tryParse(keyValue[1].trim()) ?? 0.0;
+      if (keyValue.length != 2) {
+        logger.w('Invalid data format: $rawData');
+        return;
+      }
 
-        // เก็บค่าลง buffer
-        _dataBuffer[key] = value;
+      String key = keyValue[0].trim().toUpperCase();
 
-        // ถ้าครบ 13 ค่าแล้ว -> อัพเดท UI
-        if (_dataBuffer.length >= _expectedFieldCount) {
-          _updateUI();
-        } else {
-          // ยังไม่ครบ -> ตั้ง timeout กันข้อมูลค้าง
-          _debounceTimer?.cancel();
-          _debounceTimer = Timer(const Duration(milliseconds: 200), () {
-            // ถ้าเกิน 200ms ยังไม่มีข้อมูลใหม่ -> อัพเดทแม้ยังไม่ครบ
-            if (_dataBuffer.isNotEmpty) {
-              _updateUI();
-            }
-          });
-        }
+      // Validate key
+      if (!_validKeys.contains(key)) {
+        logger.w('Unknown ECU parameter: $key');
+        return;
+      }
+
+      // Parse value
+      double? value = double.tryParse(keyValue[1].trim());
+      if (value == null) {
+        logger.w('Invalid numeric value for $key: ${keyValue[1]}');
+        return;
+      }
+
+      // Validate value bounds
+      if (!_isValueInValidRange(key, value)) {
+        logger.w('Value out of range for $key: $value');
+        return;
+      }
+
+      // เก็บค่าลง buffer
+      _dataBuffer[key] = value;
+
+      // ถ้าครบ 13 ค่าแล้ว -> อัพเดท UI
+      if (_dataBuffer.length >= _expectedFieldCount) {
+        _updateUI();
+      } else {
+        // ยังไม่ครบ -> ตั้ง timeout กันข้อมูลค้าง
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(const Duration(milliseconds: 200), () {
+          // ถ้าเกิน 200ms ยังไม่มีข้อมูลใหม่ -> อัพเดทแม้ยังไม่ครบ
+          if (_dataBuffer.isNotEmpty) {
+            _updateUI();
+          }
+        });
       }
     } catch (e) {
       logger.e('Error parsing ECU data: $e');
     }
   }
 
+  // Validate ECU parameter values are within realistic ranges
+  bool _isValueInValidRange(String key, double value) {
+    switch (key) {
+      case 'TECHO': // RPM
+        return value >= 0 && value <= 20000;
+      case 'SPEED': // km/h
+        return value >= 0 && value <= 400;
+      case 'WATER': // Water temp (°C)
+        return value >= -40 && value <= 200;
+      case 'AIR.T': // Air temp (°C)
+        return value >= -40 && value <= 150;
+      case 'MAP': // kPa
+        return value >= 0 && value <= 300;
+      case 'TPS': // %
+        return value >= 0 && value <= 100;
+      case 'BATT': // Volts
+        return value >= 0 && value <= 20;
+      case 'IGNITI': // Degrees
+        return value >= -30 && value <= 60;
+      case 'INJECT': // ms
+        return value >= 0 && value <= 50;
+      case 'AFR': // Air-Fuel Ratio
+        return value >= 5 && value <= 25;
+      case 'S.TRIM': // %
+        return value >= 0 && value <= 200;
+      case 'L.TRIM': // %
+        return value >= 0 && value <= 200;
+      case 'IACV': // %
+        return value >= 0 && value <= 100;
+      default:
+        return true;
+    }
+  }
+
   // อัพเดท UI เมื่อรับข้อมูลครบแล้ว
   void _updateUI() {
+    _isProcessing = true;
     try {
       // สร้าง ECU Data object จาก buffer
       ECUData newData = ECUData.fromJson(_dataBuffer);
@@ -91,17 +166,21 @@ class ECUDataController extends GetxController {
       // ตรวจสอบ alerts
       _checkAlerts(newData);
 
-      // บันทึกลง database ถ้าเปิด logging
+      // บันทึกลง database ถ้าเปิด logging (async without blocking)
       if (isLogging.value) {
-        _dbHelper.insertECUData(newData);
+        _dbHelper.insertECUData(newData).catchError((error) {
+          logger.e('Error saving to database: $error');
+          return -1; // Return error indicator
+        });
       }
-
 
       // ล้าง buffer เพื่อรอรับชุดใหม่
       _dataBuffer.clear();
       _debounceTimer?.cancel();
     } catch (e) {
       logger.e('Error updating UI: $e');
+    } finally {
+      _isProcessing = false;
     }
   }
 
@@ -166,16 +245,16 @@ class ECUDataController extends GetxController {
     SystemSound.play(SystemSoundType.alert);
   }
 
-  void _showAlertPopup(String paramName, double value, AlertThreshold threshold) {
-    Get.snackbar(
-      '⚠️ แจ้งเตือน',
-      '$paramName: ${value.toStringAsFixed(1)} (ควรอยู่ระหว่าง ${threshold.minValue}-${threshold.maxValue})',
-      snackPosition: SnackPosition.TOP,
-      duration: const Duration(seconds: 3),
-      backgroundColor: Get.theme.colorScheme.error.withValues(alpha: .9),
-      colorText: Get.theme.colorScheme.onError,
-    );
-  }
+  // void _showAlertPopup(String paramName, double value, AlertThreshold threshold) {
+  //   Get.snackbar(
+  //     '⚠️ แจ้งเตือน',
+  //     '$paramName: ${value.toStringAsFixed(1)} (ควรอยู่ระหว่าง ${threshold.minValue}-${threshold.maxValue})',
+  //     snackPosition: SnackPosition.TOP,
+  //     duration: const Duration(seconds: 3),
+  //     backgroundColor: Get.theme.colorScheme.error.withValues(alpha: .9),
+  //     colorText: Get.theme.colorScheme.onError,
+  //   );
+  // }
 
   // จัดการ Alert Thresholds
   Future<void> addAlertThreshold(AlertThreshold threshold) async {
@@ -197,16 +276,20 @@ class ECUDataController extends GetxController {
   void startLogging() {
     isLogging.value = true;
     // บันทึกทุก 1 วินาที
-    loggingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _loggingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (currentData.value != null) {
-        _dbHelper.insertECUData(currentData.value!);
+        _dbHelper.insertECUData(currentData.value!).catchError((error) {
+          logger.e('Error in periodic logging: $error');
+          return -1;
+        });
       }
     });
   }
 
   void stopLogging() {
     isLogging.value = false;
-    loggingTimer?.cancel();
+    _loggingTimer?.cancel();
+    _loggingTimer = null;
   }
 
   // ดึงข้อมูล logs จาก database
@@ -265,41 +348,6 @@ class ECUDataController extends GetxController {
     List<Map<String, dynamic>> jsonList = logs.map((data) => data.toJson()).toList();
 
     return jsonEncode(jsonList);
-  }
-
-  // สร้างข้อมูล dummy สำหรับ testing (สามารถลบได้)
-  void startGeneratingData() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (timer.tick > 30) {
-        timer.cancel();
-        return;
-      }
-
-      // RPM เพิ่มทีละ 500 (0, 500, 1000, 1500, ...)
-      int rpm = timer.tick * 500;
-
-      // สร้างข้อมูลแบบเรียงลำดับและส่งทีละคู่
-      List<String> dataList = [
-        'TECHO=$rpm',
-        'SPEED=${(timer.tick * 5).toString()}',
-        'WATER=${(80 + timer.tick).toString()}',
-        'AIR.T=${(30 + timer.tick).toString()}',
-        'MAP=${(100 + timer.tick).toString()}',
-        'TPS=${(timer.tick * 2).toString()}',
-        'BATT=13.5',
-        'IGNITI=${(15 + timer.tick * 0.5).toString()}',
-        'INJECT=${(5 + timer.tick * 0.2).toString()}',
-        'AFR=14.7',
-        'S.TRIM=100',
-        'L.TRIM=100',
-        'IACV=50',
-      ];
-
-      // ส่งข้อมูลทีละคู่ไปที่ updateDataFromBluetooth
-      for (var data in dataList) {
-        updateDataFromBluetooth(data);
-      }
-    });
   }
 
   // Reset data
