@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/performance_test.dart';
 import '../services/database_helper.dart';
+import '../services/permission_service.dart';
 import 'ecu_data_controller.dart';
 
 class PerformanceTestController extends GetxController {
@@ -13,10 +14,10 @@ class PerformanceTestController extends GetxController {
   final RxDouble currentSpeed = 0.0.obs;
   final RxDouble maxSpeed = 0.0.obs;
 
-  Position? startPosition;
-  DateTime? startTime;
-  Timer? testTimer;
-  StreamSubscription<Position>? positionSubscription;
+  Position? _startPosition;
+  DateTime? _startTime;
+  Timer? _testTimer;
+  StreamSubscription<Position>? _positionSubscription;
 
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final RxList<PerformanceTest> testHistory = <PerformanceTest>[].obs;
@@ -35,24 +36,15 @@ class PerformanceTestController extends GetxController {
   }
 
   Future<void> _checkLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      Get.snackbar('Location', 'กรุณาเปิด Location Service');
-      return;
-    }
+    final permissionService = PermissionService.instance;
+    final hasPermission = await permissionService.requestLocationPermissions();
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        Get.snackbar('Permission', 'ไม่มีสิทธิ์เข้าถึง Location');
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      Get.snackbar('Permission', 'กรุณาอนุญาตการเข้าถึง Location ในการตั้งค่า');
-      return;
+    if (!hasPermission) {
+      Get.snackbar(
+        'Permission Required',
+        'Location permission is required for performance testing',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -64,9 +56,9 @@ class PerformanceTestController extends GetxController {
     if (isTestRunning.value) return;
 
     // ตรวจสอบ permission
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
+    final permissionService = PermissionService.instance;
+    final hasPermission = await permissionService.checkLocationPermissions();
+    if (!hasPermission) {
       await _checkLocationPermission();
       return;
     }
@@ -79,21 +71,21 @@ class PerformanceTestController extends GetxController {
     maxSpeed.value = 0.0;
 
     // บันทึกตำแหน่งเริ่มต้น
-    startPosition = await Geolocator.getCurrentPosition(
+    _startPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
-    startTime = DateTime.now();
+    _startTime = DateTime.now();
 
     // เริ่มจับเวลา
-    testTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (startTime != null) {
+    _testTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (_startTime != null) {
         currentTime.value =
-            DateTime.now().difference(startTime!).inMilliseconds / 1000;
+            DateTime.now().difference(_startTime!).inMilliseconds / 1000;
       }
     });
 
     // ติดตามตำแหน่ง
-    positionSubscription = Geolocator.getPositionStream(
+    _positionSubscription = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 1,
@@ -104,12 +96,12 @@ class PerformanceTestController extends GetxController {
   }
 
   void _updatePosition(Position position) {
-    if (startPosition == null) return;
+    if (_startPosition == null) return;
 
     // คำนวณระยะทาง
     double distance = Geolocator.distanceBetween(
-      startPosition!.latitude,
-      startPosition!.longitude,
+      _startPosition!.latitude,
+      _startPosition!.longitude,
       position.latitude,
       position.longitude,
     );
@@ -149,8 +141,11 @@ class PerformanceTestController extends GetxController {
 
     stopTest();
 
-    // คำนวณความเร็วเฉลี่ย
-    double avgSpeed = (currentDistance.value / currentTime.value) * 3.6;
+    // คำนวณความเร็วเฉลี่ย (ป้องกัน division by zero)
+    double avgSpeed = 0.0;
+    if (currentTime.value > 0) {
+      avgSpeed = (currentDistance.value / currentTime.value) * 3.6;
+    }
 
     // สร้าง PerformanceTest object
     PerformanceTest test = PerformanceTest(
@@ -179,11 +174,13 @@ class PerformanceTestController extends GetxController {
 
   void stopTest() {
     isTestRunning.value = false;
-    testTimer?.cancel();
-    positionSubscription?.cancel();
+    _testTimer?.cancel();
+    _positionSubscription?.cancel();
 
-    startPosition = null;
-    startTime = null;
+    _testTimer = null;
+    _positionSubscription = null;
+    _startPosition = null;
+    _startTime = null;
   }
 
   Future<void> deleteTest(int id) async {
@@ -206,13 +203,13 @@ class PerformanceTestController extends GetxController {
     currentSpeed.value = 0.0;
     maxSpeed.value = 0.0;
 
-    startTime = DateTime.now();
+    _startTime = DateTime.now();
 
     // เริ่มจับเวลา
-    testTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (startTime != null) {
+    _testTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (_startTime != null) {
         currentTime.value =
-            DateTime.now().difference(startTime!).inMilliseconds / 1000;
+            DateTime.now().difference(_startTime!).inMilliseconds / 1000;
 
         // ดึงความเร็วจาก ECUDataController
         final ecuController = Get.find<ECUDataController>();
