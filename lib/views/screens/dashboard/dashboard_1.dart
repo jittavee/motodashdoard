@@ -23,6 +23,23 @@ class TemplateOneScreen extends StatelessWidget {
             final screenHeight = constraints.maxHeight;
             return Stack(
               children: [
+
+                // TPS Progress Bar (below image)
+                Positioned(
+                  bottom: screenHeight * 0.2 - 5, // ต่ำกว่ารูปเล็กน้อย
+                  right: screenWidth * 0.2 - 21,
+                  child: Obx(() {
+                    final tps = ecuController.currentData.value?.tps ?? 0;
+                    return Container(
+                      width: screenWidth * .140, // ความกว้าง
+                      height: 15, // ความสูง (เรียวกว่าเดิม)
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.5),
+                      ),
+                      child: _buildTPSProgressBar(tps),
+                    );
+                  }),
+                ),
                 // Background Image
                 Positioned.fill(
                   child: Image.asset(
@@ -112,28 +129,7 @@ class TemplateOneScreen extends StatelessWidget {
                   ),
                 ),
 
-                // TPS Progress Bar
-                Positioned(
-                  bottom: screenHeight * 0.17, // 11% จากด้านล่าง
-                  right:
-                      screenWidth * 0.2 -
-                      21,
-                  child: Obx(() {
-                    final tps = ecuController.currentData.value?.tps ?? 0;
-                    return Container(
-                      width: screenWidth * .140, // ความกว้าง
-                      height: 15, // ความสูง (เรียวกว่าเดิม)
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(300.0),
-                          bottomRight: Radius.circular(300.0),
-                        ),
-                      ),
-                      child: _buildTPSProgressBar(tps),
-                    );
-                  }),
-                ),
+                
 
                 // Settings Button (Top Left)
                 const Positioned(
@@ -286,6 +282,7 @@ class TemplateOneScreen extends StatelessWidget {
 
   /// TPS Progress Bar (Linear Gauge) - รูปแบบตามรูป
   Widget _buildTPSProgressBar(double tps) {
+    print(  'TPS Value: $tps'); // Debugging line
     return Stack(
       children: [
         // Progress Fill (หลอดที่เต็ม)
