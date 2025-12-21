@@ -1,10 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/ecu_data_controller.dart';
 import '../../models/alert_threshold.dart';
 
-class AlertSettingsScreen extends StatelessWidget {
+class AlertSettingsScreen extends StatefulWidget {
   const AlertSettingsScreen({super.key});
+
+  @override
+  State<AlertSettingsScreen> createState() => _AlertSettingsScreenState();
+}
+
+class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // บังคับให้หน้า Alert Settings เป็นแนวตั้งเท่านั้น
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  @override
+  void dispose() {
+    // คืนค่าให้รองรับทุกแนว
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
