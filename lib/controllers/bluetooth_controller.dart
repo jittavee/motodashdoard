@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../utils/logger.dart';
+import '../services/permission_service.dart';
 import 'ecu_data_controller.dart';
 
 enum BluetoothConnectionStatus {
@@ -25,6 +25,8 @@ class BluetoothController extends GetxController {
   BluetoothCharacteristic? dataCharacteristic;
   StreamSubscription? connectionSubscription;
   StreamSubscription? dataSubscription;
+  StreamSubscription? scanResultsSubscription;
+  StreamSubscription? isScanningSubscription;
 
   final RxString lastReceivedData = ''.obs;
 
@@ -37,6 +39,8 @@ class BluetoothController extends GetxController {
   @override
   void onClose() {
     disconnect();
+    scanResultsSubscription?.cancel();
+    isScanningSubscription?.cancel();
     super.onClose();
   }
 
@@ -53,21 +57,16 @@ class BluetoothController extends GetxController {
   }
 
   Future<void> _requestPermissions() async {
-    // สำหรับ Android 12+
-    if (GetPlatform.isAndroid) {
-      await [
-        Permission.bluetoothScan,
-        Permission.bluetoothConnect,
-        Permission.bluetoothAdvertise,
-        Permission.location,
-      ].request();
-    } else if (GetPlatform.isIOS) {
-      await Permission.bluetooth.request();
-    }
+    final permissionService = PermissionService.instance;
+    await permissionService.requestBluetoothPermissions();
   }
 
   Future<void> startScan() async {
     try {
+      // Cancel existing subscriptions first
+      await scanResultsSubscription?.cancel();
+      await isScanningSubscription?.cancel();
+
       scanResults.clear();
       isScanning.value = true;
       errorMessage.value = '';
@@ -85,27 +84,33 @@ class BluetoothController extends GetxController {
         timeout: const Duration(seconds: 15),
       );
 
-      // รับผลการสแกน
-      FlutterBluePlus.scanResults.listen((results) {
+      // รับผลการสแกน - store subscription to cancel later
+      scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
         scanResults.value = results;
       });
 
-      // เมื่อสแกนเสร็จ
-      FlutterBluePlus.isScanning.listen((scanning) {
+      // เมื่อสแกนเสร็จ - store subscription to cancel later
+      isScanningSubscription = FlutterBluePlus.isScanning.listen((scanning) {
         isScanning.value = scanning;
       });
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการสแกน: $e';
       isScanning.value = false;
+      logger.e('Error starting scan', error: e);
     }
   }
 
   Future<void> stopScan() async {
     try {
       await FlutterBluePlus.stopScan();
+      await scanResultsSubscription?.cancel();
+      await isScanningSubscription?.cancel();
+      scanResultsSubscription = null;
+      isScanningSubscription = null;
       isScanning.value = false;
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการหยุดสแกน: $e';
+      logger.e('Error stopping scan', error: e);
     }
   }
 
@@ -195,8 +200,22 @@ class BluetoothController extends GetxController {
 
   void _handleReceivedData(List<int> data) {
     try {
-      // แปลงข้อมูลจาก bytes เป็น String
-      String dataString = utf8.decode(data);
+      // Validate data is not empty
+      if (data.isEmpty) {
+        logger.w('Received empty data');
+        return;
+      }
+
+      // แปลงข้อมูลจาก bytes เป็น String with error handling
+      String dataString;
+      try {
+        dataString = utf8.decode(data, allowMalformed: false);
+      } catch (e) {
+        logger.e('Invalid UTF-8 data received', error: e);
+        errorMessage.value = 'ข้อมูลที่รับไม่ถูกต้อง';
+        return;
+      }
+
       lastReceivedData.value = dataString;
 
       // Log ข้อมูลที่รับได้
