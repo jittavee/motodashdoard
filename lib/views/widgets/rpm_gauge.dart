@@ -8,11 +8,11 @@ class RpmGauge extends StatelessWidget {
   final double maxValue;
 
   const RpmGauge({
-    Key? key,
+    super.key,
     required this.value,
     required this.theme,
     this.maxValue = 15000,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

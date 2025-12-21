@@ -8,11 +8,11 @@ class SpeedGauge extends StatelessWidget {
   final String unit;
 
   const SpeedGauge({
-    Key? key,
+    super.key,
     required this.value,
     required this.theme,
     this.unit = 'km/h',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
