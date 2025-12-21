@@ -22,9 +22,44 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Incremented version for migration
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    // Migration logic for future schema changes
+    if (oldVersion < 2) {
+      // Add indexes for better query performance
+      await _createIndexes(db);
+    }
+  }
+
+  Future<void> _createIndexes(Database db) async {
+    // Index for ECU logs timestamp (frequently queried)
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_ecu_logs_timestamp
+      ON ecu_logs(timestamp DESC)
+    ''');
+
+    // Index for performance tests timestamp
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_performance_tests_timestamp
+      ON performance_tests(timestamp DESC)
+    ''');
+
+    // Index for performance tests type (for filtering)
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_performance_tests_type
+      ON performance_tests(testType)
+    ''');
+
+    // Composite index for ECU logs date range queries
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_ecu_logs_timestamp_range
+      ON ecu_logs(timestamp)
+    ''');
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -79,6 +114,9 @@ class DatabaseHelper {
 
     // เพิ่ม default alert thresholds
     await _insertDefaultAlerts(db);
+
+    // Create indexes
+    await _createIndexes(db);
   }
 
   Future<void> _insertDefaultAlerts(Database db) async {
@@ -123,7 +161,12 @@ class DatabaseHelper {
     return await db.insert('ecu_logs', data.toMap());
   }
 
-  Future<List<ECUData>> getECULogs({int? limit, DateTime? startDate, DateTime? endDate}) async {
+  Future<List<ECUData>> getECULogs({
+    int? limit,
+    int? offset,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     final db = await database;
 
     String whereClause = '';
@@ -131,7 +174,10 @@ class DatabaseHelper {
 
     if (startDate != null && endDate != null) {
       whereClause = 'timestamp BETWEEN ? AND ?';
-      whereArgs = [startDate.millisecondsSinceEpoch, endDate.millisecondsSinceEpoch];
+      whereArgs = [
+        startDate.millisecondsSinceEpoch,
+        endDate.millisecondsSinceEpoch
+      ];
     }
 
     final maps = await db.query(
@@ -139,10 +185,34 @@ class DatabaseHelper {
       where: whereClause.isEmpty ? null : whereClause,
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
       orderBy: 'timestamp DESC',
-      limit: limit,
+      limit: limit ?? 100, // Default limit to prevent loading too much data
+      offset: offset,
     );
 
     return maps.map((map) => ECUData.fromMap(map)).toList();
+  }
+
+  // Get total count of ECU logs (for pagination)
+  Future<int> getECULogsCount({DateTime? startDate, DateTime? endDate}) async {
+    final db = await database;
+
+    String whereClause = '';
+    List<dynamic> whereArgs = [];
+
+    if (startDate != null && endDate != null) {
+      whereClause = ' WHERE timestamp BETWEEN ? AND ?';
+      whereArgs = [
+        startDate.millisecondsSinceEpoch,
+        endDate.millisecondsSinceEpoch
+      ];
+    }
+
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) FROM ecu_logs$whereClause',
+      whereArgs.isEmpty ? null : whereArgs,
+    );
+
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
   Future<int> deleteECULogsBefore(DateTime date) async {
@@ -196,15 +266,40 @@ class DatabaseHelper {
     return await db.insert('performance_tests', test.toMap());
   }
 
-  Future<List<PerformanceTest>> getAllPerformanceTests({String? testType}) async {
+  Future<List<PerformanceTest>> getAllPerformanceTests({
+    String? testType,
+    int? limit,
+    int? offset,
+  }) async {
     final db = await database;
     final maps = await db.query(
       'performance_tests',
       where: testType != null ? 'testType = ?' : null,
       whereArgs: testType != null ? [testType] : null,
       orderBy: 'timestamp DESC',
+      limit: limit ?? 50, // Default limit
+      offset: offset,
     );
     return maps.map((map) => PerformanceTest.fromMap(map)).toList();
+  }
+
+  // Get total count of performance tests
+  Future<int> getPerformanceTestsCount({String? testType}) async {
+    final db = await database;
+
+    String whereClause = '';
+    List<dynamic>? whereArgs;
+
+    if (testType != null) {
+      whereClause = ' WHERE testType = ?';
+      whereArgs = [testType];
+    }
+
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) FROM performance_tests$whereClause',
+      whereArgs,
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
   Future<int> deletePerformanceTest(int id) async {
