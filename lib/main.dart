@@ -8,6 +8,9 @@ import 'controllers/settings_controller.dart';
 import 'controllers/ecu_data_controller.dart';
 import 'controllers/bluetooth_controller.dart';
 import 'controllers/language_controller.dart';
+import 'controllers/performance_test_controller.dart';
+
+import 'services/permission_service.dart';
 
 import 'constants/app_themes.dart';
 import 'translations/app_translations.dart';
@@ -23,7 +26,23 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
+  // Initialize services and controllers - Dependency Injection
+  await _initializeDependencies();
+
   runApp(const MyApp());
+}
+
+Future<void> _initializeDependencies() async {
+  // Initialize services first (순서 중요)
+  await Get.putAsync(() async => PermissionService());
+
+  // Initialize controllers (can use services)
+  Get.put(ThemeController(), permanent: true);
+  Get.put(LanguageController(), permanent: true);
+  Get.put(SettingsController(), permanent: true);
+  Get.put(ECUDataController(), permanent: true);
+  Get.put(BluetoothController(), permanent: true);
+  Get.put(PerformanceTestController(), permanent: true);
 }
 
 class MyApp extends StatelessWidget {
@@ -31,12 +50,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controllers
-    final themeController = Get.put(ThemeController());
-    final languageController = Get.put(LanguageController());
-    Get.put(SettingsController());
-    Get.put(ECUDataController());
-    Get.put(BluetoothController());
+    // Find controllers (already initialized in main)
+    final themeController = Get.find<ThemeController>();
+    final languageController = Get.find<LanguageController>();
 
     return Obx(
       () => GetMaterialApp(
