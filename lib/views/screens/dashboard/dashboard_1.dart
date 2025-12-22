@@ -56,10 +56,10 @@ class TemplateOneScreen extends StatelessWidget {
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
                     return _buildRotatingNeedleGauge(
-                      value: rpm,
+                      value: rpm, // ค่าปัจจุบันของ RPM
                       maxValue: 15000,
                       size: 85,
-                      offsetAngle: 150.0,
+                      offsetAngle: 140.0,
                       rotationRange: 240.0,
                     );
                   }),
@@ -282,7 +282,6 @@ class TemplateOneScreen extends StatelessWidget {
 
   /// TPS Progress Bar (Linear Gauge) - รูปแบบตามรูป
   Widget _buildTPSProgressBar(double tps) {
-    print(  'TPS Value: $tps'); // Debugging line
     return Stack(
       children: [
         // Progress Fill (หลอดที่เต็ม)
