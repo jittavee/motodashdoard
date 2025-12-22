@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/language_controller.dart';
+import '../../controllers/ecu_data_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -38,6 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final settingsController = Get.find<SettingsController>();
     final languageController = Get.find<LanguageController>();
+    final ecuController = Get.find<ECUDataController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -189,17 +191,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Alert Settings'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // Navigate to alert settings
-              Get.snackbar('Info', 'Alert settings coming soon');
+              Get.toNamed('/alert-settings');
             },
           ),
+          // Data Logging Toggle
+          Obx(() => ListTile(
+                leading: const Icon(Icons.data_usage),
+                title: const Text('Data Logging'),
+                subtitle: Text(
+                  ecuController.isLogging.value
+                      ? 'Recording ECU data to database'
+                      : 'Not recording',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: ecuController.isLogging.value
+                        ? Colors.green
+                        : Colors.grey,
+                  ),
+                ),
+                trailing: Switch(
+                  value: ecuController.isLogging.value,
+                  onChanged: (value) {
+                    if (value) {
+                      ecuController.startLogging();
+                      Get.snackbar(
+                        'Data Logging',
+                        'Started recording ECU data',
+                        snackPosition: SnackPosition.BOTTOM,
+                        duration: const Duration(seconds: 2),
+                      );
+                    } else {
+                      ecuController.stopLogging();
+                      Get.snackbar(
+                        'Data Logging',
+                        'Stopped recording ECU data',
+                        snackPosition: SnackPosition.BOTTOM,
+                        duration: const Duration(seconds: 2),
+                      );
+                    }
+                  },
+                ),
+              )),
+          // View Log History
           ListTile(
-            leading: const Icon(Icons.data_usage),
-            title: const Text('Data Logging'),
+            leading: const Icon(Icons.history),
+            title: const Text('View Log History'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // Navigate to data logging
-              Get.snackbar('Info', 'Data logging screen coming soon');
+              Get.toNamed('/data-log');
             },
           ),
           ListTile(
@@ -207,8 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Performance Test'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // Navigate to performance test
-              Get.snackbar('Info', 'Performance test screen coming soon');
+              Get.toNamed('/performance-test');
             },
           ),
 
