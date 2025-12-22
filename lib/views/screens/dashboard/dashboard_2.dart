@@ -1,16 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../models/ecu_data.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 
-class TemplateTwoScreen extends StatelessWidget {
+class TemplateTwoScreen extends StatefulWidget {
   const TemplateTwoScreen({super.key});
+
+  @override
+  State<TemplateTwoScreen> createState() => _TemplateTwoScreenState();
+}
+
+class _TemplateTwoScreenState extends State<TemplateTwoScreen> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _setLandscape();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _resetOrientation();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _setLandscape();
+    }
+  }
+
+  void _setLandscape() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  void _resetOrientation() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setLandscape();
+    });
 
     return Scaffold(
       backgroundColor: Colors.black,
