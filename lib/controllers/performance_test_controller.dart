@@ -9,10 +9,14 @@ import 'ecu_data_controller.dart';
 class PerformanceTestController extends GetxController {
   final RxBool isTestRunning = false.obs;
   final RxString currentTestType = ''.obs;
+  final RxString selectedTestType = ''.obs;
   final RxDouble currentDistance = 0.0.obs;
   final RxDouble currentTime = 0.0.obs;
   final RxDouble currentSpeed = 0.0.obs;
   final RxDouble maxSpeed = 0.0.obs;
+
+  // Alias for compatibility
+  RxBool get isTestActive => isTestRunning;
 
   Position? _startPosition;
   DateTime? _startTime;
@@ -52,6 +56,10 @@ class PerformanceTestController extends GetxController {
     testHistory.value = await _dbHelper.getAllPerformanceTests();
   }
 
+  void selectTestType(String testType) {
+    selectedTestType.value = testType;
+  }
+
   Future<void> startTest(String testType) async {
     if (isTestRunning.value) return;
 
@@ -65,6 +73,7 @@ class PerformanceTestController extends GetxController {
 
     isTestRunning.value = true;
     currentTestType.value = testType;
+    selectedTestType.value = testType;
     currentDistance.value = 0.0;
     currentTime.value = 0.0;
     currentSpeed.value = 0.0;
