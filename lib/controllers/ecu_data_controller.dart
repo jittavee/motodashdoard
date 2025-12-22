@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:api_tech_moto/utils/logger.dart';
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/ecu_data.dart';
 import '../models/alert_threshold.dart';
@@ -231,7 +232,7 @@ class ECUDataController extends GetxController {
 
           // แสดง popup
           if (threshold.popupAlert) {
-            // _showAlertPopup(paramName, value, threshold);
+            _showAlertPopup(paramName, value, threshold);
           }
 
           break;
@@ -245,16 +246,20 @@ class ECUDataController extends GetxController {
     SystemSound.play(SystemSoundType.alert);
   }
 
-  // void _showAlertPopup(String paramName, double value, AlertThreshold threshold) {
-  //   Get.snackbar(
-  //     '⚠️ แจ้งเตือน',
-  //     '$paramName: ${value.toStringAsFixed(1)} (ควรอยู่ระหว่าง ${threshold.minValue}-${threshold.maxValue})',
-  //     snackPosition: SnackPosition.TOP,
-  //     duration: const Duration(seconds: 3),
-  //     backgroundColor: Get.theme.colorScheme.error.withValues(alpha: .9),
-  //     colorText: Get.theme.colorScheme.onError,
-  //   );
-  // }
+  void _showAlertPopup(String paramName, double value, AlertThreshold threshold) {
+    Get.snackbar(
+      '⚠️ แจ้งเตือน',
+      '$paramName: ${value.toStringAsFixed(1)} (ควรอยู่ระหว่าง ${threshold.minValue}-${threshold.maxValue})',
+      snackPosition: SnackPosition.TOP,
+      duration: const Duration(seconds: 3),
+      backgroundColor: Colors.red.withValues(alpha: 0.9),
+      colorText: Colors.white,
+      icon: const Icon(Icons.warning, color: Colors.white),
+      shouldIconPulse: true,
+      margin: const EdgeInsets.all(10),
+      borderRadius: 8,
+    );
+  }
 
   // จัดการ Alert Thresholds
   Future<void> addAlertThreshold(AlertThreshold threshold) async {
