@@ -9,6 +9,8 @@ class AppRoutes {
   // Settings
   static const String settings = '/settings';
   static const String alertSettings = '/alert-settings';
+  static const String dataLog = '/data-log';
+  static const String performanceTest = '/performance-test';
 
   // Templates
   static const String template1 = '/template-1';

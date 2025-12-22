@@ -3,6 +3,8 @@ import '../views/screens/splash_screen.dart';
 import '../views/screens/bluetooth_screen.dart';
 import '../views/screens/settings_screen.dart';
 import '../views/screens/alert_settings_screen.dart';
+import '../views/screens/data_log_screen.dart';
+import '../views/screens/performance_test_screen.dart';
 import '../views/screens/dashboard/dashboard_1.dart';
 import '../views/screens/dashboard/dashboard_2.dart';
 import '../views/screens/dashboard/dashboard_3.dart';
@@ -29,6 +31,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.alertSettings,
       page: () => const AlertSettingsScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.dataLog,
+      page: () => const DataLogScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.performanceTest,
+      page: () => const PerformanceTestScreen(),
     ),
     GetPage(
       name: AppRoutes.template1,
