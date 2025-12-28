@@ -25,6 +25,7 @@ class BluetoothButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isConnected ? Colors.green : Colors.transparent,
           shape: BoxShape.circle,
+          border: Border.all(color: Colors.white70, width: 2),
         ),
         child: IconButton(
           icon: const Icon(
