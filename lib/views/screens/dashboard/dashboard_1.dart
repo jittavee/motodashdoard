@@ -1,13 +1,46 @@
 import 'dart:math';
 import 'package:api_tech_moto/models/ecu_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 
-class TemplateOneScreen extends StatelessWidget {
+class TemplateOneScreen extends StatefulWidget {
   const TemplateOneScreen({super.key});
+
+  @override
+  State<TemplateOneScreen> createState() => _TemplateOneScreenState();
+}
+
+class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _setLandscape();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _setLandscape();
+    }
+  }
+
+  void _setLandscape() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 
@@ -22,7 +21,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _resetOrientation();
     super.dispose();
   }
 
@@ -35,15 +33,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
 
   void _setLandscape() {
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
-  void _resetOrientation() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);

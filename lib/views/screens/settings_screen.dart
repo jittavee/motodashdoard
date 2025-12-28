@@ -27,8 +27,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void dispose() {
     // คืนค่าให้รองรับทุกแนว
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);

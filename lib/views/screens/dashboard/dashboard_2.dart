@@ -24,7 +24,6 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _resetOrientation();
     super.dispose();
   }
 
@@ -37,15 +36,6 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen> with WidgetsBindi
 
   void _setLandscape() {
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
-  void _resetOrientation() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);

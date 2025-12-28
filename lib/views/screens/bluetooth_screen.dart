@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/bluetooth_controller.dart';
-import '../../controllers/ecu_data_controller.dart';
-import '../../utils/debug_data_generator.dart';
 
 class BluetoothScreen extends StatefulWidget {
   const BluetoothScreen({super.key});
@@ -29,10 +27,8 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
 
   @override
   void dispose() {
-    // คืนค่าให้รองรับทุกแนว
+    // คืนค่ากลับเป็นแนวนอนตามการตั้งค่าของแอพ
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
