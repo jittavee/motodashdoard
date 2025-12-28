@@ -65,63 +65,6 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
       body: Obx(() {
         return Column(
           children: [
-            // Connected Device
-            if (btController.connectedDevice.value != null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                color: Colors.green,
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.bluetooth_connected,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'เชื่อมต่ออยู่',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            btController.connectedDevice.value!.platformName.isEmpty
-                                ? 'Unknown Device'
-                                : btController.connectedDevice.value!.platformName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            btController.connectedDevice.value!.remoteId.toString(),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: btController.disconnect,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('ตัดการเชื่อมต่อ'),
-                    ),
-                  ],
-                ),
-              ),
-
             // Error Message
             if (btController.errorMessage.value.isNotEmpty)
               Container(
@@ -226,11 +169,11 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
                               trailing: isConnected
                                   ? ElevatedButton(
                                       onPressed: btController.disconnect,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
+                                      child: const Text('ตัดการเชื่อมต่อ', 
+                                      style: TextStyle(
+                                        color: Colors.red,
                                       ),
-                                      child: const Text('ตัดการเชื่อมต่อ'),
-                                    )
+                                    ))
                                   : ElevatedButton(
                                       onPressed: () {
                                         btController.connectToDevice(device);
