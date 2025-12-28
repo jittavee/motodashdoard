@@ -1,4 +1,3 @@
-import 'package:api_tech_moto/models/ecu_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -166,7 +165,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                   speed.toInt().toString(),
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: screenHeight * 0.2,
+                                    fontSize: screenHeight * 0.3,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 );
