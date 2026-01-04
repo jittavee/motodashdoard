@@ -156,7 +156,6 @@ class _DataLogScreenState extends State<DataLogScreen> {
       'start': sessionData.first.timestamp,
       'end': sessionData.last.timestamp,
       'count': sessionData.length,
-      'duration': sessionData.last.timestamp.difference(sessionData.first.timestamp),
       'maxSpeed': maxSpeed,
       'maxRpm': maxRpm,
       'maxWaterTemp': maxWaterTemp,
@@ -569,7 +568,6 @@ class _DataLogScreenState extends State<DataLogScreen> {
                             itemCount: _sessions.length,
                             itemBuilder: (context, index) {
                               final session = _sessions[index];
-                              final sessionNum = _sessions.length - index;
                               return Card(
                                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                                 elevation: 3,
@@ -589,25 +587,6 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                         // Session header
                                         Row(
                                           children: [
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                                vertical: 6,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.blue,
-                                                borderRadius: BorderRadius.circular(20),
-                                              ),
-                                              child: Text(
-                                                'ครั้งที่ $sessionNum',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
                                             Expanded(
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -620,13 +599,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                                       fontSize: 15,
                                                     ),
                                                   ),
-                                                  Text(
-                                                    'ระยะเวลา: ${session['duration']}',
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                      color: Colors.grey[600],
-                                                    ),
-                                                  ),
+                                                 
                                                 ],
                                               ),
                                             ),
