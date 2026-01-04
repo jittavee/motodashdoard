@@ -26,51 +26,51 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
   bool _isLoading = true;
   String _selectedParameter = 'rpm';
 
-  final Map<String, Map<String, dynamic>> _parameters = {
+  Map<String, Map<String, dynamic>> get _parameters => {
     'rpm': {
-      'name': 'รอบเครื่องยนต์ (RPM)',
+      'name': 'rpm_label'.tr,
       'unit': 'RPM',
       'color': Colors.red,
       'getValue': (ECUData data) => data.rpm,
     },
     'speed': {
-      'name': 'ความเร็ว',
+      'name': 'speed_label'.tr,
       'unit': 'km/h',
       'color': Colors.blue,
       'getValue': (ECUData data) => data.speed,
     },
     'waterTemp': {
-      'name': 'อุณหภูมิน้ำ',
+      'name': 'water_temp_label'.tr,
       'unit': '°C',
       'color': Colors.orange,
       'getValue': (ECUData data) => data.waterTemp,
     },
     'airTemp': {
-      'name': 'อุณหภูมิอากาศ',
+      'name': 'air_temp_label'.tr,
       'unit': '°C',
       'color': Colors.cyan,
       'getValue': (ECUData data) => data.airTemp,
     },
     'battery': {
-      'name': 'แบตเตอรี่',
+      'name': 'battery_label'.tr,
       'unit': 'V',
       'color': Colors.green,
       'getValue': (ECUData data) => data.battery,
     },
     'tps': {
-      'name': 'TPS (Throttle)',
+      'name': 'tps_label'.tr,
       'unit': '%',
       'color': Colors.purple,
       'getValue': (ECUData data) => data.tps,
     },
     'afr': {
-      'name': 'AFR (Air-Fuel Ratio)',
+      'name': 'afr_label'.tr,
       'unit': '',
       'color': Colors.pink,
       'getValue': (ECUData data) => data.afr,
     },
     'map': {
-      'name': 'MAP',
+      'name': 'map_label'.tr,
       'unit': 'kPa',
       'color': Colors.teal,
       'getValue': (ECUData data) => data.map,
@@ -100,7 +100,7 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
 
   Future<void> _loadLogs() async {
     setState(() => _isLoading = true);
-print('Loading logs for chart from ${widget.startDate} to ${widget.endDate}');
+  print('Loading logs for chart from ${widget.startDate} to ${widget.endDate}');
     try {
       final logs = await _dbHelper.getECULogs(
         limit: 500, // ดึงข้อมูล 500 จุดสุดท้าย
@@ -216,7 +216,7 @@ print('Loading logs for chart from ${widget.startDate} to ${widget.endDate}');
                       Icon(Icons.show_chart, size: 64, color: Colors.grey[400]),
                       const SizedBox(height: 16),
                       Text(
-                        'ไม่มีข้อมูลสำหรับแสดงกราฟ',
+                        'no_data_for_chart'.tr,
                         style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                       ),
                     ],
@@ -352,19 +352,19 @@ print('Loading logs for chart from ${widget.startDate} to ${widget.endDate}');
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           _buildStatCard(
-                            'ค่าต่ำสุด',
+                            'min_value'.tr,
                             _getMinY().toStringAsFixed(1),
                             paramUnit,
                             Colors.blue,
                           ),
                           _buildStatCard(
-                            'ค่าสูงสุด',
+                            'max_value'.tr,
                             _getMaxY().toStringAsFixed(1),
                             paramUnit,
                             Colors.red,
                           ),
                           _buildStatCard(
-                            'ค่าเฉลี่ย',
+                            'avg_value'.tr,
                             _getAverage().toStringAsFixed(1),
                             paramUnit,
                             Colors.green,

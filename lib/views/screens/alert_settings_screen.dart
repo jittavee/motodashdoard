@@ -59,12 +59,12 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'ยังไม่มีการตั้งค่าแจ้งเตือน',
+                  'no_alerts_configured'.tr,
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'กดปุ่ม + เพื่อเพิ่มการแจ้งเตือน',
+                  'press_plus_to_add_alert'.tr,
                   style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
@@ -147,7 +147,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     children: [
                       Icon(Icons.volume_up, size: 20, color: Colors.grey[600]),
                       const SizedBox(width: 8),
-                      Text('Sound', style: TextStyle(color: Colors.grey[700])),
+                      Text('sound_alert'.tr, style: TextStyle(color: Colors.grey[700])),
                       const SizedBox(width: 4),
                       Checkbox(
                         value: threshold.soundAlert,
@@ -174,7 +174,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     children: [
                       Icon(Icons.message, size: 20, color: Colors.grey[600]),
                       const SizedBox(width: 8),
-                      Text('Popup', style: TextStyle(color: Colors.grey[700])),
+                      Text('popup_alert'.tr, style: TextStyle(color: Colors.grey[700])),
                       const SizedBox(width: 4),
                       Checkbox(
                         value: threshold.popupAlert,
@@ -206,14 +206,14 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                   onPressed: () =>
                       _showEditAlertDialog(context, controller, threshold),
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Edit'),
+                  label: Text('edit'.tr),
                 ),
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: () =>
                       _confirmDelete(context, controller, threshold),
                   icon: const Icon(Icons.delete, size: 18),
-                  label: const Text('Delete'),
+                  label: Text('delete'.tr),
                   style: TextButton.styleFrom(foregroundColor: Colors.red),
                 ),
               ],
@@ -237,13 +237,13 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('เพิ่มการแจ้งเตือน'),
+              title: Text('add_alert'.tr),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('พารามิเตอร์'),
+                    Text('parameter'.tr),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: selectedParameter,
@@ -280,7 +280,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text('ค่าต่ำสุด'),
+                    Text('min_threshold'.tr),
                     const SizedBox(height: 8),
                     TextFormField(
                       initialValue: minValue.toString(),
@@ -297,7 +297,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text('ค่าสูงสุด'),
+                    Text('max_threshold'.tr),
                     const SizedBox(height: 8),
                     TextFormField(
                       initialValue: maxValue.toString(),
@@ -315,7 +315,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     ),
                     const SizedBox(height: 16),
                     CheckboxListTile(
-                      title: const Text('เสียงแจ้งเตือน'),
+                      title: Text('sound_alert'.tr),
                       value: soundAlert,
                       onChanged: (value) {
                         setState(() {
@@ -325,7 +325,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       contentPadding: EdgeInsets.zero,
                     ),
                     CheckboxListTile(
-                      title: const Text('Popup แจ้งเตือน'),
+                      title: Text('popup_alert'.tr),
                       value: popupAlert,
                       onChanged: (value) {
                         setState(() {
@@ -340,7 +340,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('ยกเลิก'),
+                  child: Text('cancel'.tr),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -355,7 +355,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     controller.addAlertThreshold(threshold);
                     Navigator.pop(context);
                   },
-                  child: const Text('เพิ่ม'),
+                  child: Text('add'.tr),
                 ),
               ],
             );
@@ -381,13 +381,13 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('แก้ไข ${_getParameterName(threshold.parameter)}'),
+              title: Text('${'edit'.tr} ${_getParameterName(threshold.parameter)}'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('ค่าต่ำสุด'),
+                    Text('min_threshold'.tr),
                     const SizedBox(height: 8),
                     TextFormField(
                       initialValue: minValue.toString(),
@@ -404,7 +404,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text('ค่าสูงสุด'),
+                    Text('max_threshold'.tr),
                     const SizedBox(height: 8),
                     TextFormField(
                       initialValue: maxValue.toString(),
@@ -447,7 +447,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('ยกเลิก'),
+                  child: Text('cancel'.tr),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -463,7 +463,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     controller.updateAlertThreshold(updated);
                     Navigator.pop(context);
                   },
-                  child: const Text('บันทึก'),
+                  child: Text('save'.tr),
                 ),
               ],
             );
@@ -482,14 +482,14 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('ยืนยันการลบ'),
+          title: Text('confirm_delete'.tr),
           content: Text(
-            'คุณต้องการลบการแจ้งเตือนสำหรับ ${_getParameterName(threshold.parameter)} หรือไม่?',
+            'confirm_delete_alert'.trParams({'parameter': _getParameterName(threshold.parameter)}),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('ยกเลิก'),
+              child: Text('cancel'.tr),
             ),
             ElevatedButton(
               onPressed: () {
@@ -499,7 +499,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('ลบ'),
+              child: Text('delete'.tr),
             ),
           ],
         );

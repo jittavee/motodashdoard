@@ -46,11 +46,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           // Speed Unit
-          const ListTile(
-            leading: Icon(Icons.speed),
+          ListTile(
+            leading: const Icon(Icons.speed),
             title: Text(
-              'Speed Unit',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              'speed_unit'.tr,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
           Obx(() => Column(
@@ -114,17 +114,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
 
           // Dashboard Template
-          const ListTile(
-            leading: Icon(Icons.dashboard),
+          ListTile(
+            leading: const Icon(Icons.dashboard),
             title: Text(
-              'Dashboard Template',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              'dashboard_template'.tr,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
           Obx(() => Column(
                 children: [
                   RadioListTile<DashboardTemplate>(
-                    title: const Text('Template 1 - Default'),
+                    title: Text('template_default'.tr),
                     value: DashboardTemplate.template1,
                     groupValue: settingsController.dashboardTemplate.value,
                     onChanged: (value) {
@@ -135,7 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   RadioListTile<DashboardTemplate>(
-                    title: const Text('Template 2'),
+                    title: Text('template_2'.tr),
                     value: DashboardTemplate.template2,
                     groupValue: settingsController.dashboardTemplate.value,
                     onChanged: (value) {
@@ -146,7 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   RadioListTile<DashboardTemplate>(
-                    title: const Text('Template 3'),
+                    title: Text('template_3'.tr),
                     value: DashboardTemplate.template3,
                     groupValue: settingsController.dashboardTemplate.value,
                     onChanged: (value) {
@@ -157,7 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   RadioListTile<DashboardTemplate>(
-                    title: const Text('Template 4'),
+                    title: Text('template_4'.tr),
                     value: DashboardTemplate.template4,
                     groupValue: settingsController.dashboardTemplate.value,
                     onChanged: (value) {
@@ -168,7 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   RadioListTile<DashboardTemplate>(
-                    title: const Text('Template 5'),
+                    title: Text('template_5'.tr),
                     value: DashboardTemplate.template5,
                     groupValue: settingsController.dashboardTemplate.value,
                     onChanged: (value) {
@@ -186,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Other Options
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Alert Settings'),
+            title: Text('alert_settings'.tr),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Get.toNamed('/alert-settings');
@@ -195,11 +195,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Data Logging Toggle
           Obx(() => ListTile(
                 leading: const Icon(Icons.data_usage),
-                title: const Text('Data Logging'),
+                title: Text('data_logging'.tr),
                 subtitle: Text(
                   ecuController.isLogging.value
-                      ? 'Recording ECU data to database'
-                      : 'Not recording',
+                      ? 'recording_ecu_data'.tr
+                      : 'not_recording'.tr,
                   style: TextStyle(
                     fontSize: 12,
                     color: ecuController.isLogging.value
@@ -213,16 +213,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (value) {
                       ecuController.startLogging();
                       Get.snackbar(
-                        'Data Logging',
-                        'Started recording ECU data',
+                        'data_logging'.tr,
+                        'started_recording'.tr,
                         snackPosition: SnackPosition.BOTTOM,
                         duration: const Duration(seconds: 2),
                       );
                     } else {
                       ecuController.stopLogging();
                       Get.snackbar(
-                        'Data Logging',
-                        'Stopped recording ECU data',
+                        'data_logging'.tr,
+                        'stopped_recording'.tr,
                         snackPosition: SnackPosition.BOTTOM,
                         duration: const Duration(seconds: 2),
                       );
@@ -233,7 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // View Log History
           ListTile(
             leading: const Icon(Icons.history),
-            title: const Text('View Log History'),
+            title: Text('view_log_history'.tr),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Get.toNamed('/data-log');
@@ -241,7 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.timer),
-            title: const Text('Performance Test'),
+            title: Text('performance_test'.tr),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Get.toNamed('/performance-test');
@@ -251,10 +251,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
 
           // About
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text('About'),
-            subtitle: Text('ECU Gauge v1.0.0'),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: Text('about'.tr),
+            subtitle: Text('app_version'.tr),
           ),
         ],
       ),

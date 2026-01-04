@@ -96,7 +96,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
           _isLoading = false;
           _showSessions = true;
         });
-        Get.snackbar('Info', 'ไม่มีข้อมูลในช่วงเวลาที่เลือก');
+        Get.snackbar('Info', 'no_data_in_range'.tr);
         return;
       }
 
@@ -200,19 +200,19 @@ class _DataLogScreenState extends State<DataLogScreen> {
   Future<void> _selectMonthQuickPick() async {
     final now = DateTime.now();
     final options = [
-      {'label': 'วันนี้', 'start': DateTime(now.year, now.month, now.day), 'end': now},
-      {'label': 'สัปดาห์นี้', 'start': now.subtract(Duration(days: now.weekday - 1)), 'end': now},
-      {'label': 'เดือนนี้', 'start': DateTime(now.year, now.month, 1), 'end': now},
-      {'label': '7 วันที่แล้ว', 'start': now.subtract(const Duration(days: 7)), 'end': now},
-      {'label': '30 วันที่แล้ว', 'start': now.subtract(const Duration(days: 30)), 'end': now},
-      {'label': 'เดือนที่แล้ว', 'start': DateTime(now.year, now.month - 1, 1), 'end': DateTime(now.year, now.month, 0)},
+      {'label': 'today'.tr, 'start': DateTime(now.year, now.month, now.day), 'end': now},
+      {'label': 'this_week'.tr, 'start': now.subtract(Duration(days: now.weekday - 1)), 'end': now},
+      {'label': 'this_month'.tr, 'start': DateTime(now.year, now.month, 1), 'end': now},
+      {'label': '7_days_ago'.tr, 'start': now.subtract(const Duration(days: 7)), 'end': now},
+      {'label': '30_days_ago'.tr, 'start': now.subtract(const Duration(days: 30)), 'end': now},
+      {'label': 'last_month'.tr, 'start': DateTime(now.year, now.month - 1, 1), 'end': DateTime(now.year, now.month, 0)},
     ];
 
     await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('เลือกช่วงเวลา'),
+          title: Text('select_time_period'.tr),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: options.map((option) {
@@ -233,14 +233,14 @@ class _DataLogScreenState extends State<DataLogScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('ยกเลิก'),
+              child: Text('cancel'.tr),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 _selectDateRange();
               },
-              child: const Text('เลือกวันเอง'),
+              child: Text('select_custom_date'.tr),
             ),
           ],
         );
@@ -558,7 +558,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                 Icon(Icons.folder_open, size: 64, color: Colors.grey[400]),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'ไม่พบข้อมูลการขับขี่',
+                                  'no_driving_sessions_found'.tr,
                                   style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                                 ),
                               ],
@@ -612,7 +612,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                           children: [
                                             Expanded(
                                               child: _buildSessionStatCard(
-                                                'ความเร็วสูงสุด',
+                                                'max_speed'.tr,
                                                 '${session['maxSpeed'].toStringAsFixed(0)}',
                                                 'km/h',
                                                 Icons.speed,
@@ -622,7 +622,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                             const SizedBox(width: 8),
                                             Expanded(
                                               child: _buildSessionStatCard(
-                                                'รอบสูงสุด',
+                                                'max_rpm'.tr,
                                                 '${session['maxRpm'].toStringAsFixed(0)}',
                                                 'RPM',
                                                 Icons.av_timer,
@@ -636,7 +636,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                           children: [
                                             Expanded(
                                               child: _buildSessionStatCard(
-                                                'อุณหภูมิน้ำสูงสุด',
+                                                'max_water_temp'.tr,
                                                 '${session['maxWaterTemp'].toStringAsFixed(1)}',
                                                 '°C',
                                                 Icons.thermostat,
@@ -646,7 +646,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                             const SizedBox(width: 8),
                                             Expanded(
                                               child: _buildSessionStatCard(
-                                                'ความเร็วเฉลี่ย',
+                                                'avg_speed'.tr,
                                                 '${session['avgSpeed'].toStringAsFixed(0)}',
                                                 'km/h',
                                                 Icons.trending_up,
@@ -660,7 +660,7 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                           children: [
                                             Expanded(
                                               child: _buildSessionStatCard(
-                                                'รอบเฉลี่ย',
+                                                'avg_rpm'.tr,
                                                 '${session['avgRpm'].toStringAsFixed(0)}',
                                                 'RPM',
                                                 Icons.show_chart,
@@ -670,9 +670,9 @@ class _DataLogScreenState extends State<DataLogScreen> {
                                             const SizedBox(width: 8),
                                             Expanded(
                                               child: _buildSessionStatCard(
-                                                'จำนวนข้อมูล',
+                                                'record_count'.tr,
                                                 '${session['count']}',
-                                                'records',
+                                                'records'.tr,
                                                 Icons.data_usage,
                                                 Colors.purple,
                                               ),
