@@ -19,13 +19,8 @@ class ECUDataController extends GetxController {
   final RxString activeAlertMessage = ''.obs;
 
   Timer? _loggingTimer;
-  Timer? _debounceTimer;
   final Map<String, double> _dataBuffer = {}; // Buffer สำหรับเก็บข้อมูลที่รับมาทีละตัว
-  bool _isProcessing = false; // Thread-safety flag
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-
-  // จำนวนฟิลด์ทั้งหมดที่ต้องรับครบ
-  static const int _expectedFieldCount = 13;
 
   // Valid ECU parameter keys
   static const Set<String> _validKeys = {
@@ -42,7 +37,6 @@ class ECUDataController extends GetxController {
   @override
   void onClose() {
     _loggingTimer?.cancel();
-    _debounceTimer?.cancel();
     super.onClose();
   }
 
@@ -52,12 +46,6 @@ class ECUDataController extends GetxController {
 
   // รับข้อมูลจาก Bluetooth (มาทีละตัว เช่น "TECHO=290")
   void updateDataFromBluetooth(String rawData) {
-    // Prevent concurrent access
-    if (_isProcessing) {
-      logger.w('Skipping data update - already processing');
-      return;
-    }
-
     try {
       // Validate input
       if (rawData.isEmpty) {
@@ -96,19 +84,8 @@ class ECUDataController extends GetxController {
       // เก็บค่าลง buffer
       _dataBuffer[key] = value;
 
-      // ถ้าครบ 13 ค่าแล้ว -> อัพเดท UI
-      if (_dataBuffer.length >= _expectedFieldCount) {
-        _updateUI();
-      } else {
-        // ยังไม่ครบ -> ตั้ง timeout กันข้อมูลค้าง
-        _debounceTimer?.cancel();
-        _debounceTimer = Timer(const Duration(milliseconds: 200), () {
-          // ถ้าเกิน 200ms ยังไม่มีข้อมูลใหม่ -> อัพเดทแม้ยังไม่ครบ
-          if (_dataBuffer.isNotEmpty) {
-            _updateUI();
-          }
-        });
-      }
+      // อัพเดท UI ทันทีทุกครั้งที่รับค่า
+      _updateUI();
     } catch (e) {
       logger.e('Error parsing ECU data: $e');
     }
@@ -148,9 +125,8 @@ class ECUDataController extends GetxController {
     }
   }
 
-  // อัพเดท UI เมื่อรับข้อมูลครบแล้ว
+  // อัพเดท UI ทันทีทุกครั้งที่รับข้อมูล
   void _updateUI() {
-    _isProcessing = true;
     try {
       // สร้าง ECU Data object จาก buffer
       ECUData newData = ECUData.fromJson(_dataBuffer);
@@ -175,13 +151,9 @@ class ECUDataController extends GetxController {
         });
       }
 
-      // ล้าง buffer เพื่อรอรับชุดใหม่
-      _dataBuffer.clear();
-      _debounceTimer?.cancel();
+      // ไม่ล้าง buffer เพื่อให้ค่าเก่ายังคงอยู่ (จะถูก overwrite ด้วยค่าใหม่)
     } catch (e) {
       logger.e('Error updating UI: $e');
-    } finally {
-      _isProcessing = false;
     }
   }
 

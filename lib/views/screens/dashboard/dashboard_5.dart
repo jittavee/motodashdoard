@@ -25,7 +25,6 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _resetOrientation();
     super.dispose();
   }
 
@@ -43,15 +42,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
     ]);
   }
 
-  void _resetOrientation() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();

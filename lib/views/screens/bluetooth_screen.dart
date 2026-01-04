@@ -29,8 +29,8 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   void dispose() {
     // คืนค่ากลับเป็นแนวนอนตามการตั้งค่าของแอพ
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
     ]);
     super.dispose();
   }
@@ -43,23 +43,25 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
       appBar: AppBar(
         title: Text('scan_devices'.tr),
         actions: [
-          Obx(() => Row(
-            children: [
-              TextButton(
-                onPressed: btController.isScanning.value
-                    ? null
-                    : btController.startScan,
-                child: Text('add_devices'.tr),
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: btController.isScanning.value
-                    ? null
-                    : btController.startScan,
-                tooltip: 'add_devices'.tr,
-              ),
-            ],
-          )),
+          Obx(
+            () => Row(
+              children: [
+                TextButton(
+                  onPressed: btController.isScanning.value
+                      ? null
+                      : btController.startScan,
+                  child: Text('add_devices'.tr),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: btController.isScanning.value
+                      ? null
+                      : btController.startScan,
+                  tooltip: 'add_devices'.tr,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
       body: Obx(() {
@@ -169,11 +171,11 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
                               trailing: isConnected
                                   ? ElevatedButton(
                                       onPressed: btController.disconnect,
-                                      child: const Text('ตัดการเชื่อมต่อ', 
-                                      style: TextStyle(
-                                        color: Colors.red,
+                                      child: const Text(
+                                        'ตัดการเชื่อมต่อ',
+                                        style: TextStyle(color: Colors.red),
                                       ),
-                                    ))
+                                    )
                                   : ElevatedButton(
                                       onPressed: () {
                                         btController.connectToDevice(device);

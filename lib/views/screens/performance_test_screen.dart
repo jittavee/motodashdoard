@@ -30,8 +30,6 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }
@@ -92,10 +90,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                     ),
                     const Text(
                       'km/h',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 18,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 18),
                     ),
                   ],
                 ),
@@ -110,48 +105,47 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 children: [
                   const Text(
                     'Select Test Type',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  Obx(() => Column(
-                        children: [
-                          _buildTestCard(
-                            context,
-                            perfController,
-                            '0-100 m',
-                            '0-100m',
-                            Icons.speed,
-                            'Quarter Kilometer Sprint',
-                          ),
-                          _buildTestCard(
-                            context,
-                            perfController,
-                            '0-201 m',
-                            '0-201m',
-                            Icons.directions_run,
-                            'Eighth Mile',
-                          ),
-                          _buildTestCard(
-                            context,
-                            perfController,
-                            '0-402 m',
-                            '0-402m',
-                            Icons.local_fire_department,
-                            'Quarter Mile',
-                          ),
-                          _buildTestCard(
-                            context,
-                            perfController,
-                            '0-1000 m',
-                            '0-1000m',
-                            Icons.rocket_launch,
-                            'Kilometer Sprint',
-                          ),
-                        ],
-                      )),
+                  Obx(
+                    () => Column(
+                      children: [
+                        _buildTestCard(
+                          context,
+                          perfController,
+                          '0-100 m',
+                          '0-100m',
+                          Icons.speed,
+                          'Quarter Kilometer Sprint',
+                        ),
+                        _buildTestCard(
+                          context,
+                          perfController,
+                          '0-201 m',
+                          '0-201m',
+                          Icons.directions_run,
+                          'Eighth Mile',
+                        ),
+                        _buildTestCard(
+                          context,
+                          perfController,
+                          '0-402 m',
+                          '0-402m',
+                          Icons.local_fire_department,
+                          'Quarter Mile',
+                        ),
+                        _buildTestCard(
+                          context,
+                          perfController,
+                          '0-1000 m',
+                          '0-1000m',
+                          Icons.rocket_launch,
+                          'Kilometer Sprint',
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -176,7 +170,8 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                perfController.currentTestType.value.toUpperCase(),
+                                perfController.currentTestType.value
+                                    .toUpperCase(),
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -240,7 +235,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : null,
+      color: isSelected
+          ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+          : null,
       child: ListTile(
         leading: Icon(
           icon,
@@ -258,7 +255,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
         subtitle: Text(subtitle),
         trailing: isSelected
             ? ElevatedButton.icon(
-                onPressed: isActive ? null : () => controller.startTest(testType),
+                onPressed: isActive
+                    ? null
+                    : () => controller.startTest(testType),
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('START'),
                 style: ElevatedButton.styleFrom(
@@ -277,26 +276,20 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
       children: [
         Icon(icon, size: 32, color: Colors.orange),
         const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ],
     );
   }
 
-  void _showTestHistory(BuildContext context, PerformanceTestController controller) {
+  void _showTestHistory(
+    BuildContext context,
+    PerformanceTestController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -312,7 +305,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -341,11 +336,18 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.timer_off, size: 64, color: Colors.grey[400]),
+                          Icon(
+                            Icons.timer_off,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'No test history yet',
-                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
                           ),
                         ],
                       ),
@@ -371,7 +373,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   }
 
   Widget _buildHistoryCard(PerformanceTest test) {
-    final formattedDate = DateFormat('MMM dd, yyyy HH:mm').format(test.timestamp);
+    final formattedDate = DateFormat(
+      'MMM dd, yyyy HH:mm',
+    ).format(test.timestamp);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -383,7 +387,10 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.shade100,
                     borderRadius: BorderRadius.circular(12),
@@ -400,10 +407,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 const Spacer(),
                 Text(
                   formattedDate,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -411,9 +415,18 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildHistoryMetric('Time', '${test.time.toStringAsFixed(2)} s'),
-                _buildHistoryMetric('Max Speed', '${test.maxSpeed.toStringAsFixed(0)} km/h'),
-                _buildHistoryMetric('Avg Speed', '${test.avgSpeed.toStringAsFixed(0)} km/h'),
+                _buildHistoryMetric(
+                  'Time',
+                  '${test.time.toStringAsFixed(2)} s',
+                ),
+                _buildHistoryMetric(
+                  'Max Speed',
+                  '${test.maxSpeed.toStringAsFixed(0)} km/h',
+                ),
+                _buildHistoryMetric(
+                  'Avg Speed',
+                  '${test.avgSpeed.toStringAsFixed(0)} km/h',
+                ),
               ],
             ),
             if (test.note != null && test.note!.isNotEmpty) ...[
@@ -436,20 +449,11 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   Widget _buildHistoryMetric(String label, String value) {
     return Column(
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ],
     );

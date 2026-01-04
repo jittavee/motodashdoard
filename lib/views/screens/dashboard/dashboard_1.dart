@@ -191,10 +191,10 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildDataRow(data?.map.toStringAsFixed(0) ?? 'XXX'),
-        _buildDataRow(data?.battery.toStringAsFixed(1) ?? 'XX'),
-        _buildDataRow(data?.airTemp.toStringAsFixed(0) ?? 'XX'),
-        _buildDataRow(data?.waterTemp.toStringAsFixed(0) ?? 'XX'),
+        _buildDataRow(data?.map.toStringAsFixed(0) ?? '0'),
+        _buildDataRow(data?.battery.toStringAsFixed(1) ?? '0'),
+        _buildDataRow(data?.airTemp.toStringAsFixed(0) ?? '0'),
+        _buildDataRow(data?.waterTemp.toStringAsFixed(0) ?? '0'),
       ],
     );
   }
@@ -289,10 +289,10 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildDataRow(data?.ignition.toStringAsFixed(1) ?? 'XXX'),
-        _buildDataRow(data?.inject.toStringAsFixed(1) ?? 'XXX'),
-        _buildDataRow(data?.tps.toStringAsFixed(0) ?? 'XX'),
-        _buildDataRow(data?.afr.toStringAsFixed(1) ?? 'XX'),
+        _buildDataRow(data?.ignition.toStringAsFixed(1) ?? '0'),
+        _buildDataRow(data?.inject.toStringAsFixed(1) ?? '0'),
+        _buildDataRow(data?.tps.toStringAsFixed(0) ?? '0'),
+        _buildDataRow(data?.afr.toStringAsFixed(1) ?? '0'),
       ],
     );
   }

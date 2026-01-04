@@ -24,12 +24,10 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
 
   @override
   void dispose() {
-    // คืนค่าให้รองรับทุกแนว
+    // คืนค่าให้กลับเป็นแนวนอนตามค่าเริ่มต้นของแอป
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }
@@ -62,18 +60,12 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'ยังไม่มีการตั้งค่าแจ้งเตือน',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'กดปุ่ม + เพื่อเพิ่มการแจ้งเตือน',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -125,10 +117,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Range: ${threshold.minValue} - ${threshold.maxValue}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -158,10 +147,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     children: [
                       Icon(Icons.volume_up, size: 20, color: Colors.grey[600]),
                       const SizedBox(width: 8),
-                      Text(
-                        'Sound',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
+                      Text('Sound', style: TextStyle(color: Colors.grey[700])),
                       const SizedBox(width: 4),
                       Checkbox(
                         value: threshold.soundAlert,
@@ -188,10 +174,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     children: [
                       Icon(Icons.message, size: 20, color: Colors.grey[600]),
                       const SizedBox(width: 8),
-                      Text(
-                        'Popup',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
+                      Text('Popup', style: TextStyle(color: Colors.grey[700])),
                       const SizedBox(width: 4),
                       Checkbox(
                         value: threshold.popupAlert,
@@ -220,22 +203,18 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
-                  onPressed: () => _showEditAlertDialog(
-                    context,
-                    controller,
-                    threshold,
-                  ),
+                  onPressed: () =>
+                      _showEditAlertDialog(context, controller, threshold),
                   icon: const Icon(Icons.edit, size: 18),
                   label: const Text('Edit'),
                 ),
                 const SizedBox(width: 8),
                 TextButton.icon(
-                  onPressed: () => _confirmDelete(context, controller, threshold),
+                  onPressed: () =>
+                      _confirmDelete(context, controller, threshold),
                   icon: const Icon(Icons.delete, size: 18),
                   label: const Text('Delete'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red,
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
                 ),
               ],
             ),
@@ -270,12 +249,21 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       value: selectedParameter,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       items: const [
                         DropdownMenuItem(value: 'rpm', child: Text('RPM')),
-                        DropdownMenuItem(value: 'waterTemp', child: Text('Water Temp')),
-                        DropdownMenuItem(value: 'battery', child: Text('Battery')),
+                        DropdownMenuItem(
+                          value: 'waterTemp',
+                          child: Text('Water Temp'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'battery',
+                          child: Text('Battery'),
+                        ),
                         DropdownMenuItem(value: 'tps', child: Text('TPS')),
                         DropdownMenuItem(value: 'afr', child: Text('AFR')),
                       ],
@@ -299,7 +287,10 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       onChanged: (value) {
                         minValue = double.tryParse(value) ?? minValue;
@@ -313,7 +304,10 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       onChanged: (value) {
                         maxValue = double.tryParse(value) ?? maxValue;
@@ -400,7 +394,10 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       onChanged: (value) {
                         minValue = double.tryParse(value) ?? minValue;
@@ -414,7 +411,10 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       onChanged: (value) {
                         maxValue = double.tryParse(value) ?? maxValue;
@@ -498,9 +498,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                 }
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: const Text('ลบ'),
             ),
           ],
