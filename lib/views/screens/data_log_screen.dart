@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../services/database_helper.dart';
 import '../../models/ecu_data.dart';
+import 'data_log_chart_screen.dart';
 
 class DataLogScreen extends StatefulWidget {
   const DataLogScreen({super.key});
@@ -26,6 +27,9 @@ class _DataLogScreenState extends State<DataLogScreen> {
 
   DateTime? _startDate;
   DateTime? _endDate;
+
+  List<Map<String, dynamic>> _sessions = [];
+  bool _showSessions = false;
 
   @override
   void initState() {
@@ -75,6 +79,93 @@ class _DataLogScreenState extends State<DataLogScreen> {
     }
   }
 
+  Future<void> _detectSessions() async {
+    setState(() => _isLoading = true);
+
+    try {
+      // โหลดข้อมูลทั้งหมดในช่วงเวลาที่เลือก
+      final allLogs = await _dbHelper.getECULogs(
+        limit: 10000,
+        startDate: _startDate,
+        endDate: _endDate,
+      );
+
+      if (allLogs.isEmpty) {
+        setState(() {
+          _sessions = [];
+          _isLoading = false;
+          _showSessions = true;
+        });
+        Get.snackbar('Info', 'ไม่มีข้อมูลในช่วงเวลาที่เลือก');
+        return;
+      }
+
+      // แบ่ง session โดยดูจากช่วงเวลาที่ห่างกันเกิน 1 นาที
+      final sessions = <Map<String, dynamic>>[];
+      List<ECUData> currentSession = [allLogs[0]];
+
+      for (int i = 1; i < allLogs.length; i++) {
+        final prevTime = allLogs[i - 1].timestamp;
+        final currentTime = allLogs[i].timestamp;
+        final difference = currentTime.difference(prevTime);
+
+        if (difference.inSeconds > 60) {
+          // ห่างกันเกิน 1 นาที = session ใหม่
+          sessions.add(_calculateSessionStats(currentSession));
+          currentSession = [allLogs[i]];
+        } else {
+          currentSession.add(allLogs[i]);
+        }
+      }
+
+      // เพิ่ม session สุดท้าย
+      if (currentSession.isNotEmpty) {
+        sessions.add(_calculateSessionStats(currentSession));
+      }
+
+      setState(() {
+        _sessions = sessions;
+        _isLoading = false;
+        _showSessions = true;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      Get.snackbar('Error', 'Failed to detect sessions: $e');
+    }
+  }
+
+  Map<String, dynamic> _calculateSessionStats(List<ECUData> sessionData) {
+    double maxSpeed = 0;
+    double maxRpm = 0;
+    double maxWaterTemp = 0;
+    double avgSpeed = 0;
+    double avgRpm = 0;
+
+    for (var data in sessionData) {
+      if (data.speed > maxSpeed) maxSpeed = data.speed;
+      if (data.rpm > maxRpm) maxRpm = data.rpm;
+      if (data.waterTemp > maxWaterTemp) maxWaterTemp = data.waterTemp;
+      avgSpeed += data.speed;
+      avgRpm += data.rpm;
+    }
+
+    avgSpeed /= sessionData.length;
+    avgRpm /= sessionData.length;
+
+    return {
+      'start': sessionData.first.timestamp,
+      'end': sessionData.last.timestamp,
+      'count': sessionData.length,
+      'duration': sessionData.last.timestamp.difference(sessionData.first.timestamp),
+      'maxSpeed': maxSpeed,
+      'maxRpm': maxRpm,
+      'maxWaterTemp': maxWaterTemp,
+      'avgSpeed': avgSpeed,
+      'avgRpm': avgRpm,
+    };
+  }
+
+  
   Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -83,6 +174,18 @@ class _DataLogScreenState extends State<DataLogScreen> {
       initialDateRange: _startDate != null && _endDate != null
           ? DateTimeRange(start: _startDate!, end: _endDate!)
           : null,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            datePickerTheme: DatePickerThemeData(
+              headerBackgroundColor: Colors.blue.shade700,
+              headerForegroundColor: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -93,6 +196,57 @@ class _DataLogScreenState extends State<DataLogScreen> {
       });
       _loadLogs();
     }
+  }
+
+  Future<void> _selectMonthQuickPick() async {
+    final now = DateTime.now();
+    final options = [
+      {'label': 'วันนี้', 'start': DateTime(now.year, now.month, now.day), 'end': now},
+      {'label': 'สัปดาห์นี้', 'start': now.subtract(Duration(days: now.weekday - 1)), 'end': now},
+      {'label': 'เดือนนี้', 'start': DateTime(now.year, now.month, 1), 'end': now},
+      {'label': '7 วันที่แล้ว', 'start': now.subtract(const Duration(days: 7)), 'end': now},
+      {'label': '30 วันที่แล้ว', 'start': now.subtract(const Duration(days: 30)), 'end': now},
+      {'label': 'เดือนที่แล้ว', 'start': DateTime(now.year, now.month - 1, 1), 'end': DateTime(now.year, now.month, 0)},
+    ];
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('เลือกช่วงเวลา'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: options.map((option) {
+              return ListTile(
+                title: Text(option['label'] as String),
+                onTap: () {
+                  setState(() {
+                    _startDate = option['start'] as DateTime;
+                    _endDate = option['end'] as DateTime;
+                    _currentPage = 0;
+                  });
+                  Navigator.pop(context);
+                  _loadLogs();
+                },
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('ยกเลิก'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _selectDateRange();
+              },
+              child: const Text('เลือกวันเอง'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _clearDateFilter() async {
@@ -262,9 +416,24 @@ class _DataLogScreenState extends State<DataLogScreen> {
         title: const Text('Data Log History'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.date_range),
-            tooltip: 'Filter by date',
-            onPressed: _selectDateRange,
+            icon: const Icon(Icons.show_chart),
+            tooltip: 'View Chart',
+            onPressed: () {
+              Get.to(() => DataLogChartScreen(
+                    startDate: _startDate,
+                    endDate: _endDate,
+                  ));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.drive_eta),
+            tooltip: 'Select driving session',
+            onPressed: _detectSessions,
+          ),
+          IconButton(
+            icon: const Icon(Icons.calendar_month),
+            tooltip: 'Quick date filter',
+            onPressed: _selectMonthQuickPick,
           ),
           if (_startDate != null || _endDate != null)
             IconButton(
@@ -377,69 +546,232 @@ class _DataLogScreenState extends State<DataLogScreen> {
             ),
           ),
 
-          // Log List
+          // Log List or Session List
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _logs.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.folder_open, size: 64, color: Colors.grey[400]),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No logs found',
-                              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Enable Data Logging in Settings to start recording',
-                              style: TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: _logs.length,
-                        itemBuilder: (context, index) {
-                          final log = _logs[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            child: ExpansionTile(
-                              title: Text(
-                                _formatTimestamp(log.timestamp),
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(
-                                'RPM: ${log.rpm.toStringAsFixed(0)} | Speed: ${log.speed.toStringAsFixed(0)} km/h',
-                              ),
+                : _showSessions
+                    ? _sessions.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    children: [
-                                      _buildDataRow('RPM', log.rpm.toStringAsFixed(0)),
-                                      _buildDataRow('Speed', '${log.speed.toStringAsFixed(0)} km/h'),
-                                      _buildDataRow('Water Temp', '${log.waterTemp.toStringAsFixed(1)}°C'),
-                                      _buildDataRow('Air Temp', '${log.airTemp.toStringAsFixed(1)}°C'),
-                                      _buildDataRow('MAP', '${log.map.toStringAsFixed(1)} kPa'),
-                                      _buildDataRow('TPS', '${log.tps.toStringAsFixed(1)}%'),
-                                      _buildDataRow('Battery', '${log.battery.toStringAsFixed(1)}V'),
-                                      _buildDataRow('Ignition', '${log.ignition.toStringAsFixed(1)}°'),
-                                      _buildDataRow('Inject', '${log.inject.toStringAsFixed(2)} ms'),
-                                      _buildDataRow('AFR', log.afr.toStringAsFixed(2)),
-                                      _buildDataRow('Short Trim', '${log.shortTrim.toStringAsFixed(1)}%'),
-                                      _buildDataRow('Long Trim', '${log.longTrim.toStringAsFixed(1)}%'),
-                                      _buildDataRow('IACV', '${log.iacv.toStringAsFixed(0)}'),
-                                    ],
-                                  ),
+                                Icon(Icons.folder_open, size: 64, color: Colors.grey[400]),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'ไม่พบข้อมูลการขับขี่',
+                                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                                 ),
                               ],
                             ),
-                          );
-                        },
-                      ),
+                          )
+                        : ListView.builder(
+                            itemCount: _sessions.length,
+                            itemBuilder: (context, index) {
+                              final session = _sessions[index];
+                              final sessionNum = _sessions.length - index;
+                              return Card(
+                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                elevation: 3,
+                                child: InkWell(
+                                  onTap: () {
+                                    // Navigate to chart view for this session
+                                    Get.to(() => DataLogChartScreen(
+                                      startDate: session['start'] as DateTime,
+                                      endDate: session['end'] as DateTime,
+                                    ));
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Session header
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 6,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue,
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                'ครั้งที่ $sessionNum',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    DateFormat('dd MMM yyyy, HH:mm')
+                                                        .format(session['start'] as DateTime),
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'ระยะเวลา: ${session['duration']}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Icon(Icons.chevron_right, color: Colors.grey[400]),
+                                          ],
+                                        ),
+                                        const Divider(height: 24),
+                                        // Statistics grid
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _buildSessionStatCard(
+                                                'ความเร็วสูงสุด',
+                                                '${session['maxSpeed'].toStringAsFixed(0)}',
+                                                'km/h',
+                                                Icons.speed,
+                                                Colors.red,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: _buildSessionStatCard(
+                                                'รอบสูงสุด',
+                                                '${session['maxRpm'].toStringAsFixed(0)}',
+                                                'RPM',
+                                                Icons.av_timer,
+                                                Colors.orange,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _buildSessionStatCard(
+                                                'อุณหภูมิน้ำสูงสุด',
+                                                '${session['maxWaterTemp'].toStringAsFixed(1)}',
+                                                '°C',
+                                                Icons.thermostat,
+                                                Colors.deepOrange,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: _buildSessionStatCard(
+                                                'ความเร็วเฉลี่ย',
+                                                '${session['avgSpeed'].toStringAsFixed(0)}',
+                                                'km/h',
+                                                Icons.trending_up,
+                                                Colors.blue,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _buildSessionStatCard(
+                                                'รอบเฉลี่ย',
+                                                '${session['avgRpm'].toStringAsFixed(0)}',
+                                                'RPM',
+                                                Icons.show_chart,
+                                                Colors.green,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: _buildSessionStatCard(
+                                                'จำนวนข้อมูล',
+                                                '${session['count']}',
+                                                'records',
+                                                Icons.data_usage,
+                                                Colors.purple,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                    : _logs.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.folder_open, size: 64, color: Colors.grey[400]),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No logs found',
+                                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Enable Data Logging in Settings to start recording',
+                                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _logs.length,
+                            itemBuilder: (context, index) {
+                              final log = _logs[index];
+                              return Card(
+                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                child: ExpansionTile(
+                                  title: Text(
+                                    _formatTimestamp(log.timestamp),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    'RPM: ${log.rpm.toStringAsFixed(0)} | Speed: ${log.speed.toStringAsFixed(0)} km/h',
+                                  ),
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        children: [
+                                          _buildDataRow('RPM', log.rpm.toStringAsFixed(0)),
+                                          _buildDataRow('Speed', '${log.speed.toStringAsFixed(0)} km/h'),
+                                          _buildDataRow('Water Temp', '${log.waterTemp.toStringAsFixed(1)}°C'),
+                                          _buildDataRow('Air Temp', '${log.airTemp.toStringAsFixed(1)}°C'),
+                                          _buildDataRow('MAP', '${log.map.toStringAsFixed(1)} kPa'),
+                                          _buildDataRow('TPS', '${log.tps.toStringAsFixed(1)}%'),
+                                          _buildDataRow('Battery', '${log.battery.toStringAsFixed(1)}V'),
+                                          _buildDataRow('Ignition', '${log.ignition.toStringAsFixed(1)}°'),
+                                          _buildDataRow('Inject', '${log.inject.toStringAsFixed(2)} ms'),
+                                          _buildDataRow('AFR', log.afr.toStringAsFixed(2)),
+                                          _buildDataRow('Short Trim', '${log.shortTrim.toStringAsFixed(1)}%'),
+                                          _buildDataRow('Long Trim', '${log.longTrim.toStringAsFixed(1)}%'),
+                                          _buildDataRow('IACV', '${log.iacv.toStringAsFixed(0)}'),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
           ),
         ],
       ),
@@ -454,6 +786,69 @@ class _DataLogScreenState extends State<DataLogScreen> {
         children: [
           Text(label, style: const TextStyle(color: Colors.grey)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSessionStatCard(
+    String label,
+    String value,
+    String unit,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                unit,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
