@@ -164,4 +164,10 @@ const Map<String, String> enUs = {
   'stopped_recording': 'Stopped recording ECU data',
   'about': 'About',
   'app_version': 'v1.0.0',
+
+  // Bluetooth Screen
+  'searching_devices': 'Searching for devices...',
+  'pull_to_scan': 'Pull down to scan for devices',
+  'unknown_device': 'Unknown Device',
+  'connected': 'Connected',
 };

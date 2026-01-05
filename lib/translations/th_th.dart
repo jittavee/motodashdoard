@@ -164,4 +164,10 @@ const Map<String, String> thTh = {
   'stopped_recording': 'หยุดบันทึกข้อมูล ECU แล้ว',
   'about': 'เกี่ยวกับ',
   'app_version': 'เวอร์ชัน 1.0.0',
+
+  // Bluetooth Screen
+  'searching_devices': 'กำลังค้นหาอุปกรณ์...',
+  'pull_to_scan': 'ลากลงเพื่อค้นหาอุปกรณ์',
+  'unknown_device': 'อุปกรณ์ไม่รู้จัก',
+  'connected': 'เชื่อมต่อแล้ว',
 };

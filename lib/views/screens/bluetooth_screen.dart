@@ -29,8 +29,8 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   void dispose() {
     // คืนค่ากลับเป็นแนวนอนตามการตั้งค่าของแอพ
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }
@@ -122,8 +122,8 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
                                     const SizedBox(height: 16),
                                     Text(
                                       btController.isScanning.value
-                                          ? 'กำลังค้นหาอุปกรณ์...'
-                                          : 'ไม่พบอุปกรณ์',
+                                          ? 'searching_devices'.tr
+                                          : 'no_devices_found'.tr,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: Colors.grey[600],
@@ -131,7 +131,7 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'ลากลงเพื่อค้นหาอุปกรณ์',
+                                      'pull_to_scan'.tr,
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.grey[500],
@@ -164,23 +164,21 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
                               leading: const Icon(Icons.bluetooth),
                               title: Text(
                                 device.platformName.isEmpty
-                                    ? 'Unknown Device'
+                                    ? 'unknown_device'.tr
                                     : device.platformName,
                               ),
                               subtitle: Text(device.remoteId.toString()),
                               trailing: isConnected
                                   ? ElevatedButton(
                                       onPressed: btController.disconnect,
-                                      child: const Text(
-                                        'ตัดการเชื่อมต่อ',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
+                                      child: Text('disconnect'.tr,
+                                      style: TextStyle(color: Colors.red),),
                                     )
                                   : ElevatedButton(
                                       onPressed: () {
                                         btController.connectToDevice(device);
                                       },
-                                      child: const Text('เชื่อมต่อ'),
+                                      child: Text('connect'.tr),
                                     ),
                             ),
                           );
