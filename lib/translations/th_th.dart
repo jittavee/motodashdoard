@@ -61,6 +61,8 @@ const Map<String, String> thTh = {
   'enable_alerts': 'เปิดใช้การแจ้งเตือน',
   'alert_sound': 'เสียงแจ้งเตือน',
   'alert_vibration': 'สั่นเตือน',
+  'select_parameter': 'เลือกพารามิเตอร์',
+  'please_fill_all_fields': 'กรุณากรอกข้อมูลให้ครบถ้วน',
 
   // Performance Test
   'performance_test': 'ทดสอบสมรรถนะ',

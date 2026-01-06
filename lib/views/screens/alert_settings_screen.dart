@@ -225,11 +225,11 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
   }
 
   void _showAddAlertDialog(BuildContext context, ECUDataController controller) {
-    String selectedParameter = 'rpm';
-    double minValue = 0;
-    double maxValue = 10000;
-    bool soundAlert = true;
-    bool popupAlert = true;
+    String? selectedParameter;
+    double? minValue;
+    double? maxValue;
+    bool soundAlert = false;
+    bool popupAlert = false;
 
     showDialog(
       context: context,
@@ -254,6 +254,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                           vertical: 8,
                         ),
                       ),
+                      hint: Text('select_parameter'.tr),
                       items: const [
                         DropdownMenuItem(value: 'rpm', child: Text('RPM')),
                         DropdownMenuItem(
@@ -271,10 +272,6 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                         if (value != null) {
                           setState(() {
                             selectedParameter = value;
-                            _setDefaultValues(value, (min, max) {
-                              minValue = min;
-                              maxValue = max;
-                            });
                           });
                         }
                       },
@@ -283,7 +280,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                     Text('min_threshold'.tr),
                     const SizedBox(height: 8),
                     TextFormField(
-                      initialValue: minValue.toString(),
+                      initialValue: minValue?.toString() ?? '',
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -293,14 +290,14 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                         ),
                       ),
                       onChanged: (value) {
-                        minValue = double.tryParse(value) ?? minValue;
+                        minValue = double.tryParse(value);
                       },
                     ),
                     const SizedBox(height: 16),
                     Text('max_threshold'.tr),
                     const SizedBox(height: 8),
                     TextFormField(
-                      initialValue: maxValue.toString(),
+                      initialValue: maxValue?.toString() ?? '',
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -310,7 +307,7 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                         ),
                       ),
                       onChanged: (value) {
-                        maxValue = double.tryParse(value) ?? maxValue;
+                        maxValue = double.tryParse(value);
                       },
                     ),
                     const SizedBox(height: 16),
@@ -344,10 +341,18 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    if (selectedParameter == null || minValue == null || maxValue == null) {
+                      Get.snackbar(
+                        'error'.tr,
+                        'please_fill_all_fields'.tr,
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return;
+                    }
                     final threshold = AlertThreshold(
-                      parameter: selectedParameter,
-                      minValue: minValue,
-                      maxValue: maxValue,
+                      parameter: selectedParameter!,
+                      minValue: minValue!,
+                      maxValue: maxValue!,
                       enabled: true,
                       soundAlert: soundAlert,
                       popupAlert: popupAlert,
@@ -505,26 +510,6 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
         );
       },
     );
-  }
-
-  void _setDefaultValues(String parameter, Function(double, double) callback) {
-    switch (parameter) {
-      case 'rpm':
-        callback(0, 10000);
-        break;
-      case 'waterTemp':
-        callback(0, 120);
-        break;
-      case 'battery':
-        callback(11, 15);
-        break;
-      case 'tps':
-        callback(0, 100);
-        break;
-      case 'afr':
-        callback(12, 16);
-        break;
-    }
   }
 
   String _getParameterName(String parameter) {

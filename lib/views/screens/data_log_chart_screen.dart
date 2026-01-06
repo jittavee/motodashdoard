@@ -100,7 +100,6 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
 
   Future<void> _loadLogs() async {
     setState(() => _isLoading = true);
-  print('Loading logs for chart from ${widget.startDate} to ${widget.endDate}');
     try {
       final logs = await _dbHelper.getECULogs(
         limit: 500, // ดึงข้อมูล 500 จุดสุดท้าย
@@ -108,7 +107,6 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
         endDate: widget.endDate,
       );
 
-      print('Loaded ${logs.length} log entries for chart.');
       // เรียงข้อมูลจากเก่าไปใหม่ (ASC) เพื่อให้กราฟแสดงถูกต้อง
       logs.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
@@ -170,7 +168,6 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
   @override
   Widget build(BuildContext context) {
     final paramColor = _parameters[_selectedParameter]!['color'] as Color;
-    final paramName = _parameters[_selectedParameter]!['name'] as String;
     final paramUnit = _parameters[_selectedParameter]!['unit'] as String;
 
     return Scaffold(

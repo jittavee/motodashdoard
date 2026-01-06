@@ -61,6 +61,8 @@ const Map<String, String> enUs = {
   'enable_alerts': 'Enable Alerts',
   'alert_sound': 'Alert Sound',
   'alert_vibration': 'Alert Vibration',
+  'select_parameter': 'Select Parameter',
+  'please_fill_all_fields': 'Please fill all fields',
 
   // Performance Test
   'performance_test': 'Performance Test',
