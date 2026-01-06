@@ -193,60 +193,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           // Data Logging Toggle
-          Obx(() => ListTile(
-                leading: const Icon(Icons.data_usage),
-                title: Text('data_logging'.tr),
-                subtitle: Text(
-                  ecuController.isLogging.value
-                      ? 'recording_ecu_data'.tr
-                      : 'not_recording'.tr,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: ecuController.isLogging.value
-                        ? Colors.green
-                        : Colors.grey,
-                  ),
-                ),
-                trailing: Switch(
-                  value: ecuController.isLogging.value,
-                  onChanged: (value) {
-                    if (value) {
-                      ecuController.startLogging();
-                      Get.snackbar(
-                        'data_logging'.tr,
-                        'started_recording'.tr,
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 2),
-                      );
-                    } else {
-                      ecuController.stopLogging();
-                      Get.snackbar(
-                        'data_logging'.tr,
-                        'stopped_recording'.tr,
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 2),
-                      );
-                    }
-                  },
-                ),
-              )),
-          // View Log History
-          ListTile(
-            leading: const Icon(Icons.history),
-            title: Text('view_log_history'.tr),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              Get.toNamed('/data-log');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.timer),
-            title: Text('performance_test'.tr),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              Get.toNamed('/performance-test');
-            },
-          ),
+          // Obx(() => ListTile(
+          //       leading: const Icon(Icons.data_usage),
+          //       title: Text('data_logging'.tr),
+          //       subtitle: Text(
+          //         ecuController.isLogging.value
+          //             ? 'recording_ecu_data'.tr
+          //             : 'not_recording'.tr,
+          //         style: TextStyle(
+          //           fontSize: 12,
+          //           color: ecuController.isLogging.value
+          //               ? Colors.green
+          //               : Colors.grey,
+          //         ),
+          //       ),
+          //       trailing: Switch(
+          //         value: ecuController.isLogging.value,
+          //         onChanged: (value) {
+          //           if (value) {
+          //             ecuController.startLogging();
+          //             Get.snackbar(
+          //               'data_logging'.tr,
+          //               'started_recording'.tr,
+          //               snackPosition: SnackPosition.BOTTOM,
+          //               duration: const Duration(seconds: 2),
+          //             );
+          //           } else {
+          //             ecuController.stopLogging();
+          //             Get.snackbar(
+          //               'data_logging'.tr,
+          //               'stopped_recording'.tr,
+          //               snackPosition: SnackPosition.BOTTOM,
+          //               duration: const Duration(seconds: 2),
+          //             );
+          //           }
+          //         },
+          //       ),
+          //     )),
+          // // View Log History
+          // ListTile(
+          //   leading: const Icon(Icons.history),
+          //   title: Text('view_log_history'.tr),
+          //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          //   onTap: () {
+          //     Get.toNamed('/data-log');
+          //   },
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.timer),
+          //   title: Text('performance_test'.tr),
+          //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          //   onTap: () {
+          //     Get.toNamed('/performance-test');
+          //   },
+          // ),
 
           const Divider(),
 
