@@ -128,9 +128,10 @@ class ECUDataController extends GetxController {
   // อัพเดท UI ทันทีทุกครั้งที่รับข้อมูล
   void _updateUI() {
     try {
-      // สร้าง ECU Data object จาก buffer
+      // สร้าง ECU Data object จาม buffer
       ECUData newData = ECUData.fromJson(_dataBuffer);
       currentData.value = newData;
+      currentData.refresh(); // บังคับให้ GetX update listeners ทั้งหมด
 
       // เพิ่มลงใน history
       dataHistory.add(newData);
