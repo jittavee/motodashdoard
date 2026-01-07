@@ -133,6 +133,9 @@ class BluetoothController extends GetxController {
           connectionStatus.value = BluetoothConnectionStatus.connected;
           logger.i('Bluetooth Connected: ${device.platformName} (${device.remoteId})');
           _discoverServices();
+
+          // กลับไปหน้า Dashboard ที่เปิดอยู่ก่อนหน้า
+          Get.back();
         } else if (state == BluetoothConnectionState.disconnected) {
           connectionStatus.value = BluetoothConnectionStatus.disconnected;
           logger.w('Bluetooth Disconnected');
