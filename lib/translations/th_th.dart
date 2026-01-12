@@ -172,4 +172,9 @@ const Map<String, String> thTh = {
   'pull_to_scan': 'ลากลงเพื่อค้นหาอุปกรณ์',
   'unknown_device': 'อุปกรณ์ไม่รู้จัก',
   'connected': 'เชื่อมต่อแล้ว',
+
+  // Data Log Chart Screen
+  'data_log_chart': 'กราฟข้อมูล ECU',
+  'select_date': 'เลือกวันที่',
+  'clear_filter': 'ล้างตัวกรอง',
 };

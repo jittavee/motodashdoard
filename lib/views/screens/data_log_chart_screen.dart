@@ -25,6 +25,8 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
   List<ECUData> _logs = [];
   bool _isLoading = true;
   String _selectedParameter = 'rpm';
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   Map<String, Map<String, dynamic>> get _parameters => {
     'rpm': {
@@ -85,6 +87,9 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    // Initialize dates from widget parameters
+    _startDate = widget.startDate;
+    _endDate = widget.endDate;
     _loadLogs();
   }
 
@@ -103,8 +108,8 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
     try {
       final logs = await _dbHelper.getECULogs(
         limit: 500, // ดึงข้อมูล 500 จุดสุดท้าย
-        startDate: widget.startDate,
-        endDate: widget.endDate,
+        startDate: _startDate,
+        endDate: _endDate,
       );
 
       // เรียงข้อมูลจากเก่าไปใหม่ (ASC) เพื่อให้กราฟแสดงถูกต้อง
@@ -165,15 +170,71 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
     return minValue * 0.9;
   }
 
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            datePickerTheme: DatePickerThemeData(
+              headerBackgroundColor: Colors.blue.shade700,
+              headerForegroundColor: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        // Set start of day to end of day for the selected date
+        _startDate = DateTime(picked.year, picked.month, picked.day, 0, 0, 0);
+        _endDate = DateTime(picked.year, picked.month, picked.day, 23, 59, 59);
+      });
+      _loadLogs();
+    }
+  }
+
+  Future<void> _clearDateFilter() async {
+    setState(() {
+      _startDate = null;
+      _endDate = null;
+    });
+    _loadLogs();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final paramColor = _parameters[_selectedParameter]!['color'] as Color;
-    final paramUnit = _parameters[_selectedParameter]!['unit'] as String;
+    final param = _parameters[_selectedParameter];
+    if (param == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Data Log Chart')),
+        body: const Center(child: Text('Invalid parameter selected')),
+      );
+    }
+
+    final paramColor = param['color'] as Color;
+    final paramUnit = param['unit'] as String;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Data Log Chart'),
+        title: Text('data_log_chart'.tr),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            tooltip: 'select_date'.tr,
+            onPressed: _selectDate,
+          ),
+          if (_startDate != null || _endDate != null)
+            IconButton(
+              icon: const Icon(Icons.clear),
+              tooltip: 'clear_filter'.tr,
+              onPressed: _clearDateFilter,
+            ),
           PopupMenuButton<String>(
             initialValue: _selectedParameter,
             onSelected: (value) {
@@ -221,6 +282,23 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
                 )
               : Column(
                   children: [
+                    // Date range indicator
+                    if (_startDate != null && _endDate != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.calendar_today, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${DateFormat('MMM dd, yyyy').format(_startDate!)} - ${DateFormat('MMM dd, yyyy').format(_endDate!)}',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
                     // Chart
                     Expanded(
                       child: Padding(

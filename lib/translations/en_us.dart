@@ -172,4 +172,9 @@ const Map<String, String> enUs = {
   'pull_to_scan': 'Pull down to scan for devices',
   'unknown_device': 'Unknown Device',
   'connected': 'Connected',
+
+  // Data Log Chart Screen
+  'data_log_chart': 'Data Log Chart',
+  'select_date': 'Select date',
+  'clear_filter': 'Clear filter',
 };
