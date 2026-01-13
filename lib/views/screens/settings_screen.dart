@@ -47,38 +47,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           // Speed Unit
-          ListTile(
-            leading: const Icon(Icons.speed),
-            title: Text(
-              'speed_unit'.tr,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ),
-          Obx(() => Column(
-                children: [
-                  RadioListTile<SpeedUnit>(
-                    title: const Text('km/h'),
-                    value: SpeedUnit.kmh,
-                    groupValue: settingsController.speedUnit.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        settingsController.setSpeedUnit(value);
-                      }
-                    },
-                  ),
-                  RadioListTile<SpeedUnit>(
-                    title: const Text('mph'),
-                    value: SpeedUnit.mph,
-                    groupValue: settingsController.speedUnit.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        settingsController.setSpeedUnit(value);
-                      }
-                    },
-                  ),
-                ],
-              )),
-          const Divider(),
+          // ListTile(
+          //   leading: const Icon(Icons.speed),
+          //   title: Text(
+          //     'speed_unit'.tr,
+          //     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          //   ),
+          // ),
+          // Obx(() => Column(
+          //       children: [
+          //         RadioListTile<SpeedUnit>(
+          //           title: const Text('km/h'),
+          //           value: SpeedUnit.kmh,
+          //           groupValue: settingsController.speedUnit.value,
+          //           onChanged: (value) {
+          //             if (value != null) {
+          //               settingsController.setSpeedUnit(value);
+          //             }
+          //           },
+          //         ),
+          //         RadioListTile<SpeedUnit>(
+          //           title: const Text('mph'),
+          //           value: SpeedUnit.mph,
+          //           groupValue: settingsController.speedUnit.value,
+          //           onChanged: (value) {
+          //             if (value != null) {
+          //               settingsController.setSpeedUnit(value);
+          //             }
+          //           },
+          //         ),
+          //       ],
+          //     )),
+          // const Divider(),
 
           // Language
           ListTile(
