@@ -48,7 +48,7 @@ dependencies:
   path_provider: ^2.1.3
 
   # GPS/Location
-  geolocator: ^12.0.0
+  geolocator: ^11.1.0
 
   # UI Components
   syncfusion_flutter_gauges: ^26.1.35

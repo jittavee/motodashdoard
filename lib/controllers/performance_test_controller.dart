@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/performance_test.dart';
 import '../services/database_helper.dart';
+import '../services/permission_service.dart';
 import 'ecu_data_controller.dart';
 
 class PerformanceTestController extends GetxController {
@@ -16,8 +18,10 @@ class PerformanceTestController extends GetxController {
   // Alias for compatibility
   RxBool get isTestActive => isTestRunning;
 
+  Position? _startPosition;
   DateTime? _startTime;
   Timer? _testTimer;
+  StreamSubscription<Position>? _positionSubscription;
 
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final RxList<PerformanceTest> testHistory = <PerformanceTest>[].obs;
@@ -42,9 +46,23 @@ class PerformanceTestController extends GetxController {
     selectedTestType.value = testType;
   }
 
-  // ใช้ความเร็วจาก ECU แทน GPS
+  // ใช้ GPS สำหรับการทดสอบ (ขอ permission ตอนกด START)
   Future<void> startTest(String testType) async {
     if (isTestRunning.value) return;
+
+    // ขอ permission location
+    final permissionService = PermissionService.instance;
+    final hasPermission = await permissionService.requestLocationPermissions();
+
+    if (!hasPermission) {
+      Get.snackbar(
+        'Permission Required',
+        'Location permission is required for performance testing',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
 
     isTestRunning.value = true;
     currentTestType.value = testType;
@@ -54,6 +72,21 @@ class PerformanceTestController extends GetxController {
     currentSpeed.value = 0.0;
     maxSpeed.value = 0.0;
 
+    // บันทึกตำแหน่งเริ่มต้น
+    try {
+      _startPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Cannot get GPS location. Make sure GPS is enabled.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      isTestRunning.value = false;
+      return;
+    }
+
     _startTime = DateTime.now();
 
     // เริ่มจับเวลา
@@ -61,30 +94,44 @@ class PerformanceTestController extends GetxController {
       if (_startTime != null) {
         currentTime.value =
             DateTime.now().difference(_startTime!).inMilliseconds / 1000;
-
-        // ดึงความเร็วจาก ECUDataController
-        final ecuController = Get.find<ECUDataController>();
-        if (ecuController.currentData.value != null) {
-          currentSpeed.value = ecuController.currentData.value!.speed;
-
-          // คำนวณระยะทางจากความเร็ว (ใช้สูตร v = s/t)
-          // s = v * t (แปลง km/h เป็น m/s แล้วคูณด้วยเวลา)
-          double speedInMps = currentSpeed.value / 3.6;
-          currentDistance.value += speedInMps * 0.1; // เพิ่มทุก 0.1 วินาที
-
-          // บันทึกความเร็วสูงสุด
-          if (currentSpeed.value > maxSpeed.value) {
-            maxSpeed.value = currentSpeed.value;
-          }
-
-          // ตรวจสอบว่าถึงเป้าหมายหรือยัง
-          double targetDistance = _getTargetDistance(currentTestType.value);
-          if (currentDistance.value >= targetDistance) {
-            _completeTest();
-          }
-        }
       }
     });
+
+    // ติดตามตำแหน่ง GPS
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 1,
+      ),
+    ).listen((Position position) {
+      _updatePosition(position);
+    });
+  }
+
+  void _updatePosition(Position position) {
+    if (_startPosition == null) return;
+
+    // คำนวณระยะทาง
+    double distance = Geolocator.distanceBetween(
+      _startPosition!.latitude,
+      _startPosition!.longitude,
+      position.latitude,
+      position.longitude,
+    );
+
+    currentDistance.value = distance;
+    currentSpeed.value = position.speed * 3.6; // แปลง m/s เป็น km/h
+
+    // บันทึกความเร็วสูงสุด
+    if (currentSpeed.value > maxSpeed.value) {
+      maxSpeed.value = currentSpeed.value;
+    }
+
+    // ตรวจสอบว่าถึงเป้าหมายหรือยัง
+    double targetDistance = _getTargetDistance(currentTestType.value);
+    if (distance >= targetDistance) {
+      _completeTest();
+    }
   }
 
   double _getTargetDistance(String testType) {
@@ -141,7 +188,11 @@ class PerformanceTestController extends GetxController {
   void stopTest() {
     isTestRunning.value = false;
     _testTimer?.cancel();
+    _positionSubscription?.cancel();
+
     _testTimer = null;
+    _positionSubscription = null;
+    _startPosition = null;
     _startTime = null;
   }
 
