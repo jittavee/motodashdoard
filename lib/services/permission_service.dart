@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:geolocator/geolocator.dart';
 import '../utils/logger.dart';
 
 class PermissionService extends GetxService {
@@ -9,8 +8,6 @@ class PermissionService extends GetxService {
 
   // Permission status observables
   final RxBool hasBluetoothPermission = false.obs;
-  final RxBool hasLocationPermission = false.obs;
-  final RxBool isLocationServiceEnabled = false.obs;
 
   @override
   void onInit() {
@@ -21,7 +18,6 @@ class PermissionService extends GetxService {
   // Check all permissions at once
   Future<void> checkAllPermissions() async {
     await checkBluetoothPermissions();
-    await checkLocationPermissions();
   }
 
   // Bluetooth Permissions
@@ -91,71 +87,6 @@ class PermissionService extends GetxService {
     }
   }
 
-  // Location Permissions
-  Future<bool> checkLocationPermissions() async {
-    try {
-      // Check if location service is enabled
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      isLocationServiceEnabled.value = serviceEnabled;
-
-      if (!serviceEnabled) {
-        logger.w('Location services are disabled');
-        return false;
-      }
-
-      // Check permission
-      LocationPermission permission = await Geolocator.checkPermission();
-
-      final hasPermission = permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always;
-
-      hasLocationPermission.value = hasPermission;
-      return hasPermission;
-    } catch (e) {
-      logger.e('Error checking location permissions', error: e);
-      return false;
-    }
-  }
-
-  Future<bool> requestLocationPermissions() async {
-    try {
-      // Check if location service is enabled
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      isLocationServiceEnabled.value = serviceEnabled;
-
-      if (!serviceEnabled) {
-        _showLocationServiceDialog();
-        return false;
-      }
-
-      // Check current permission
-      LocationPermission permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        _showPermanentlyDeniedDialog('Location');
-        return false;
-      }
-
-      final hasPermission = permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always;
-
-      hasLocationPermission.value = hasPermission;
-
-      if (!hasPermission) {
-        _showPermissionDeniedDialog('Location');
-      }
-
-      return hasPermission;
-    } catch (e) {
-      logger.e('Error requesting location permissions', error: e);
-      return false;
-    }
-  }
-
   // Open app settings
   Future<void> openSettings() async {
     await openAppSettings();
@@ -166,29 +97,6 @@ class PermissionService extends GetxService {
     Get.snackbar(
       'Permission Required',
       '$permissionName permission is required for this feature to work',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 4),
-    );
-  }
-
-  void _showPermanentlyDeniedDialog(String permissionName) {
-    Get.defaultDialog(
-      title: 'Permission Required',
-      middleText:
-          '$permissionName permission has been permanently denied. Please enable it in app settings.',
-      textConfirm: 'Open Settings',
-      textCancel: 'Cancel',
-      onConfirm: () {
-        Get.back();
-        openSettings();
-      },
-    );
-  }
-
-  void _showLocationServiceDialog() {
-    Get.snackbar(
-      'Location Service Disabled',
-      'Please enable location services in your device settings',
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 4),
     );

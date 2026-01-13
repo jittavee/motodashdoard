@@ -73,6 +73,16 @@ const Map<String, String> thTh = {
   '0_200': '0-200 กม./ชม.',
   'quarter_mile': '1/4 ไมล์',
   'seconds': 'วินาที',
+  'current_speed': 'ความเร็วปัจจุบัน',
+  'select_test_type': 'เลือกประเภทการทดสอบ',
+  'quarter_kilometer_sprint': 'วิ่งระยะ 100 เมตร',
+  'eighth_mile': 'วิ่งระยะ 201 เมตร',
+  'kilometer_sprint': 'วิ่งระยะกิโลเมตร',
+  'test_in_progress': 'กำลังทดสอบ',
+  'no_test_history': 'ยังไม่มีประวัติการทดสอบ',
+  'note': 'หมายเหตุ',
+  'completed': 'เสร็จสิ้น!',
+  'distance': 'ระยะทาง',
 
   // Data & History
   'data': 'ข้อมูล',

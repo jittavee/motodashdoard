@@ -73,6 +73,16 @@ const Map<String, String> enUs = {
   '0_200': '0-200 km/h',
   'quarter_mile': '1/4 Mile',
   'seconds': 'seconds',
+  'current_speed': 'CURRENT SPEED',
+  'select_test_type': 'Select Test Type',
+  'quarter_kilometer_sprint': 'Quarter Kilometer Sprint',
+  'eighth_mile': 'Eighth Mile',
+  'kilometer_sprint': 'Kilometer Sprint',
+  'test_in_progress': 'Test in Progress',
+  'no_test_history': 'No test history yet',
+  'note': 'Note',
+  'completed': 'Completed!',
+  'distance': 'Distance',
 
   // Data & History
   'data': 'Data',

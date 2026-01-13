@@ -41,11 +41,11 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Performance Test'),
+        title: Text('performance_test'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
-            tooltip: 'Test History',
+            tooltip: 'test_history'.tr,
             onPressed: () => _showTestHistory(context, perfController),
           ),
         ],
@@ -71,9 +71,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'CURRENT SPEED',
-                      style: TextStyle(
+                    Text(
+                      'current_speed'.tr,
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
                         letterSpacing: 2,
@@ -103,9 +103,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Select Test Type',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    'select_test_type'.tr,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Obx(
@@ -117,7 +117,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                           '0-100 m',
                           '0-100m',
                           Icons.speed,
-                          'Quarter Kilometer Sprint',
+                          'quarter_kilometer_sprint'.tr,
                         ),
                         _buildTestCard(
                           context,
@@ -125,7 +125,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                           '0-201 m',
                           '0-201m',
                           Icons.directions_run,
-                          'Eighth Mile',
+                          'eighth_mile'.tr,
                         ),
                         _buildTestCard(
                           context,
@@ -133,7 +133,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                           '0-402 m',
                           '0-402m',
                           Icons.local_fire_department,
-                          'Quarter Mile',
+                          'quarter_mile'.tr,
                         ),
                         _buildTestCard(
                           context,
@@ -141,7 +141,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                           '0-1000 m',
                           '0-1000m',
                           Icons.rocket_launch,
-                          'Kilometer Sprint',
+                          'kilometer_sprint'.tr,
                         ),
                       ],
                     ),
@@ -178,9 +178,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                                   color: Colors.orange,
                                 ),
                               ),
-                              const Text(
-                                'Test in Progress',
-                                style: TextStyle(
+                              Text(
+                                'test_in_progress'.tr,
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey,
                                 ),
@@ -259,7 +259,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                     ? null
                     : () => controller.startTest(testType),
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('START'),
+                label: Text('start_test'.tr.toUpperCase()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
@@ -313,9 +313,9 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                   children: [
                     const Icon(Icons.history, color: Colors.white),
                     const SizedBox(width: 12),
-                    const Text(
-                      'Test History',
-                      style: TextStyle(
+                    Text(
+                      'test_history'.tr,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -343,7 +343,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No test history yet',
+                            'no_test_history'.tr,
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[600],
@@ -416,15 +416,15 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildHistoryMetric(
-                  'Time',
+                  'time'.tr,
                   '${test.time.toStringAsFixed(2)} s',
                 ),
                 _buildHistoryMetric(
-                  'Max Speed',
+                  'max_speed'.tr,
                   '${test.maxSpeed.toStringAsFixed(0)} km/h',
                 ),
                 _buildHistoryMetric(
-                  'Avg Speed',
+                  'avg_speed'.tr,
                   '${test.avgSpeed.toStringAsFixed(0)} km/h',
                 ),
               ],
@@ -432,7 +432,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
             if (test.note != null && test.note!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'Note: ${test.note}',
+                '${'note'.tr}: ${test.note}',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],
