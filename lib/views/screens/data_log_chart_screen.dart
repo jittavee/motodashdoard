@@ -1,20 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../services/database_helper.dart';
 import '../../models/ecu_data.dart';
+import '../../controllers/ecu_data_controller.dart';
 
 class DataLogChartScreen extends StatefulWidget {
   final DateTime? startDate;
   final DateTime? endDate;
 
-  const DataLogChartScreen({
-    super.key,
-    this.startDate,
-    this.endDate,
-  });
+  const DataLogChartScreen({super.key, this.startDate, this.endDate});
 
   @override
   State<DataLogChartScreen> createState() => _DataLogChartScreenState();
@@ -128,7 +128,9 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
   List<FlSpot> _getChartData() {
     if (_logs.isEmpty) return [];
 
-    final getValue = _parameters[_selectedParameter]!['getValue'] as double Function(ECUData);
+    final getValue =
+        _parameters[_selectedParameter]!['getValue']
+            as double Function(ECUData);
 
     // สร้างจุดข้อมูลสำหรับกราฟ
     final spots = <FlSpot>[];
@@ -143,7 +145,9 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
   double _getMaxY() {
     if (_logs.isEmpty) return 100;
 
-    final getValue = _parameters[_selectedParameter]!['getValue'] as double Function(ECUData);
+    final getValue =
+        _parameters[_selectedParameter]!['getValue']
+            as double Function(ECUData);
     double maxValue = 0;
 
     for (var log in _logs) {
@@ -158,7 +162,9 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
   double _getMinY() {
     if (_logs.isEmpty) return 0;
 
-    final getValue = _parameters[_selectedParameter]!['getValue'] as double Function(ECUData);
+    final getValue =
+        _parameters[_selectedParameter]!['getValue']
+            as double Function(ECUData);
     double minValue = double.infinity;
 
     for (var log in _logs) {
@@ -207,6 +213,64 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
     _loadLogs();
   }
 
+  Future<void> _exportToCSV() async {
+    try {
+      if (_logs.isEmpty) {
+        Get.snackbar('Info', 'No data to export');
+        return;
+      }
+
+      final ecuController = Get.find<ECUDataController>();
+      final csvData = await ecuController.exportToCsv(
+        startDate: _startDate,
+        endDate: _endDate,
+      );
+
+      final directory = await getApplicationDocumentsDirectory();
+      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final file = File('${directory.path}/ecu_chart_$timestamp.csv');
+      await file.writeAsString(csvData);
+
+      await Share.shareXFiles([XFile(file.path)],
+          subject: 'ECU Chart Data (CSV)',
+          text: 'Exported ${_logs.length} ECU data records');
+
+      Get.snackbar('Success', 'Exported ${_logs.length} records to CSV',
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to export CSV: $e');
+    }
+  }
+
+  Future<void> _exportToJSON() async {
+    try {
+      if (_logs.isEmpty) {
+        Get.snackbar('Info', 'No data to export');
+        return;
+      }
+
+      final ecuController = Get.find<ECUDataController>();
+      final jsonData = await ecuController.exportToJson(
+        startDate: _startDate,
+        endDate: _endDate,
+      );
+
+      final directory = await getApplicationDocumentsDirectory();
+      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final file = File('${directory.path}/ecu_chart_$timestamp.json');
+      await file.writeAsString(jsonData);
+
+      await Share.shareXFiles([XFile(file.path)],
+          subject: 'ECU Chart Data (JSON)',
+          text: 'Exported ${_logs.length} ECU data records');
+
+      Get.snackbar('Success', 'Exported ${_logs.length} records to JSON',
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to export JSON: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final param = _parameters[_selectedParameter];
@@ -235,6 +299,39 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
               tooltip: 'clear_filter'.tr,
               onPressed: _clearDateFilter,
             ),
+            PopupMenuButton<String>(
+            icon: const Icon(Icons.import_export),
+            tooltip: 'Export data',
+            onSelected: (value) {
+              if (value == 'export_csv') {
+                _exportToCSV();
+              } else if (value == 'export_json') {
+                _exportToJSON();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'export_csv',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download),
+                    SizedBox(width: 8),
+                    Text('Export CSV'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export_json',
+                child: Row(
+                  children: [
+                    Icon(Icons.code),
+                    SizedBox(width: 8),
+                    Text('Export JSON'),
+                  ],
+                ),
+              ),
+            ],
+          ),
           PopupMenuButton<String>(
             initialValue: _selectedParameter,
             onSelected: (value) {
@@ -262,202 +359,209 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
               );
             }).toList(),
           ),
+          
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _logs.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.show_chart, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'no_data_for_chart'.tr,
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                // Date range indicator
+                if (_startDate != null && _endDate != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.calendar_today, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${DateFormat('MMM dd, yyyy').format(_startDate!)} - ${DateFormat('MMM dd, yyyy').format(_endDate!)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Chart
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: LineChart(
+                      LineChartData(
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: true,
+                          horizontalInterval: (_getMaxY() - _getMinY()) / 5,
+                          verticalInterval: _logs.length / 10,
+                          getDrawingHorizontalLine: (value) {
+                            return FlLine(
+                              color: Colors.grey[300]!,
+                              strokeWidth: 1,
+                            );
+                          },
+                          getDrawingVerticalLine: (value) {
+                            return FlLine(
+                              color: Colors.grey[300]!,
+                              strokeWidth: 1,
+                            );
+                          },
+                        ),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 30,
+                              interval: _logs.length / 5,
+                              getTitlesWidget: (value, meta) {
+                                if (value.toInt() >= _logs.length)
+                                  return const SizedBox();
+                                final log = _logs[value.toInt()];
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    DateFormat('HH:mm').format(log.timestamp),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              interval: (_getMaxY() - _getMinY()) / 5,
+                              reservedSize: 50,
+                              getTitlesWidget: (value, meta) {
+                                return Text(
+                                  '${value.toStringAsFixed(0)} $paramUnit',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        borderData: FlBorderData(
+                          show: true,
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        minX: 0,
+                        maxX: (_logs.length - 1).toDouble(),
+                        minY: _getMinY(),
+                        maxY: _getMaxY(),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: _getChartData(),
+                            isCurved: true,
+                            color: paramColor,
+                            barWidth: 3,
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(
+                              show:
+                                  _logs.length <
+                                  50, // แสดงจุดถ้าข้อมูลน้อยกว่า 50 จุด
+                            ),
+                            belowBarData: BarAreaData(
+                              show: true,
+                              color: paramColor.withValues(alpha: 0.1),
+                            ),
+                          ),
+                        ],
+                        lineTouchData: LineTouchData(
+                          touchTooltipData: LineTouchTooltipData(
+                            getTooltipItems: (touchedSpots) {
+                              return touchedSpots.map((spot) {
+                                final index = spot.x.toInt();
+                                if (index >= _logs.length) return null;
+
+                                final log = _logs[index];
+                                final time = DateFormat(
+                                  'HH:mm:ss',
+                                ).format(log.timestamp);
+                                final value = spot.y.toStringAsFixed(1);
+
+                                return LineTooltipItem(
+                                  '$time\n$value $paramUnit',
+                                  const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              }).toList();
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Stats summary
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Icon(Icons.show_chart, size: 64, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'no_data_for_chart'.tr,
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                      _buildStatCard(
+                        'min_value'.tr,
+                        _getMinY().toStringAsFixed(1),
+                        paramUnit,
+                        Colors.blue,
+                      ),
+                      _buildStatCard(
+                        'max_value'.tr,
+                        _getMaxY().toStringAsFixed(1),
+                        paramUnit,
+                        Colors.red,
+                      ),
+                      _buildStatCard(
+                        'avg_value'.tr,
+                        _getAverage().toStringAsFixed(1),
+                        paramUnit,
+                        Colors.green,
                       ),
                     ],
                   ),
-                )
-              : Column(
-                  children: [
-                    // Date range indicator
-                    if (_startDate != null && _endDate != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        color: Colors.blue.withValues(alpha: 0.1),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.calendar_today, size: 16),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${DateFormat('MMM dd, yyyy').format(_startDate!)} - ${DateFormat('MMM dd, yyyy').format(_endDate!)}',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-                      ),
-                    // Chart
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: LineChart(
-                          LineChartData(
-                            gridData: FlGridData(
-                              show: true,
-                              drawVerticalLine: true,
-                              horizontalInterval: (_getMaxY() - _getMinY()) / 5,
-                              verticalInterval: _logs.length / 10,
-                              getDrawingHorizontalLine: (value) {
-                                return FlLine(
-                                  color: Colors.grey[300]!,
-                                  strokeWidth: 1,
-                                );
-                              },
-                              getDrawingVerticalLine: (value) {
-                                return FlLine(
-                                  color: Colors.grey[300]!,
-                                  strokeWidth: 1,
-                                );
-                              },
-                            ),
-                            titlesData: FlTitlesData(
-                              show: true,
-                              rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              topTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 30,
-                                  interval: _logs.length / 5,
-                                  getTitlesWidget: (value, meta) {
-                                    if (value.toInt() >= _logs.length) return const SizedBox();
-                                    final log = _logs[value.toInt()];
-                                    return Padding(
-                                      padding: const EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        DateFormat('HH:mm').format(log.timestamp),
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: (_getMaxY() - _getMinY()) / 5,
-                                  reservedSize: 50,
-                                  getTitlesWidget: (value, meta) {
-                                    return Text(
-                                      '${value.toStringAsFixed(0)} $paramUnit',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.grey,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            borderData: FlBorderData(
-                              show: true,
-                              border: Border.all(color: Colors.grey[300]!),
-                            ),
-                            minX: 0,
-                            maxX: (_logs.length - 1).toDouble(),
-                            minY: _getMinY(),
-                            maxY: _getMaxY(),
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: _getChartData(),
-                                isCurved: true,
-                                color: paramColor,
-                                barWidth: 3,
-                                isStrokeCapRound: true,
-                                dotData: FlDotData(
-                                  show: _logs.length < 50, // แสดงจุดถ้าข้อมูลน้อยกว่า 50 จุด
-                                ),
-                                belowBarData: BarAreaData(
-                                  show: true,
-                                  color: paramColor.withValues(alpha: 0.1),
-                                ),
-                              ),
-                            ],
-                            lineTouchData: LineTouchData(
-                              touchTooltipData: LineTouchTooltipData(
-                                getTooltipItems: (touchedSpots) {
-                                  return touchedSpots.map((spot) {
-                                    final index = spot.x.toInt();
-                                    if (index >= _logs.length) return null;
-
-                                    final log = _logs[index];
-                                    final time = DateFormat('HH:mm:ss').format(log.timestamp);
-                                    final value = spot.y.toStringAsFixed(1);
-
-                                    return LineTooltipItem(
-                                      '$time\n$value $paramUnit',
-                                      const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  }).toList();
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Stats summary
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildStatCard(
-                            'min_value'.tr,
-                            _getMinY().toStringAsFixed(1),
-                            paramUnit,
-                            Colors.blue,
-                          ),
-                          _buildStatCard(
-                            'max_value'.tr,
-                            _getMaxY().toStringAsFixed(1),
-                            paramUnit,
-                            Colors.red,
-                          ),
-                          _buildStatCard(
-                            'avg_value'.tr,
-                            _getAverage().toStringAsFixed(1),
-                            paramUnit,
-                            Colors.green,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
+              ],
+            ),
     );
   }
 
-  Widget _buildStatCard(
-    String label,
-    String value,
-    String unit,
-    Color color,
-  ) {
+  Widget _buildStatCard(String label, String value, String unit, Color color) {
     return Expanded(
       child: Card(
         elevation: 2,
@@ -465,14 +569,10 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           child: Column(
             children: [
-              
               const SizedBox(height: 8),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.grey[600]),
               ),
               const SizedBox(height: 4),
               Text(
@@ -493,7 +593,9 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
   double _getAverage() {
     if (_logs.isEmpty) return 0;
 
-    final getValue = _parameters[_selectedParameter]!['getValue'] as double Function(ECUData);
+    final getValue =
+        _parameters[_selectedParameter]!['getValue']
+            as double Function(ECUData);
     double sum = 0;
 
     for (var log in _logs) {
