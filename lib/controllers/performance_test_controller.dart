@@ -56,8 +56,8 @@ class PerformanceTestController extends GetxController {
 
     if (!hasPermission) {
       Get.snackbar(
-        'Permission Required',
-        'Location permission is required for performance testing',
+        'permission_required'.tr,
+        'location_permission_required'.tr,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
       );
@@ -79,8 +79,8 @@ class PerformanceTestController extends GetxController {
       );
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Cannot get GPS location. Make sure GPS is enabled.',
+        'error'.tr,
+        'cannot_get_gps'.tr,
         snackPosition: SnackPosition.BOTTOM,
       );
       isTestRunning.value = false;
@@ -176,10 +176,10 @@ class PerformanceTestController extends GetxController {
 
     // แสดงผลลัพธ์
     Get.snackbar(
-      'เสร็จสิ้น!',
-      'ระยะทาง: ${currentDistance.value.toStringAsFixed(2)} ม.\n'
-      'เวลา: ${currentTime.value.toStringAsFixed(2)} วินาที\n'
-      'ความเร็วสูงสุด: ${maxSpeed.value.toStringAsFixed(2)} km/h',
+      'completed'.tr,
+      '${'distance'.tr}: ${currentDistance.value.toStringAsFixed(2)} ${'m'.tr}\n'
+      '${'time'.tr}: ${currentTime.value.toStringAsFixed(2)} ${'seconds'.tr}\n'
+      '${'max_speed'.tr}: ${maxSpeed.value.toStringAsFixed(2)} km/h',
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 5),
     );

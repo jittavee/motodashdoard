@@ -83,6 +83,9 @@ const Map<String, String> enUs = {
   'note': 'Note',
   'completed': 'Completed!',
   'distance': 'Distance',
+  'location_permission_required': 'Location permission is required for performance testing',
+  'cannot_get_gps': 'Cannot get GPS location. Make sure GPS is enabled.',
+  'm': 'm',
 
   // Data & History
   'data': 'Data',

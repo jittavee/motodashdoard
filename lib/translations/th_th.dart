@@ -83,6 +83,9 @@ const Map<String, String> thTh = {
   'note': 'หมายเหตุ',
   'completed': 'เสร็จสิ้น!',
   'distance': 'ระยะทาง',
+  'location_permission_required': 'ต้องการสิทธิ์การเข้าถึงตำแหน่งสำหรับการทดสอบสมรรถนะ',
+  'cannot_get_gps': 'ไม่สามารถรับตำแหน่ง GPS ได้ กรุณาเปิด GPS',
+  'm': 'ม.',
 
   // Data & History
   'data': 'ข้อมูล',
