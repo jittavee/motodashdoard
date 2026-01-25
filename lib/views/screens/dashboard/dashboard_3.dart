@@ -6,6 +6,7 @@ import '../../../controllers/ecu_data_controller.dart';
 import '../../../models/ecu_data.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
+import '../../widgets/animated_gauge_needle.dart';
 
 class TemplateThreeScreen extends StatefulWidget {
   const TemplateThreeScreen({super.key});
@@ -118,10 +119,31 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                               // Needle with rotation based on rpm
                               Obx(() {
                                 final rpm = ecuController.currentData.value?.rpm ?? 0;
-                                final angle = _speedToAngle(rpm, 20000, 0, 300);
-                                return _buildRotatingNeedle(
-                                  angle: angle,
-                                  size: screenHeight * 0.25, // ขนาดเข็มตามความสูงของ speedometer
+                                return AnimatedGaugeNeedle(
+                                  targetValue: rpm,
+                                  maxValue: 20000,
+                                  size: screenHeight * 0.25,
+                                  offsetAngle: 0,
+                                  rotationRange: 300,
+                                  animationDuration: const Duration(milliseconds: 300),
+                                  animationCurve: Curves.easeInOut,
+                                  builder: (angle, currentValue) {
+                                    return Transform.translate(
+                                      offset: Offset(0, screenHeight * 0.25 * 0.5),
+                                      child: SizedBox(
+                                        width: screenHeight * 0.25,
+                                        height: screenHeight * 0.25,
+                                        child: Transform.rotate(
+                                          angle: angle * (pi / 180),
+                                          alignment: Alignment(0, -1),
+                                          child: Image.asset(
+                                            'assets/ui-3/needle.png',
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               }),
                               // Speed value display
@@ -209,47 +231,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
     );
   }
 
-  // คำนวณมุมจากค่า speed
-  double _speedToAngle(
-    double value,
-    double maxValue,
-    double offsetAngle,
-    double rotationRange,
-  ) {
-    final normalized = (value / maxValue).clamp(0.0, 1.0);
-    return offsetAngle + (normalized * rotationRange);
-  }
-
-  // สร้างเข็มที่หมุนได้พร้อม animation
-  Widget _buildRotatingNeedle({
-    required double angle,
-    required double size,
-  }) {
-    return Transform.translate(
-      offset: Offset(0, size * 0.5), // เลื่อนเข็มลง 50% ของขนาด
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: angle),
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOut,
-          builder: (context, value, child) {
-            return Transform.rotate(
-              angle: value * (pi / 180),
-              alignment: Alignment.topCenter, // หมุนรอบจุดด้านบน
-              child: child,
-            );
-          },
-          child: Image.asset(
-            height: size,
-            'assets/ui-3/needle.png',
-            fit: BoxFit.fitHeight,
-          ),
-        ),
-      ),
-    );
-  }
 
   /// Helper: Build data row with title, unit, value
   Widget _buildDataRow({

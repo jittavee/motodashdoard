@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
+import '../../widgets/animated_gauge_needle.dart';
 
 class TemplateOneScreen extends StatefulWidget {
   const TemplateOneScreen({super.key});
@@ -88,12 +89,28 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                       screenWidth * 0.5 - 35, // ดึงจากตรงกลางแนวนอนไปทางซ้าย 35
                   child: Obx(() {
                     final rpm = ecuController.currentData.value?.rpm ?? 0;
-                    return _buildRotatingNeedleGauge(
-                      value: rpm, // ค่าปัจจุบันของ RPM
+                    return AnimatedGaugeNeedle(
+                      targetValue: rpm,
                       maxValue: 15000,
                       size: 85,
-                      offsetAngle: 140.0,
+                      offsetAngle: 140.0 - 135, // ปรับ offset ให้ตรงกับสูตรเดิม
                       rotationRange: 240.0,
+                      animationDuration: const Duration(milliseconds: 300),
+                      animationCurve: Curves.easeInOut,
+                      builder: (angle, currentValue) {
+                        return SizedBox(
+                          width: 85,
+                          height: 85,
+                          child: Transform.rotate(
+                            angle: angle * (pi / 180),
+                            alignment: Alignment(0, -1),
+                            child: Image.asset(
+                              'assets/ui-1/needle.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   }),
                 ),
@@ -112,14 +129,28 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                   left: screenWidth * 0.5 - 196,
                   child: Obx(() {
                     final speed = ecuController.currentData.value?.speed ?? 0;
-                    return _buildRotatingNeedleGauge(
-                      value: speed, // ค่าปัจจุบันของความเร็ว
-                      maxValue: 250, // ความเร็วสูงสุด (km/h)
-                      size: 50, // ขนาด gauge (pixels)
-                      offsetAngle:
-                          100.0, // มุมเริ่มต้น (องศา) - ปรับตำแหน่งเข็มที่ 0 km/h
-                      rotationRange:
-                          247.0, // ช่วงการหมุน (องศา) - จาก 0 ถึง 250 km/h
+                    return AnimatedGaugeNeedle(
+                      targetValue: speed,
+                      maxValue: 250,
+                      size: 50,
+                      offsetAngle: 100.0 - 135, // ปรับ offset ให้ตรงกับสูตรเดิม
+                      rotationRange: 247.0,
+                      animationDuration: const Duration(milliseconds: 300),
+                      animationCurve: Curves.easeInOut,
+                      builder: (angle, currentValue) {
+                        return SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: Transform.rotate(
+                            angle: angle * (pi / 180),
+                            alignment: Alignment(0, -1),
+                            child: Image.asset(
+                              'assets/ui-1/needle.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   }),
                 ),
@@ -213,58 +244,6 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
     );
   }
 
-  /// Main RPM Gauge with rotating needle
-  ///
-  /// [value] ค่าปัจจุบัน (RPM)
-  /// [maxValue] ค่าสูงสุด
-  /// [size] ขนาดของ gauge
-  /// [offsetAngle] มุม offset เฉพาะของ gauge นี้
-  /// [rotationRange] ช่วงการหมุนเฉพาะของ gauge นี้
-  Widget _buildRotatingNeedleGauge({
-    required double value, // ค่าปัจจุบัน (RPM, Speed, etc.)
-    required double maxValue, // ค่าสูงสุด
-    required double size,
-    required double offsetAngle, // ค่า offset เฉพาะของ gauge นี้
-    required double rotationRange, // ช่วงการหมุนเฉพาะของ gauge นี้
-  }) {
-    // คำนวณมุม
-    final angle = _rpmToAngle(value, maxValue, offsetAngle, rotationRange);
-
-    return Stack(
-      children: [
-        // Rotating Needle with smooth animation
-        SizedBox(
-          width: size,
-          height: size,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: angle),
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            builder: (context, value, child) {
-              return Transform.rotate(
-                angle: value * (pi / 180),
-                alignment: Alignment(0, -1), // หมุนรอบจุดฐานของเข็ม
-                child: child,
-              );
-            },
-            child: Image.asset('assets/ui-1/needle.png', fit: BoxFit.contain),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Convert RPM to angle in degrees
-  double _rpmToAngle(
-    double rpm,
-    double maxRpm,
-    double offsetAngle,
-    double rotationRange,
-  ) {
-    // RPM 0 → เลข 1 บน gauge, RPM max → เลข 15 บน gauge
-    final normalizedRpm = rpm.clamp(0, maxRpm);
-    return (normalizedRpm / maxRpm) * rotationRange - 135 + offsetAngle;
-  }
 
   /// Speedometer Display
   Widget _buildSpeedometer(double speed) {
