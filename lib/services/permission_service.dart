@@ -18,9 +18,13 @@ class PermissionService extends GetxService {
     checkAllPermissions();
   }
 
-  // Check all permissions at once (เช็คแค่ Bluetooth ตอน init)
+  // Check all permissions at once (เช็คทั้ง Bluetooth และ Location ตอนเปิดแอพ)
   Future<void> checkAllPermissions() async {
+    logger.i('Checking all permissions');
     await checkBluetoothPermissions();
+    await checkLocationPermissions();
+   
+    await requestAlwaysPermission();
   }
 
   // Bluetooth Permissions
@@ -123,8 +127,8 @@ class PermissionService extends GetxService {
 
   Future<bool> requestLocationPermissions() async {
     try {
-      // Check if location service is enabled
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      // Step 1: ตรวจว่า GPS เปิดไหม
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       isLocationServiceEnabled.value = serviceEnabled;
 
       if (!serviceEnabled) {
@@ -132,30 +136,86 @@ class PermissionService extends GetxService {
         return false;
       }
 
-      // Check current permission
+      // Step 2: เช็ค permission ปัจจุบัน
       LocationPermission permission = await Geolocator.checkPermission();
 
+      // Step 3: ถ้า permission ถูกปฏิเสธ ให้ขออีกครั้ง
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+
+        // ถ้ายังถูกปฏิเสธอีก
+        if (permission == LocationPermission.denied) {
+          _showPermissionDeniedDialog('Location');
+          hasLocationPermission.value = false;
+          return false;
+        }
       }
 
+      // Step 4: ถ้าผู้ใช้กด "Don't ask again" (deniedForever)
       if (permission == LocationPermission.deniedForever) {
         _showPermanentlyDeniedDialog('Location');
+        hasLocationPermission.value = false;
         return false;
       }
 
+      // Step 5: ตรวจสอบว่าได้ permission แล้ว
       final hasPermission = permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
 
       hasLocationPermission.value = hasPermission;
-
-      if (!hasPermission) {
-        _showPermissionDeniedDialog('Location');
-      }
-
       return hasPermission;
     } catch (e) {
       logger.e('Error requesting location permissions', error: e);
+      hasLocationPermission.value = false;
+      return false;
+    }
+  }
+
+  // Request Always permission (สำหรับใช้ GPS ตลอดเวลา แม้แอพอยู่เบื้องหลัง)
+  Future<bool> requestAlwaysPermission() async {
+    try {
+      // Step 1: ตรวจว่า GPS เปิดไหม
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      isLocationServiceEnabled.value = serviceEnabled;
+
+      if (!serviceEnabled) {
+        _showLocationServiceDialog();
+        return false;
+      }
+
+      // Step 2: เช็ค permission ปัจจุบัน
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      // Step 3: ถ้า permission ถูกปฏิเสธ ให้ขออีกครั้ง
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      // Step 4: ถ้าผู้ใช้กด "Don't ask again" (deniedForever)
+      if (permission == LocationPermission.deniedForever) {
+        _showPermanentlyDeniedDialog('Location');
+        hasLocationPermission.value = false;
+        return false;
+      }
+
+      // Step 5: ตรวจสอบว่าได้ Always permission หรือไม่
+      final hasAlways = permission == LocationPermission.always;
+      hasLocationPermission.value = hasAlways;
+
+      // ถ้าได้แค่ whileInUse แต่ต้องการ always ให้แจ้งเตือน
+      if (permission == LocationPermission.whileInUse) {
+        Get.snackbar(
+          'Permission Notice',
+          'Location permission is granted only while using the app. For background tracking, please enable "Always" in app settings.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 5),
+        );
+      }
+
+      return hasAlways;
+    } catch (e) {
+      logger.e('Error requesting always permission', error: e);
+      hasLocationPermission.value = false;
       return false;
     }
   }

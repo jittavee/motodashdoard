@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import '../utils/logger.dart';
-import '../services/permission_service.dart';
 import 'ecu_data_controller.dart';
 
 enum BluetoothConnectionStatus {
@@ -52,13 +51,8 @@ class BluetoothController extends GetxController {
       return;
     }
 
-    // ขอ permission
-    await _requestPermissions();
-  }
-
-  Future<void> _requestPermissions() async {
-    final permissionService = PermissionService.instance;
-    await permissionService.requestBluetoothPermissions();
+    // PermissionService จะเช็ค Bluetooth permission ตอนเปิดแอพแล้ว (ใน onInit)
+    // ไม่ต้องขอ permission ซ้ำที่นี่
   }
 
   Future<void> startScan() async {
