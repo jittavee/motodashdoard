@@ -165,7 +165,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                   speed.toInt().toString(),
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: screenHeight * 0.3,
+                                    fontSize: screenHeight * 0.22,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 );
@@ -299,7 +299,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                       value,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: size * 0.25,
+                        fontSize: size * 0.20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -316,7 +316,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                           unit,
                           style: TextStyle(
                             color: Color(0xFFFF6522),
-                            fontSize: size * 0.1,
+                            fontSize: size * 0.08,
                             fontFamily: 'Ethnocentric',
                           ),
                         ),
@@ -324,7 +324,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                           label,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: size * 0.12,
+                            fontSize: size * 0.10,
                             fontFamily: 'Ethnocentric',
                           ),
                         ),
