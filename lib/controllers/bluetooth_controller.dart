@@ -50,9 +50,6 @@ class BluetoothController extends GetxController {
       errorMessage.value = 'Bluetooth ไม่รองรับบนอุปกรณ์นี้';
       return;
     }
-
-    // PermissionService จะเช็ค Bluetooth permission ตอนเปิดแอพแล้ว (ใน onInit)
-    // ไม่ต้องขอ permission ซ้ำที่นี่
   }
 
   Future<void> startScan() async {
@@ -75,6 +72,8 @@ class BluetoothController extends GetxController {
 
       // เริ่มสแกน
       await FlutterBluePlus.startScan(
+        androidCheckLocationServices: true,
+        androidUsesFineLocation: true,
         timeout: const Duration(seconds: 15),
       );
 
