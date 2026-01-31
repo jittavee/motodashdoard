@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
+import '../../../controllers/gps_speed_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
@@ -46,6 +47,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
+    final gpsSpeedController = Get.find<GpsSpeedController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -128,7 +130,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                   top: screenHeight * 0.53 + 1, // 53% จากด้านบน
                   left: screenWidth * 0.5 - 196,
                   child: Obx(() {
-                    final speed = ecuController.currentData.value?.speed ?? 0;
+                    final speed = gpsSpeedController.gpsSpeed.value;
                     return AnimatedGaugeNeedle(
                       targetValue: speed,
                       maxValue: 250,
@@ -158,7 +160,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                   top: screenHeight * 0.43,
                   right: screenWidth * 0.5 + 270,
                   child: Obx(() {
-                    final speed = ecuController.currentData.value?.speed ?? 0;
+                    final speed = gpsSpeedController.gpsSpeed.value;
                     return _buildSpeedometer(speed);
                   }),
                 ),

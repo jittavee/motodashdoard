@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
+import '../../../controllers/gps_speed_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 
@@ -44,6 +45,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
+    final gpsSpeedController = Get.find<GpsSpeedController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setLandscape();
@@ -160,7 +162,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                             // Speed value overlay
                             Center(
                               child: Obx(() {
-                                final speed = ecuController.currentData.value?.speed ?? 0;
+                                final speed = gpsSpeedController.gpsSpeed.value;
                                 return Text(
                                   speed.toInt().toString(),
                                   style: TextStyle(

@@ -9,6 +9,7 @@ import 'controllers/ecu_data_controller.dart';
 import 'controllers/bluetooth_controller.dart';
 import 'controllers/language_controller.dart';
 import 'controllers/performance_test_controller.dart';
+import 'controllers/gps_speed_controller.dart';
 
 import 'services/permission_service.dart';
 
@@ -43,6 +44,7 @@ Future<void> _initializeDependencies() async {
   Get.put(ECUDataController(), permanent: true);
   Get.put(BluetoothController(), permanent: true);
   Get.put(PerformanceTestController(), permanent: true);
+  Get.put(GpsSpeedController(), permanent: true);
 }
 
 class MyApp extends StatelessWidget {

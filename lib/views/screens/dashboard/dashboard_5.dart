@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
+import '../../../controllers/gps_speed_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
@@ -47,6 +48,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
+    final gpsSpeedController = Get.find<GpsSpeedController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setLandscape();
@@ -72,7 +74,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                   top: screenHeight * 0.28,
                   right: screenWidth * 0.21,
                   child: Obx(() {
-                    final speed = ecuController.currentData.value?.speed ?? 0;
+                    final speed = gpsSpeedController.gpsSpeed.value;
                     return AnimatedGaugeNeedle(
                       targetValue: speed,
                       maxValue: 270,
@@ -132,7 +134,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                   top: screenHeight * 0.5,
                   right: screenWidth * 0.25 - 45,
                   child: Obx(() {
-                    final speed = ecuController.currentData.value?.speed ?? 0;
+                    final speed = gpsSpeedController.gpsSpeed.value;
                     return _buildCenterDisplay(
                       value: speed.toInt().toString(),
                       label: 'KM/H',
