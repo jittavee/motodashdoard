@@ -70,10 +70,11 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                       child: Obx(() {
                         final data = ecuController.currentData.value;
                         return _buildDataContainer(
+                          color: Colors.red,
                           data: data,
                           alignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.end,
-                          titleFactor: 0.065,
+                          titleFactor: 0.06,
                           unitFactor: 0.03,
                           valueFactor: 0.065,
                           items: [
@@ -97,7 +98,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                             },
                             {
                               'title': 'AFR',
-                              'unit': '',
+                              'unit': ' ',
                               'getValue': (ECUData? d) =>
                                   (d?.afr ?? 0).toStringAsFixed(1),
                             },
@@ -107,76 +108,79 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                     ),
                     // ส่วนกลาง - speedometer with needle (ยึดเป็นขนาดหลัก)
                     Center(
-                      child: LayoutBuilder(
-                        builder: (context, speedometerConstraints) {
-                          // ใช้ความสูงของหน้าจอเป็นตัวกำหนดขนาด speedometer
-                          return Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Background speedometer
-                              Image.asset(
-                                'assets/ui-3/mile.png',
-                                fit: BoxFit.fitHeight,
-                              ),
-                              // Needle with rotation based on rpm
-                              Obx(() {
-                                final rpm = ecuController.currentData.value?.rpm ?? 0;
-                                return AnimatedGaugeNeedle(
-                                  targetValue: rpm,
-                                  maxValue: 20000,
-                                  size: screenHeight * 0.25,
-                                  offsetAngle: 0,
-                                  rotationRange: 300,
-                                  animationDuration: const Duration(milliseconds: 300),
-                                  animationCurve: Curves.easeInOut,
-                                  builder: (angle, currentValue) {
-                                    return Transform.translate(
-                                      offset: Offset(0, screenHeight * 0.25 * 0.5),
-                                      child: SizedBox(
-                                        width: screenHeight * 0.25,
-                                        height: screenHeight * 0.25,
-                                        child: Transform.rotate(
-                                          angle: angle * (pi / 180),
-                                          alignment: Alignment(0, -1),
-                                          child: Image.asset(
-                                            'assets/ui-3/needle.png',
-                                            fit: BoxFit.contain,
+                      child: Container(
+                        color: Colors.green,
+                        child: LayoutBuilder(
+                          builder: (context, speedometerConstraints) {
+                            // ใช้ความสูงของหน้าจอเป็นตัวกำหนดขนาด speedometer
+                            return Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Background speedometer
+                                Image.asset(
+                                  'assets/ui-3/mile.png',
+                                  fit: BoxFit.fitHeight,
+                                ),
+                                // Needle with rotation based on rpm
+                                Obx(() {
+                                  final rpm = ecuController.currentData.value?.rpm ?? 0;
+                                  return AnimatedGaugeNeedle(
+                                    targetValue: rpm,
+                                    maxValue: 20000,
+                                    size: screenHeight * 0.25,
+                                    offsetAngle: 0,
+                                    rotationRange: 300,
+                                    animationDuration: const Duration(milliseconds: 300),
+                                    animationCurve: Curves.easeInOut,
+                                    builder: (angle, currentValue) {
+                                      return Transform.translate(
+                                        offset: Offset(0, screenHeight * 0.25 * 0.5),
+                                        child: SizedBox(
+                                          width: screenHeight * 0.25,
+                                          height: screenHeight * 0.25,
+                                          child: Transform.rotate(
+                                            angle: angle * (pi / 180),
+                                            alignment: Alignment(0, -1),
+                                            child: Image.asset(
+                                              'assets/ui-3/needle.png',
+                                              fit: BoxFit.contain,
+                                            ),
                                           ),
                                         ),
+                                      );
+                                    },
+                                  );
+                                }),
+                                // Speed value display
+                                Obx(() {
+                                  final speed = gpsSpeedController.gpsSpeed.value;
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        speed.toInt().toString(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: screenHeight * 0.15,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Ethnocentric',
+                                        ),
                                       ),
-                                    );
-                                  },
-                                );
-                              }),
-                              // Speed value display
-                              Obx(() {
-                                final speed = gpsSpeedController.gpsSpeed.value;
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      speed.toInt().toString(),
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: screenHeight * 0.15,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Ethnocentric',
+                                      Text(
+                                        'km/h',
+                                        style: TextStyle(
+                                          color: Color(0xFFFF6522),
+                                          fontSize: screenHeight * 0.05,
+                                          fontFamily: 'Ethnocentric',
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      'km/h',
-                                      style: TextStyle(
-                                        color: Color(0xFFFF6522),
-                                        fontSize: screenHeight * 0.05,
-                                        fontFamily: 'Ethnocentric',
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }),
-                            ],
-                          );
-                        },
+                                    ],
+                                  );
+                                }),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
                     // ส่วนขวา - แสดงข้อมูล TPS, BAT, IGN, INJ
@@ -184,6 +188,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                       child: Obx(() {
                         final data = ecuController.currentData.value;
                         return _buildDataContainer(
+                          color: Colors.red,
                           data: data,
                           alignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -245,13 +250,17 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
     bool useExpanded = true,
   }) {
     final labelRow = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: sizeTitle,
-            fontFamily: 'Ethnocentric',
+        Flexible(
+          child: Text(
+            title,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: sizeTitle,
+              fontFamily: 'Ethnocentric',
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         if (unit.isNotEmpty) ...[
@@ -302,7 +311,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
     bool useExpanded = true,
   }) {
     return Container(
-      color: color.withValues(alpha: 0.2),
+      color: color,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final sizeTitle = constraints.maxHeight * titleFactor;
