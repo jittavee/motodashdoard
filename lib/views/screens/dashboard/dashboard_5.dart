@@ -44,159 +44,181 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
     ]);
   }
 
-  
   @override
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
     final gpsSpeedController = Get.find<GpsSpeedController>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setLandscape();
-    });
-
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF19171e),
       body: SafeArea(
         child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            final screenHeight = constraints.maxHeight;
+          builder: (context, screenConstraints) {
+            // คำนวณขนาดภาพจริงที่จะแสดงโดยใช้ BoxFit.contain logic
+            const imageAspectRatio = 11773 / 5256;
+            final screenAspectRatio = screenConstraints.maxWidth / screenConstraints.maxHeight;
+
+            double imageWidth, imageHeight;
+            if (screenAspectRatio > imageAspectRatio) {
+              // จอกว้างกว่าภาพ -> ใช้ความสูงเต็ม
+              imageHeight = screenConstraints.maxHeight;
+              imageWidth = imageHeight * imageAspectRatio;
+            } else {
+              // จอแคบกว่าภาพ -> ใช้ความกว้างเต็ม
+              imageWidth = screenConstraints.maxWidth;
+              imageHeight = imageWidth / imageAspectRatio;
+            }
+
+            // Helper functions for positioning
+            double pxW(double percent) => imageWidth * percent;
+            double pxH(double percent) => imageHeight * percent;
+
+            // ขนาดเข็ม (เป็น % ของความสูงภาพ)
+            final speedNeedleSize = pxH(0.22);
+            final rpmNeedleSize = pxH(0.26);
+
             return Stack(
               children: [
-                // Background Image
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/ui-5/Component 1.png',
-                    fit: BoxFit.fitWidth,
+                // Background Image - centered
+                Center(
+                  child: SizedBox(
+                    width: imageWidth,
+                    height: imageHeight,
+                    child: Stack(
+                      children: [
+                        // Background
+                        Positioned.fill(
+                          child: Image.asset(
+                            'assets/ui-5/Component 1.png',
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+
+                        // Speed Gauge (Right)
+                        Positioned(
+                          top: pxH(0.28),
+                          right: pxW(0.16),
+                          child: Obx(() {
+                            final speed = gpsSpeedController.gpsSpeed.value;
+                            return AnimatedGaugeNeedle(
+                              targetValue: speed,
+                              maxValue: 270,
+                              size: speedNeedleSize,
+                              offsetAngle: -15 - 135,
+                              rotationRange: 270,
+                              animationDuration: const Duration(milliseconds: 300),
+                              animationCurve: Curves.easeInOut,
+                              builder: (angle, currentValue) {
+                                return SizedBox(
+                                  height: speedNeedleSize,
+                                  child: Transform.rotate(
+                                    angle: angle * (pi / 180),
+                                    alignment: Alignment.bottomLeft,
+                                    child: Image.asset(
+                                      'assets/ui-5/Component 2.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }),
+                        ),
+
+                        // RPM Gauge (Left)
+                        Positioned(
+                          top: pxH(0.28),
+                          left: pxW(0.22),
+                          child: Obx(() {
+                            final rpm = ecuController.currentData.value?.rpm ?? 0;
+                            return AnimatedGaugeNeedle(
+                              targetValue: rpm,
+                              maxValue: 15000,
+                              size: rpmNeedleSize,
+                              offsetAngle: -65 - 135,
+                              rotationRange: 320,
+                              animationDuration: const Duration(milliseconds: 300),
+                              animationCurve: Curves.easeInOut,
+                              builder: (angle, currentValue) {
+                                return SizedBox(
+                                  height: rpmNeedleSize,
+                                  child: Transform.rotate(
+                                    angle: angle * (pi / 180),
+                                    alignment: Alignment.bottomLeft,
+                                    child: Image.asset(
+                                      'assets/ui-5/Component 3.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }),
+                        ),
+
+                        // Speed Number Display (Center of right gauge)
+                        Positioned(
+                          top: pxH(0.4),
+                          right: pxW(0.16),
+                          child: Obx(() {
+                            final speed = gpsSpeedController.gpsSpeed.value;
+                            return _buildCenterDisplay(
+                              value: speed.toInt().toString(),
+                              label: 'KM/H',
+                              imageHeight: imageHeight,
+                            );
+                          }),
+                        ),
+
+                        // MAP, BATTERY, IAT, ECT Data Panel (Center)
+                        Positioned(
+                          top: pxH(0.19),
+                          left: pxW(0.48),
+                          child: Obx(() {
+                            final data = ecuController.currentData.value;
+                            return _buildTopRightDataPanel(data, imageHeight: imageHeight, imageWidth: imageWidth);
+                          }),
+                        ),
+
+                        // IGN & INJ Data Panel (Center Bottom)
+                        Positioned(
+                          bottom: pxH(0.22),
+                          left: pxW(0.55),
+                          child: Obx(() {
+                            final data = ecuController.currentData.value;
+                            return Container(
+                              child: _buildCenterDataPanel(data, imageHeight: imageHeight));
+                          }),
+                        ),
+
+                        // AFR and TPS Display (Bottom Center)
+                        Positioned(
+                          bottom: pxH(0.11),
+                          left: pxW(0.47),
+                          child: Obx(() {
+                            final data = ecuController.currentData.value;
+                            final afr = data?.afr ?? 0;
+                            final tps = data?.tps ?? 0;
+                            return _buildBottomDataPanel(afr, tps, imageHeight: imageHeight, imageWidth: imageWidth);
+                          }),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Positioned(
-                  top: screenHeight * 0.28,
-                  right: screenWidth * 0.21,
-                  child: Obx(() {
-                    final speed = gpsSpeedController.gpsSpeed.value;
-                    return AnimatedGaugeNeedle(
-                      targetValue: speed,
-                      maxValue: 270,
-                      size: 85,
-                      offsetAngle: -15 - 135, // ปรับ offset
-                      rotationRange: 270,
-                      animationDuration: const Duration(milliseconds: 300),
-                      animationCurve: Curves.easeInOut,
-                      builder: (angle, currentValue) {
-                        return SizedBox(
-                          height: 85,
-                          child: Transform.rotate(
-                            angle: angle * (pi / 180),
-                            alignment: Alignment.bottomLeft,
-                            child: Image.asset(
-                              'assets/ui-5/Component 2.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }),
-                ),
-                Positioned(
-                  top: screenHeight * 0.3 - 10,
-                  left: screenWidth * 0.3 - 35,
-                  child: Obx(() {
-                    final rpm = ecuController.currentData.value?.rpm ?? 0;
-                    return AnimatedGaugeNeedle(
-                      targetValue: rpm,
-                      maxValue: 15000,
-                      size: 100,
-                      offsetAngle: -65 - 135, // ปรับ offset
-                      rotationRange: 320,
-                      animationDuration: const Duration(milliseconds: 300),
-                      animationCurve: Curves.easeInOut,
-                      builder: (angle, currentValue) {
-                        return SizedBox(
-                          height: 100,
-                          child: Transform.rotate(
-                            angle: angle * (pi / 180),
-                            alignment: Alignment.bottomLeft,
-                            child: Image.asset(
-                              'assets/ui-5/Component 3.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }),
+
+                // Settings Button (Top Left) - outside image area
+                const Positioned(
+                  top: 10,
+                  left: 10,
+                  child: SettingsButton(),
                 ),
 
-                // Speed Number Display (Center of right gauge)
-                Positioned(
-                  top: screenHeight * 0.5,
-                  right: screenWidth * 0.25 - 45,
-                  child: Obx(() {
-                    final speed = gpsSpeedController.gpsSpeed.value;
-                    return _buildCenterDisplay(
-                      value: speed.toInt().toString(),
-                      label: 'KM/H',
-                    );
-                  }),
-                ),
-
-                // Center Data Panel
-                // Positioned(
-                //   top: screenHeight * 0.25,
-                //   left: screenWidth * 0.5 - 60,
-                //   child: Obx(() {
-                //     final data = ecuController.currentData.value;
-                //     return _buildCenterDataPanel(data);
-                //   }),
-                // ),
-
-                // Settings Button (Top Left)
-                Positioned(
-                  top: screenHeight * 0.05,
-                  left: screenWidth * 0.05,
-                  child: const SettingsButton(),
-                ),
-
-                // MAP, BATTERY, IAT, ECT Data Panel (Top Right)
-                Positioned(
-                  top: screenHeight * 0.2 + 10,
-                  left: screenWidth * 0.5 - 30,
-                  child: Obx(() {
-                    final data = ecuController.currentData.value;
-                    return Container(
-                      child: _buildTopRightDataPanel(data));
-                  }),
-                ),
-
-                // IGN & INJ Data Panel (Left Side)
-                Positioned(
-                  bottom: screenHeight * 0.25 - 5,
-                  left: screenWidth * 0.55,
-                  child: Obx(() {
-                    final data = ecuController.currentData.value;
-                    return _buildCenterDataPanel(data);
-                  }),
-                ),
-
-                // AFR and TPS Display (Bottom Center)
-                Positioned(
-                  bottom: screenHeight * 0.1 + 10,
-                  left: screenWidth * 0.45 + 20,
-                  child: Obx(() {
-                    final data = ecuController.currentData.value;
-                    final afr = data?.afr ?? 0;
-                    final tps = data?.tps ?? 0;
-                    return _buildBottomDataPanel(afr, tps);
-                  }),
-                ),
-
-                // Bluetooth Button (Bottom Right)
-                Positioned(
-                  bottom: screenHeight * 0.15,
-                  right: screenWidth * 0.05,
-                  child: const BluetoothButton(),
+                // Bluetooth Button (Bottom Right) - outside image area
+                const Positioned(
+                  top: 10,
+                  right: 10,
+                  child: BluetoothButton(),
                 ),
               ],
             );
@@ -206,42 +228,41 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
     );
   }
 
-  Row _buildBottomDataPanel(double afr, double tps) {
+  Widget _buildBottomDataPanel(double afr, double tps, {required double imageHeight, required double imageWidth}) {
     return Row(
       children: [
-        _buildDataLabel('AFR', afr.toStringAsFixed(1)),
-        SizedBox(width: 50),
-        _buildDataLabel('TPS', tps.toInt().toString()),
+        _buildDataLabel('AFR', afr.toStringAsFixed(1), imageHeight: imageHeight),
+        SizedBox(width: imageWidth * 0.098),
+        _buildDataLabel('TPS', tps.toInt().toString(), imageHeight: imageHeight),
       ],
     );
   }
 
   /// Center Display Widget
-  Widget _buildCenterDisplay({required String value, required String label}) {
+  Widget _buildCenterDisplay({required String value, required String label, required double imageHeight}) {
     return Container(
-      width: 80,
+      width: imageHeight * 0.2,
       alignment: Alignment.center,
       child: Text(
         value,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 28,
+          fontSize: imageHeight * 0.07,
           fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
-  /// Data Row Widget
   /// Data Label Widget (for AFR, TPS display)
-  Widget _buildDataLabel(String label, String value) {
+  Widget _buildDataLabel(String label, String value, {required double imageHeight}) {
     return Row(
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: imageHeight * 0.05,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -249,51 +270,44 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
     );
   }
 
-  /// Top Left Data Panel (IGN, INJ display)
-  Widget _buildCenterDataPanel(ECUData? data) {
+  /// Center Data Panel (IGN, INJ display)
+  Widget _buildCenterDataPanel(ECUData? data, {required double imageHeight}) {
+    final spacing = imageHeight * 0.028;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0'),
-        const SizedBox(height: 4),
-        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0'),
-        const SizedBox(height: 4),
-        _buildDataLabel('INJ', data?.inject.toStringAsFixed(1) ?? '0'),
-        const SizedBox(height: 4),
-        _buildDataLabel('INJ', data?.inject.toStringAsFixed(0) ?? '0'),
+        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0', imageHeight: imageHeight),
+        SizedBox(height: spacing),
+        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0', imageHeight: imageHeight),
+        SizedBox(height: spacing),
+        _buildDataLabel('INJ', data?.inject.toStringAsFixed(1) ?? '0', imageHeight: imageHeight),
+        SizedBox(height: spacing),
+        _buildDataLabel('INJ', data?.inject.toStringAsFixed(0) ?? '0', imageHeight: imageHeight),
       ],
     );
   }
 
   /// Top Right Data Panel (MAP, BATTERY, IAT, ECT display)
-  Widget _buildTopRightDataPanel(ECUData? data) {
+  Widget _buildTopRightDataPanel(ECUData? data, {required double imageHeight, required double imageWidth}) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            _buildTopRightDataItem('MAP', data?.map.toInt().toString() ?? '0'),
-            SizedBox(width: 80),
-            _buildTopRightDataItem(
-              'BATTERY',
-              data?.battery.toStringAsFixed(1) ?? '0',
-            ),
+            _buildTopRightDataItem('MAP', data?.map.toInt().toString() ?? '0', imageHeight: imageHeight),
+            SizedBox(width: imageWidth * 0.11),
+            _buildTopRightDataItem('BATTERY', data?.battery.toStringAsFixed(1) ?? '0', imageHeight: imageHeight),
           ],
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: imageHeight * 0.045),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(width: 10),
-            _buildTopRightDataItem(
-              'IAT',
-              data?.airTemp.toInt().toString() ?? '0',
-            ),
-            const SizedBox(width: 70),
-            _buildTopRightDataItem(
-              'ECT',
-              data?.waterTemp.toInt().toString() ?? '0',
-            ),
+            SizedBox(width: imageWidth * 0.012),
+            _buildTopRightDataItem('IAT', data?.airTemp.toInt().toString() ?? '0', imageHeight: imageHeight),
+            SizedBox(width: imageWidth * 0.1),
+            _buildTopRightDataItem('ECT', data?.waterTemp.toInt().toString() ?? '0', imageHeight: imageHeight),
           ],
         ),
       ],
@@ -301,20 +315,19 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
   }
 
   /// Top Right Data Item
-  Widget _buildTopRightDataItem(String label, String value) {
+  Widget _buildTopRightDataItem(String label, String value, {required double imageHeight}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: imageHeight * 0.04,
             fontWeight: FontWeight.bold,
           ),
         ),
       ],
     );
   }
-
 }
