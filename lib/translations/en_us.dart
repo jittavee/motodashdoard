@@ -190,4 +190,9 @@ const Map<String, String> enUs = {
   'data_log_chart': 'Data Log Chart',
   'select_date': 'Select date',
   'clear_filter': 'Clear filter',
+
+  // ECU Model
+  'ecu_model': 'ECU Model',
+  'synced_with_dongle': 'Synced with Dongle',
+  'not_synced': 'Not synced (Please connect Bluetooth)',
 };

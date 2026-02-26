@@ -190,4 +190,9 @@ const Map<String, String> thTh = {
   'data_log_chart': 'กราฟข้อมูล ECU',
   'select_date': 'เลือกวันที่',
   'clear_filter': 'ล้างตัวกรอง',
+
+  // ECU Model
+  'ecu_model': 'รุ่น ECU',
+  'synced_with_dongle': 'ซิงค์กับ Dongle แล้ว',
+  'not_synced': 'ยังไม่ได้ซิงค์ (กรุณาเชื่อมต่อ Bluetooth)',
 };

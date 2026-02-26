@@ -12,6 +12,25 @@ enum BluetoothConnectionStatus {
   error,
 }
 
+/// ECU Model types supported by the Dongle
+enum EcuModel {
+  simulation(0, 'SIMULATION'),
+  under150cc(1, 'Under 150cc (Wave125, Msx)'),
+  higher150cc(2, 'Higher 150cc (PCX)'),
+  smallBikes(3, 'Giorno, Lead, Click, Wave110');
+
+  final int value;
+  final String description;
+  const EcuModel(this.value, this.description);
+
+  static EcuModel fromValue(int value) {
+    return EcuModel.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => EcuModel.simulation,
+    );
+  }
+}
+
 class BluetoothController extends GetxController {
   final Rx<BluetoothConnectionStatus> connectionStatus =
       BluetoothConnectionStatus.disconnected.obs;
@@ -22,12 +41,17 @@ class BluetoothController extends GetxController {
 
   final Rx<BluetoothDevice?> connectedDevice = Rx<BluetoothDevice?>(null);
   BluetoothCharacteristic? dataCharacteristic;
+  BluetoothCharacteristic? writeCharacteristic;
   StreamSubscription? connectionSubscription;
   StreamSubscription? dataSubscription;
   StreamSubscription? scanResultsSubscription;
   StreamSubscription? isScanningSubscription;
 
   final RxString lastReceivedData = ''.obs;
+
+  // ECU Model state
+  final Rx<EcuModel> currentEcuModel = EcuModel.simulation.obs;
+  final RxBool isEcuModelSynced = false.obs;
 
   @override
   void onInit() {
@@ -141,6 +165,10 @@ class BluetoothController extends GetxController {
     }
   }
 
+  // Target Service and Characteristic UUIDs for API Bluetooth Dongle
+  static const String targetServiceUuid = '2916f51f-3d75-4868-9214-396d9ebb82f1';
+  static const String targetCharacteristicUuid = '09e6f548-20c3-48cf-8b5c-897a2f683cc3';
+
   Future<void> _discoverServices() async {
     try {
       if (connectedDevice.value == null) return;
@@ -178,14 +206,22 @@ class BluetoothController extends GetxController {
               },
             );
             logger.i('Notification enabled');
-            break;
+          }
+
+          // หา characteristic สำหรับ write
+          if (characteristic.properties.write || characteristic.properties.writeWithoutResponse) {
+            writeCharacteristic = characteristic;
+            logger.i('Selected for data writing: ${characteristic.uuid}');
           }
         }
-        if (dataCharacteristic != null) break;
       }
 
       if (dataCharacteristic == null) {
         logger.w('No suitable characteristic found for data reception');
+      }
+
+      if (writeCharacteristic == null) {
+        logger.w('No suitable characteristic found for writing data');
       }
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการค้นหา services: $e';
@@ -217,6 +253,11 @@ class BluetoothController extends GetxController {
       // Log ข้อมูลที่รับได้
       logger.d('Bluetooth Data Received: $dataString');
 
+      // ตรวจสอบว่าเป็นข้อมูล EcuModel response หรือไม่
+      if (_handleEcuModelResponse(dataString)) {
+        return;
+      }
+
       // ส่งข้อมูลไปยัง ECU Data Controller
       try {
         final ecuController = Get.find<ECUDataController>();
@@ -232,10 +273,39 @@ class BluetoothController extends GetxController {
     }
   }
 
+  /// Handle EcuModel response from Dongle
+  /// Returns true if the data was an EcuModel response
+  bool _handleEcuModelResponse(String dataString) {
+    // ตรวจสอบรูปแบบ EcuModel=0, EcuModel=1, EcuModel=2, EcuModel=3
+    final ecuModelRegex = RegExp(r'^EcuModel=(\d)$', caseSensitive: false);
+    final match = ecuModelRegex.firstMatch(dataString.trim());
+
+    if (match != null) {
+      final modelValue = int.tryParse(match.group(1) ?? '0') ?? 0;
+      currentEcuModel.value = EcuModel.fromValue(modelValue);
+      isEcuModelSynced.value = true;
+
+      logger.i('ECU Model received from Dongle: ${currentEcuModel.value.description}');
+
+      Get.snackbar(
+        'ECU Model',
+        'Dongle ตั้งค่าเป็น: ${currentEcuModel.value.description}',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
   void _handleDisconnection() {
     dataSubscription?.cancel();
     dataSubscription = null;
     dataCharacteristic = null;
+    writeCharacteristic = null;
+    isEcuModelSynced.value = false;
     Get.snackbar(
       'การเชื่อมต่อหลุด',
       'การเชื่อมต่อกับกล่อง ECU ถูกตัดขาด',
@@ -251,6 +321,8 @@ class BluetoothController extends GetxController {
 
       connectedDevice.value = null;
       dataCharacteristic = null;
+      writeCharacteristic = null;
+      isEcuModelSynced.value = false;
       connectionStatus.value = BluetoothConnectionStatus.disconnected;
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการตัดการเชื่อมต่อ: $e';
@@ -290,21 +362,51 @@ class BluetoothController extends GetxController {
   // ส่งข้อมูลไปยังกล่อง ECU
   Future<void> sendData(String data) async {
     try {
-      if (dataCharacteristic == null) {
+      if (writeCharacteristic == null) {
         errorMessage.value = 'ไม่พบ characteristic สำหรับส่งข้อมูล';
+        logger.w('No write characteristic available');
         return;
       }
 
-      if (!dataCharacteristic!.properties.write &&
-          !dataCharacteristic!.properties.writeWithoutResponse) {
+      if (!writeCharacteristic!.properties.write &&
+          !writeCharacteristic!.properties.writeWithoutResponse) {
         errorMessage.value = 'Characteristic ไม่รองรับการเขียนข้อมูล';
         return;
       }
 
       List<int> bytes = utf8.encode(data);
-      await dataCharacteristic!.write(bytes);
+      await writeCharacteristic!.write(bytes);
+      logger.i('Data sent: $data');
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการส่งข้อมูล: $e';
+      logger.e('Error sending data', error: e);
     }
+  }
+
+  /// Send ECU Model selection to Dongle
+  /// Format: model=0, model=1, model=2, model=3
+  Future<void> setEcuModel(EcuModel model) async {
+    if (connectionStatus.value != BluetoothConnectionStatus.connected) {
+      errorMessage.value = 'กรุณาเชื่อมต่อ Bluetooth ก่อน';
+      Get.snackbar(
+        'ไม่ได้เชื่อมต่อ',
+        'กรุณาเชื่อมต่อกับ Dongle ก่อนเลือก ECU Model',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final command = 'model=${model.value}';
+    logger.i('Sending ECU Model command: $command');
+
+    await sendData(command);
+
+    // Dongle จะตอบกลับด้วย EcuModel=X ซึ่งจะถูกจัดการใน _handleEcuModelResponse
+    Get.snackbar(
+      'ECU Model',
+      'กำลังส่งคำสั่งไปยัง Dongle: ${model.description}',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
   }
 }

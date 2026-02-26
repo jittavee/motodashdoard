@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/language_controller.dart';
 import '../../controllers/ecu_data_controller.dart';
+import '../../controllers/bluetooth_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -39,6 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settingsController = Get.find<SettingsController>();
     final languageController = Get.find<LanguageController>();
     final ecuController = Get.find<ECUDataController>();
+    final btController = Get.find<BluetoothController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -46,39 +48,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          // Speed Unit
-          // ListTile(
-          //   leading: const Icon(Icons.speed),
-          //   title: Text(
-          //     'speed_unit'.tr,
-          //     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          //   ),
-          // ),
-          // Obx(() => Column(
-          //       children: [
-          //         RadioListTile<SpeedUnit>(
-          //           title: const Text('km/h'),
-          //           value: SpeedUnit.kmh,
-          //           groupValue: settingsController.speedUnit.value,
-          //           onChanged: (value) {
-          //             if (value != null) {
-          //               settingsController.setSpeedUnit(value);
-          //             }
-          //           },
-          //         ),
-          //         RadioListTile<SpeedUnit>(
-          //           title: const Text('mph'),
-          //           value: SpeedUnit.mph,
-          //           groupValue: settingsController.speedUnit.value,
-          //           onChanged: (value) {
-          //             if (value != null) {
-          //               settingsController.setSpeedUnit(value);
-          //             }
-          //           },
-          //         ),
-          //       ],
-          //     )),
-          // const Divider(),
+          // ECU Model Selection
+          ListTile(
+            leading: const Icon(Icons.memory),
+            title: Text(
+              'ecu_model'.tr,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            subtitle: Obx(() => Text(
+                  btController.isEcuModelSynced.value
+                      ? 'synced_with_dongle'.tr
+                      : 'not_synced'.tr,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: btController.isEcuModelSynced.value
+                        ? Colors.green
+                        : Colors.orange,
+                  ),
+                )),
+          ),
+          Obx(() => Column(
+                children: EcuModel.values.map((model) {
+                  return RadioListTile<EcuModel>(
+                    title: Text(model.description),
+                    value: model,
+                    groupValue: btController.currentEcuModel.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        btController.setEcuModel(value);
+                      }
+                    },
+                  );
+                }).toList(),
+              )),
+          const Divider(),
 
           // Language
           ListTile(
