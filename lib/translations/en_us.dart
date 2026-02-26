@@ -195,4 +195,9 @@ const Map<String, String> enUs = {
   'ecu_model': 'ECU Model',
   'synced_with_dongle': 'Synced with Dongle',
   'not_synced': 'Not synced (Please connect Bluetooth)',
+
+  // ECU Connection Status
+  'ecu_connected': 'Connected',
+  'ecu_connecting': 'Connecting...',
+  'ecu_no_response': 'No Response',
 };

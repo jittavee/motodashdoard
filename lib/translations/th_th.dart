@@ -195,4 +195,9 @@ const Map<String, String> thTh = {
   'ecu_model': 'รุ่น ECU',
   'synced_with_dongle': 'ซิงค์กับ Dongle แล้ว',
   'not_synced': 'ยังไม่ได้ซิงค์ (กรุณาเชื่อมต่อ Bluetooth)',
+
+  // ECU Connection Status
+  'ecu_connected': 'เชื่อมต่อแล้ว',
+  'ecu_connecting': 'กำลังเชื่อมต่อ...',
+  'ecu_no_response': 'ไม่ตอบสนอง',
 };

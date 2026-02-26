@@ -12,6 +12,23 @@ enum BluetoothConnectionStatus {
   error,
 }
 
+/// ECU Connection Status (Dongle ↔ Motorcycle ECU)
+enum EcuConnectionStatus {
+  noResponse('No_response'),
+  connecting('Connecting...'),
+  connected('Connected');
+
+  final String rawValue;
+  const EcuConnectionStatus(this.rawValue);
+
+  static EcuConnectionStatus fromString(String value) {
+    return EcuConnectionStatus.values.firstWhere(
+      (e) => e.rawValue.toLowerCase() == value.toLowerCase(),
+      orElse: () => EcuConnectionStatus.noResponse,
+    );
+  }
+}
+
 /// ECU Model types supported by the Dongle
 enum EcuModel {
   simulation(0, 'SIMULATION'),
@@ -52,6 +69,9 @@ class BluetoothController extends GetxController {
   // ECU Model state
   final Rx<EcuModel> currentEcuModel = EcuModel.simulation.obs;
   final RxBool isEcuModelSynced = false.obs;
+
+  // ECU Connection Status (Dongle ↔ Motorcycle)
+  final Rx<EcuConnectionStatus> ecuConnectionStatus = EcuConnectionStatus.noResponse.obs;
 
   @override
   void onInit() {
@@ -258,6 +278,11 @@ class BluetoothController extends GetxController {
         return;
       }
 
+      // ตรวจสอบว่าเป็นข้อมูล ECU connection status หรือไม่
+      if (_handleEcuConnectionStatus(dataString)) {
+        return;
+      }
+
       // ส่งข้อมูลไปยัง ECU Data Controller
       try {
         final ecuController = Get.find<ECUDataController>();
@@ -300,12 +325,32 @@ class BluetoothController extends GetxController {
     return false;
   }
 
+  /// Handle ECU Connection Status from Dongle
+  /// Returns true if the data was an ECU connection status
+  bool _handleEcuConnectionStatus(String dataString) {
+    // ตรวจสอบรูปแบบ ECU=Connected, ECU=No_response, ECU=Connecting...
+    final ecuStatusRegex = RegExp(r'^ECU=(.+)$', caseSensitive: false);
+    final match = ecuStatusRegex.firstMatch(dataString.trim());
+
+    if (match != null) {
+      final statusValue = match.group(1) ?? 'No_response';
+      ecuConnectionStatus.value = EcuConnectionStatus.fromString(statusValue);
+
+      logger.i('ECU Connection Status: ${ecuConnectionStatus.value.rawValue}');
+
+      return true;
+    }
+
+    return false;
+  }
+
   void _handleDisconnection() {
     dataSubscription?.cancel();
     dataSubscription = null;
     dataCharacteristic = null;
     writeCharacteristic = null;
     isEcuModelSynced.value = false;
+    ecuConnectionStatus.value = EcuConnectionStatus.noResponse;
     Get.snackbar(
       'การเชื่อมต่อหลุด',
       'การเชื่อมต่อกับกล่อง ECU ถูกตัดขาด',
@@ -323,6 +368,7 @@ class BluetoothController extends GetxController {
       dataCharacteristic = null;
       writeCharacteristic = null;
       isEcuModelSynced.value = false;
+      ecuConnectionStatus.value = EcuConnectionStatus.noResponse;
       connectionStatus.value = BluetoothConnectionStatus.disconnected;
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการตัดการเชื่อมต่อ: $e';

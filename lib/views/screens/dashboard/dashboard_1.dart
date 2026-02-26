@@ -9,6 +9,7 @@ import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
+import '../../widgets/ecu_status_indicator.dart';
 
 class TemplateOneScreen extends StatefulWidget {
   const TemplateOneScreen({super.key});
@@ -236,6 +237,13 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
               left: 0,
               right: 0,
               child: Center(child: RecordingIndicator()),
+            ),
+
+            // ECU Status Indicator (Bottom Left)
+            const Positioned(
+              bottom: 10,
+              left: 10,
+              child: EcuStatusIndicator(),
             ),
           ],
         ),

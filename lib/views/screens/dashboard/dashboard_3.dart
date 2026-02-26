@@ -9,6 +9,7 @@ import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
+import '../../widgets/ecu_status_indicator.dart';
 
 class TemplateThreeScreen extends StatefulWidget {
   const TemplateThreeScreen({super.key});
@@ -237,6 +238,12 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                   left: 0,
                   right: 0,
                   child: Center(child: RecordingIndicator()),
+                ),
+                // ECU Status Indicator (Bottom Left)
+                const Positioned(
+                  bottom: 10,
+                  left: 10,
+                  child: EcuStatusIndicator(),
                 ),
               ],
             );

@@ -6,6 +6,7 @@ import '../../../controllers/gps_speed_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/recording_indicator.dart';
+import '../../widgets/ecu_status_indicator.dart';
 
 class TemplateFourScreen extends StatefulWidget {
   const TemplateFourScreen({super.key});
@@ -271,6 +272,12 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                   left: 0,
                   right: 0,
                   child: Center(child: RecordingIndicator()),
+                ),
+                // ECU Status Indicator (Bottom Left)
+                const Positioned(
+                  bottom: 10,
+                  left: 10,
+                  child: EcuStatusIndicator(),
                 ),
               ],
             );
