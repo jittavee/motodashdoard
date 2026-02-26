@@ -8,6 +8,7 @@ import '../../../models/ecu_data.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
+import '../../widgets/recording_indicator.dart';
 
 class TemplateThreeScreen extends StatefulWidget {
   const TemplateThreeScreen({super.key});
@@ -230,6 +231,13 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                  Positioned(top: 10, left: screenWidth * 0.3, child: SettingsButton()),
                 // Bluetooth Button (Top Right)
                 Positioned(top: 10, right: screenWidth * 0.3, child: const BluetoothButton()),
+                // Recording Indicator (Top Center)
+                const Positioned(
+                  top: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(child: RecordingIndicator()),
+                ),
               ],
             );
           },

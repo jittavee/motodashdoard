@@ -8,6 +8,7 @@ import '../../../controllers/gps_speed_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
+import '../../widgets/recording_indicator.dart';
 
 class TemplateFiveScreen extends StatefulWidget {
   const TemplateFiveScreen({super.key});
@@ -219,6 +220,14 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                   top: 10,
                   right: 10,
                   child: BluetoothButton(),
+                ),
+
+                // Recording Indicator (Top Center)
+                const Positioned(
+                  top: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(child: RecordingIndicator()),
                 ),
               ],
             );

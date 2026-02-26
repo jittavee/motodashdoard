@@ -5,6 +5,7 @@ import '../../../controllers/ecu_data_controller.dart';
 import '../../../controllers/gps_speed_controller.dart';
 import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
+import '../../widgets/recording_indicator.dart';
 
 class TemplateFourScreen extends StatefulWidget {
   const TemplateFourScreen({super.key});
@@ -264,6 +265,13 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                 const Positioned(top: 10, left: 10, child: SettingsButton()),
                 // Bluetooth Button (Top Right)
                 const Positioned(top: 10, right: 10, child: BluetoothButton()),
+                // Recording Indicator (Top Center)
+                const Positioned(
+                  top: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(child: RecordingIndicator()),
+                ),
               ],
             );
           },
