@@ -72,7 +72,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                       child: Obx(() {
                         final data = ecuController.currentData.value;
                         return _buildDataContainer(
-                          color: Colors.red,
                           data: data,
                           alignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -111,7 +110,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                     // ส่วนกลาง - speedometer with needle (ยึดเป็นขนาดหลัก)
                     Center(
                       child: Container(
-                        color: Colors.green,
                         child: LayoutBuilder(
                           builder: (context, speedometerConstraints) {
                             // ใช้ความสูงของหน้าจอเป็นตัวกำหนดขนาด speedometer
@@ -190,7 +188,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                       child: Obx(() {
                         final data = ecuController.currentData.value;
                         return _buildDataContainer(
-                          color: Colors.red,
                           data: data,
                           alignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.end,
