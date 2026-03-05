@@ -73,6 +73,10 @@ class BluetoothController extends GetxController {
   // ECU Connection Status (Dongle ↔ Motorcycle)
   final Rx<EcuConnectionStatus> ecuConnectionStatus = EcuConnectionStatus.noResponse.obs;
 
+  // Loading state for ECU Model selection
+  final RxBool isSettingEcuModel = false.obs;
+  Timer? _ecuModelTimeout;
+
   @override
   void onInit() {
     super.onInit();
@@ -81,6 +85,7 @@ class BluetoothController extends GetxController {
 
   @override
   void onClose() {
+    _ecuModelTimeout?.cancel();
     disconnect();
     scanResultsSubscription?.cancel();
     isScanningSubscription?.cancel();
@@ -306,6 +311,10 @@ class BluetoothController extends GetxController {
     final match = ecuModelRegex.firstMatch(dataString.trim());
 
     if (match != null) {
+      // ยกเลิก timeout และ loading state
+      _ecuModelTimeout?.cancel();
+      isSettingEcuModel.value = false;
+
       final modelValue = int.tryParse(match.group(1) ?? '0') ?? 0;
       currentEcuModel.value = EcuModel.fromValue(modelValue);
       isEcuModelSynced.value = true;
@@ -350,6 +359,8 @@ class BluetoothController extends GetxController {
     dataCharacteristic = null;
     writeCharacteristic = null;
     isEcuModelSynced.value = false;
+    isSettingEcuModel.value = false;
+    _ecuModelTimeout?.cancel();
     ecuConnectionStatus.value = EcuConnectionStatus.noResponse;
     Get.snackbar(
       'การเชื่อมต่อหลุด',
@@ -442,12 +453,35 @@ class BluetoothController extends GetxController {
       return;
     }
 
+    // ป้องกันการกดซ้ำขณะกำลังประมวลผล
+    if (isSettingEcuModel.value) {
+      return;
+    }
+
+    isSettingEcuModel.value = true;
+
     final command = 'model=${model.value}';
     logger.i('Sending ECU Model command: $command');
 
     await sendData(command);
 
-    // Dongle จะตอบกลับด้วย EcuModel=X ซึ่งจะถูกจัดการใน _handleEcuModelResponse
+    // ตั้ง timeout 10 วินาที - ถ้า Dongle ไม่ตอบกลับจะยกเลิกการรอ
+    _ecuModelTimeout?.cancel();
+    _ecuModelTimeout = Timer(const Duration(seconds: 10), () {
+      if (isSettingEcuModel.value) {
+        isSettingEcuModel.value = false;
+        logger.w('ECU Model response timeout');
+        Get.snackbar(
+          'หมดเวลา',
+          'Dongle ไม่ตอบกลับ - กรุณาตรวจสอบการเชื่อมต่อ ECU',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+          backgroundColor: Get.theme.colorScheme.error,
+          colorText: Get.theme.colorScheme.onError,
+        );
+      }
+    });
+
     Get.snackbar(
       'ECU Model',
       'กำลังส่งคำสั่งไปยัง Dongle: ${model.description}',

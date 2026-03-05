@@ -67,19 +67,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 )),
           ),
-          Obx(() => Column(
-                children: EcuModel.values.map((model) {
-                  return RadioListTile<EcuModel>(
-                    title: Text(model.description),
-                    value: model,
-                    groupValue: btController.currentEcuModel.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        btController.setEcuModel(value);
-                      }
-                    },
-                  );
-                }).toList(),
+          Obx(() => Stack(
+                children: [
+                  Column(
+                    children: EcuModel.values.map((model) {
+                      return RadioListTile<EcuModel>(
+                        title: Text(model.description),
+                        value: model,
+                        groupValue: btController.currentEcuModel.value,
+                        onChanged: btController.isSettingEcuModel.value
+                            ? null // ปิด interaction ขณะรอ response
+                            : (value) {
+                                if (value != null) {
+                                  btController.setEcuModel(value);
+                                }
+                              },
+                      );
+                    }).toList(),
+                  ),
+                  // Loading overlay
+                  if (btController.isSettingEcuModel.value)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        child: const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 8),
+                              Text(
+                                'กำลังรอ ECU ตอบกลับ...',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               )),
           const Divider(),
 
