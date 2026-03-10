@@ -52,233 +52,264 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
       _setLandscape();
     });
 
+    // Aspect ratio ของพื้นหลัง
+    const double bgAspectRatio = 16 / 9;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            final screenHeight = constraints.maxHeight;
+        child: Stack(
+          children: [
+            Center(
+              child: AspectRatio(
+                aspectRatio: bgAspectRatio,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final bgWidth = constraints.maxWidth;
+                    final bgHeight = constraints.maxHeight;
 
-            return Stack(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Left margin for settings button
-                    SizedBox(width: 60),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          // แถวที่ 1
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.airTemp ?? 0)
-                                          .toStringAsFixed(0),
-                                      unit: 'C',
-                                      label: 'IAT',
-                                    );
-                                  }),
-                                ),
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.waterTemp ?? 0)
-                                          .toStringAsFixed(0),
-                                      unit: 'C',
-                                      label: 'ECT',
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // แถวที่ 2
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.map ?? 0).toStringAsFixed(
-                                        0,
-                                      ),
-                                      unit: 'kPa',
-                                      label: 'MAP',
-                                    );
-                                  }),
-                                ),
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.battery ?? 0)
-                                          .toStringAsFixed(1),
-                                      unit: 'V',
-                                      label: 'BATT',
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // แถวที่ 3 (1 คอลัมน์)
-                          Expanded(
-                            child: Obx(() {
-                              final data = ecuController.currentData.value;
-                              return _buildCircleGauge(
-                                value: ((data?.rpm ?? 0) / 1000)
-                                    .toStringAsFixed(1),
-                                unit: 'x1000',
-                                label: 'RPM',
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Center(
-                      child: Container(
-                        width: screenWidth * 0.4,
-                        height: screenHeight,
-                        color: Colors.black,
-                        child: Stack(
+                    return Stack(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Speed image
-                            Image.asset(
-                              'assets/ui-4/speed.png',
-                              fit: BoxFit.contain,
-                            ),
-                            // Speed value overlay
-                            Center(
-                              child: Obx(() {
-                                final speed = gpsSpeedController.gpsSpeed.value;
-                                return Text(
-                                  speed.toInt().toString(),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: screenHeight * 0.22,
-                                    fontWeight: FontWeight.bold,
+                            // Left margin
+                            SizedBox(width: bgWidth * 0.05),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  // แถวที่ 1
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.airTemp ?? 0)
+                                                  .toStringAsFixed(0),
+                                              unit: 'C',
+                                              label: 'IAT',
+                                            );
+                                          }),
+                                        ),
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.waterTemp ?? 0)
+                                                  .toStringAsFixed(0),
+                                              unit: 'C',
+                                              label: 'ECT',
+                                            );
+                                          }),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                );
-                              }),
+                                  // แถวที่ 2
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.map ?? 0)
+                                                  .toStringAsFixed(0),
+                                              unit: 'kPa',
+                                              label: 'MAP',
+                                            );
+                                          }),
+                                        ),
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.battery ?? 0)
+                                                  .toStringAsFixed(1),
+                                              unit: 'V',
+                                              label: 'BATT',
+                                            );
+                                          }),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // แถวที่ 3 (1 คอลัมน์)
+                                  Expanded(
+                                    child: Obx(() {
+                                      final data =
+                                          ecuController.currentData.value;
+                                      return _buildCircleGauge(
+                                        value: ((data?.rpm ?? 0) / 1000)
+                                            .toStringAsFixed(1),
+                                        unit: 'x1000',
+                                        label: 'RPM',
+                                      );
+                                    }),
+                                  ),
+                                ],
+                              ),
                             ),
+                            // Center speedometer
+                            Container(
+                              width: bgWidth * 0.4,
+                              height: bgHeight,
+                              color: Colors.black,
+                              child: LayoutBuilder(
+                                builder: (context, speedConstraints) {
+                                  final speedSize = speedConstraints.maxHeight;
+                                  return Stack(
+                                    children: [
+                                      // Speed image
+                                      Center(
+                                        child: Image.asset(
+                                          'assets/ui-4/speed.png',
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                      // Speed value overlay
+                                      Center(
+                                        child: Obx(() {
+                                          final speed =
+                                              gpsSpeedController.gpsSpeed.value;
+                                          return Text(
+                                            speed.toInt().toString(),
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: speedSize * 0.22,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  // แถวที่ 1
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.ignition ?? 0)
+                                                  .toStringAsFixed(1),
+                                              unit: 'deg',
+                                              label: 'IGN',
+                                            );
+                                          }),
+                                        ),
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.ignition ?? 0)
+                                                  .toStringAsFixed(1),
+                                              unit: 'ms',
+                                              label: 'IGN',
+                                            );
+                                          }),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // แถวที่ 2
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.inject ?? 0)
+                                                  .toStringAsFixed(1),
+                                              unit: 'ms',
+                                              label: 'INJ',
+                                            );
+                                          }),
+                                        ),
+                                        Expanded(
+                                          child: Obx(() {
+                                            final data =
+                                                ecuController.currentData.value;
+                                            return _buildCircleGauge(
+                                              value: (data?.inject ?? 0)
+                                                  .toStringAsFixed(1),
+                                              unit: 'ms',
+                                              label: 'INJ',
+                                            );
+                                          }),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // แถวที่ 3 (1 คอลัมน์)
+                                  Expanded(
+                                    child: Obx(() {
+                                      final data =
+                                          ecuController.currentData.value;
+                                      return _buildCircleGauge(
+                                        value:
+                                            (data?.tps ?? 0).toStringAsFixed(0),
+                                        unit: '%',
+                                        label: 'TPS',
+                                      );
+                                    }),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Right margin
+                            SizedBox(width: bgWidth * 0.05),
                           ],
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          // แถวที่ 1
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.ignition ?? 0)
-                                          .toStringAsFixed(1),
-                                      unit: 'deg',
-                                      label: 'IGN',
-                                    );
-                                  }),
-                                ),
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.ignition ?? 0)
-                                          .toStringAsFixed(1),
-                                      unit: 'ms',
-                                      label: 'IGN',
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // แถวที่ 2
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.inject ?? 0)
-                                          .toStringAsFixed(1),
-                                      unit: 'ms',
-                                      label: 'INJ',
-                                    );
-                                  }),
-                                ),
-                                Expanded(
-                                  child: Obx(() {
-                                    final data =
-                                        ecuController.currentData.value;
-                                    return _buildCircleGauge(
-                                      value: (data?.inject ?? 0)
-                                          .toStringAsFixed(1),
-                                      unit: 'ms',
-                                      label: 'INJ',
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // แถวที่ 3 (1 คอลัมน์)
-                          Expanded(
-                            child: Obx(() {
-                              final data = ecuController.currentData.value;
-                              return _buildCircleGauge(
-                                value: (data?.tps ?? 0).toStringAsFixed(0),
-                                unit: '%',
-                                label: 'TPS',
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Right margin for bluetooth button
-                    SizedBox(width: 60),
-                  ],
+                        // Recording Indicator (Top Center)
+                        Positioned(
+                          top: bgHeight * 0.02,
+                          left: 0,
+                          right: 0,
+                          child: const Center(child: RecordingIndicator()),
+                        ),
+                        // ECU Status Indicator (Bottom Left)
+                        Positioned(
+                          bottom: bgHeight * 0.02,
+                          left: bgWidth * 0.02,
+                          child: const EcuStatusIndicator(),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                // Settings Button (Top Right)
-                const Positioned(top: 10, right: 10, child: SettingsButton()),
-                // Recording Indicator (Top Center)
-                const Positioned(
-                  top: 10,
-                  left: 0,
-                  right: 0,
-                  child: Center(child: RecordingIndicator()),
-                ),
-                // ECU Status Indicator (Bottom Left)
-                const Positioned(
-                  bottom: 10,
-                  left: 10,
-                  child: EcuStatusIndicator(),
-                ),
-              ],
-            );
-          },
+              ),
+            ),
+            // Settings Button (Top Right) - ยึดมุมขวาบนของจอ
+            const Positioned(
+              top: 10,
+              right: 10,
+              child: SettingsButton(),
+            ),
+          ],
         ),
       ),
     );
@@ -290,67 +321,67 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
     required String unit,
     required String label,
   }) {
-    return Stack(
-      children: [
-        Container(
-          alignment: Alignment.center,
-          child: Image.asset('assets/ui-4/circle.png', fit: BoxFit.contain),
-        ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final size = constraints.maxWidth < constraints.maxHeight
-                ? constraints.maxWidth
-                : constraints.maxHeight;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.maxWidth < constraints.maxHeight
+            ? constraints.maxWidth
+            : constraints.maxHeight;
 
-            return SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: Stack(
-                children: [
-                  // Value in center
-                  Center(
-                    child: Text(
-                      value,
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/ui-4/circle.png',
+                  width: size,
+                  height: size,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              // Value in center
+              Center(
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: size * 0.3,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // Unit and Label at bottom
+              Positioned(
+                bottom: size * 0.05,
+                left: 0,
+                right: 0,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      unit,
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: size * 0.20,
-                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFF6522),
+                        fontSize: size * 0.08,
+                        fontFamily: 'Ethnocentric',
                       ),
                     ),
-                  ),
-                  // Unit and Label at bottom
-                  Positioned(
-                    bottom: size * 0.05,
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          unit,
-                          style: TextStyle(
-                            color: Color(0xFFFF6522),
-                            fontSize: size * 0.08,
-                            fontFamily: 'Ethnocentric',
-                          ),
-                        ),
-                        Text(
-                          label,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: size * 0.10,
-                            fontFamily: 'Ethnocentric',
-                          ),
-                        ),
-                      ],
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: size * 0.10,
+                        fontFamily: 'Ethnocentric',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
-          },
-        ),
-      ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
