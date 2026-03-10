@@ -38,39 +38,57 @@ class EcuStatusIndicator extends StatelessWidget {
           break;
       }
 
+      // แสดงเป็นจุดกลมเล็กๆ
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        width: 12,
+        height: 12,
         decoration: BoxDecoration(
-          color: statusColor.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(20),
+          color: statusColor,
+          shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
               color: statusColor.withValues(alpha: 0.5),
-              blurRadius: 8,
+              blurRadius: 6,
               spreadRadius: 2,
             ),
           ],
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              statusIcon,
-              color: Colors.white,
-              size: 14,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'ECU: ${_getStatusText(ecuStatus)}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
       );
+
+      // แบบเก่า - แสดง text
+      // return Container(
+      //   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      //   decoration: BoxDecoration(
+      //     color: statusColor.withValues(alpha: 0.8),
+      //     borderRadius: BorderRadius.circular(20),
+      //     boxShadow: [
+      //       BoxShadow(
+      //         color: statusColor.withValues(alpha: 0.5),
+      //         blurRadius: 8,
+      //         spreadRadius: 2,
+      //       ),
+      //     ],
+      //   ),
+      //   child: Row(
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: [
+      //       Icon(
+      //         statusIcon,
+      //         color: Colors.white,
+      //         size: 14,
+      //       ),
+      //       const SizedBox(width: 6),
+      //       Text(
+      //         'ECU: ${_getStatusText(ecuStatus)}',
+      //         style: const TextStyle(
+      //           color: Colors.white,
+      //           fontSize: 11,
+      //           fontWeight: FontWeight.bold,
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // );
     });
   }
 
