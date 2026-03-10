@@ -129,17 +129,20 @@ class ECUDataController extends GetxController {
   void _updateUI() {
     try {
       // สร้าง ECU Data object จาก buffer
-      ECUData newData = ECUData.fromJson(_dataBuffer);
+      final newData = ECUData.fromJson(_dataBuffer);
+
+      // อัพเดทค่าใหม่ - Rxn จะ trigger Obx โดยอัตโนมัติ
       currentData.value = newData;
-      currentData.refresh(); // บังคับให้ GetX update listeners ทั้งหมด
+      currentData.refresh(); // บังคับ refresh เพื่อให้แน่ใจว่า Obx จะ rebuild
 
-      // เพิ่มลงใน history
-      dataHistory.add(newData);
+      // Debug: ยืนยันว่า currentData อัพเดทแล้ว
+      logger.d('ECU UI Updated - RPM: ${newData.rpm}, Speed: ${newData.speed}, Water: ${newData.waterTemp}');
 
-      // จำกัดขนาด history (เก็บแค่ 100 รายการล่าสุด)
-      if (dataHistory.length > 100) {
+      // เพิ่มลงใน history (จำกัด 100 รายการ)
+      if (dataHistory.length >= 100) {
         dataHistory.removeAt(0);
       }
+      dataHistory.add(newData);
 
       // ตรวจสอบ alerts
       _checkAlerts(newData);

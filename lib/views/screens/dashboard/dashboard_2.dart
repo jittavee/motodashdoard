@@ -53,42 +53,51 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
       _setLandscape();
     });
 
+    // Aspect ratio ของรูปพื้นหลัง (ปรับตามขนาดจริงของ bg.png)
+    const double bgAspectRatio = 16 / 9;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = MediaQuery.of(context).size.width;
-            final screenHeight = MediaQuery.of(context).size.height;
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: bgAspectRatio,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bgWidth = constraints.maxWidth;
+                final bgHeight = constraints.maxHeight;
 
-            return Stack(
-              children: [
-                Center(
-                  child: Stack(
-                    children: [
-                      Obx(() {
-                        final rpm = ecuController.currentData.value?.rpm ?? 0;
-                        // คำนวณความกว้างตาม RPM (0-16000 -> 0%-100%)
-                        final rpmPercent = (rpm / 16000).clamp(0.0, 1.0);
-                        return Positioned(
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: (screenWidth * 0.78) * rpmPercent,
-                          child: Container(
-                            color: Color(0xFF93dae0).withValues(alpha: 0.7),
-                          ),
-                        );
-                      }),
-                      Image.asset('assets/ui-2/bg.png', fit: BoxFit.fitHeight),
-
-                      Positioned(
+                return Stack(
+                  children: [
+                    // RPM Bar
+                    Obx(() {
+                      final rpm = ecuController.currentData.value?.rpm ?? 0;
+                      final rpmPercent = (rpm / 16000).clamp(0.0, 1.0);
+                      return Positioned(
                         left: 0,
-                        top: screenHeight * 0.2,
-                        bottom: screenHeight * 0.2,
-                        right: 0,
-                        child: Column(
-                      children: [
+                        top: 0,
+                        bottom: 0,
+                        width: bgWidth * rpmPercent,
+                        child: Container(
+                          color: Color(0xFF93dae0).withValues(alpha: 0.7),
+                        ),
+                      );
+                    }),
+                    // Background Image
+                    Positioned.fill(
+                      child: Image.asset(
+                        'assets/ui-2/bg.png',
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    // Data Overlay
+                    Positioned(
+                      left: 0,
+                      top: bgHeight * 0.2,
+                      bottom: bgHeight * 0.2,
+                      right: 0,
+                      child: Column(
+                        children: [
                         Expanded(
                           flex: 70,
                           child: Row(
@@ -101,9 +110,9 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                                     alignment: MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    titleFactor: 0.15,
+                                    titleFactor: 0.13,
                                     unitFactor: 0.08,
-                                    valueFactor: 0.15,
+                                    valueFactor: 0.13,
                                     data: data,
                                     items: [
                                       {
@@ -172,9 +181,9 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                                     alignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.end,
-                                    titleFactor: 0.15,
+                                    titleFactor: 0.13,
                                     unitFactor: 0.08,
-                                    valueFactor: 0.15,
+                                    valueFactor: 0.13,
                                     data: data,
                                     items: [
                                       {
@@ -294,27 +303,30 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                       ],
                     ),
                   ),
-                    ],
+                  // Settings Button (Top Right)
+                  Positioned(
+                    top: bgHeight * 0.02,
+                    right: bgWidth * 0.02,
+                    child: const SettingsButton(),
                   ),
-                ),
-                // Settings Button (Top Right)
-                const Positioned(top: 10, right: 10, child: SettingsButton()),
-                // Recording Indicator (Top Center)
-                const Positioned(
-                  top: 10,
-                  left: 0,
-                  right: 0,
-                  child: Center(child: RecordingIndicator()),
-                ),
-                // ECU Status Indicator (Bottom Left)
-                const Positioned(
-                  bottom: 10,
-                  left: 10,
-                  child: EcuStatusIndicator(),
-                ),
-              ],
-            );
-          },
+                  // Recording Indicator (Top Center)
+                  Positioned(
+                    top: bgHeight * 0.02,
+                    left: 0,
+                    right: 0,
+                    child: const Center(child: RecordingIndicator()),
+                  ),
+                  // ECU Status Indicator (Bottom Left)
+                  Positioned(
+                    bottom: bgHeight * 0.02,
+                    left: bgWidth * 0.02,
+                    child: const EcuStatusIndicator(),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
         ),
       ),
     );
