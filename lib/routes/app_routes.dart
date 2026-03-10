@@ -8,6 +8,8 @@ class AppRoutes {
 
   // Settings
   static const String settings = '/settings';
+  static const String ecuModel = '/ecu-model';
+  static const String dashboardTemplate = '/dashboard-template';
   static const String alertSettings = '/alert-settings';
   static const String dataLog = '/data-log';
   static const String dataLogChart = '/data-log-chart';

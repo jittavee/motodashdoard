@@ -319,6 +319,15 @@ class BluetoothController extends GetxController {
       currentEcuModel.value = EcuModel.fromValue(modelValue);
       isEcuModelSynced.value = true;
 
+      // Reset ECU data buffer เพื่อให้ค่าใหม่จาก ECU ใหม่แสดงผล
+      try {
+        final ecuController = Get.find<ECUDataController>();
+        ecuController.resetData();
+        logger.i('ECU data buffer cleared for new ECU Model');
+      } catch (e) {
+        logger.w('ECUDataController not found for reset', error: e);
+      }
+
       logger.i('ECU Model received from Dongle: ${currentEcuModel.value.description}');
 
       Get.snackbar(

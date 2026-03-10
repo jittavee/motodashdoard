@@ -333,5 +333,6 @@ class ECUDataController extends GetxController {
   void resetData() {
     currentData.value = null;
     dataHistory.clear();
+    _dataBuffer.clear();
   }
 }
