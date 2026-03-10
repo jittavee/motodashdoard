@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../controllers/gps_speed_controller.dart';
-import '../../widgets/bluetooth_button.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
@@ -217,18 +216,11 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
               ),
             ),
 
-            // Settings Button (Top Left) - outside AspectRatio
-            const Positioned(
-              top: 10,
-              left: 10,
-              child: SettingsButton(),
-            ),
-
-            // Bluetooth Button - outside AspectRatio
+            // Settings Button (Top Right) - outside AspectRatio
             const Positioned(
               top: 10,
               right: 10,
-              child: BluetoothButton(),
+              child: SettingsButton(),
             ),
 
             // Recording Indicator (Top Center)

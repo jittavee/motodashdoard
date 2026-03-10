@@ -280,6 +280,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
+          // Bluetooth
+          Obx(() {
+            final isConnected = btController.connectionStatus.value ==
+                BluetoothConnectionStatus.connected;
+            return ListTile(
+              leading: Icon(
+                isConnected ? Icons.bluetooth_connected : Icons.bluetooth,
+                color: isConnected ? Colors.blue : null,
+              ),
+              title: Text('bluetooth'.tr),
+              subtitle: Text(
+                isConnected
+                    ? btController.connectedDevice.value?.platformName ?? 'connected'.tr
+                    : 'not_connected'.tr,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isConnected ? Colors.green : Colors.grey,
+                ),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Get.toNamed(AppRoutes.bluetooth);
+              },
+            );
+          }),
+
+          const Divider(),
+
           // About
           ListTile(
             leading: const Icon(Icons.info),
