@@ -30,8 +30,8 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   void dispose() {
     // คืนค่ากลับเป็นแนวนอนตามการตั้งค่าของแอพ
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
     ]);
     super.dispose();
   }

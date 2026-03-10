@@ -293,6 +293,12 @@ class BluetoothController extends GetxController {
         final ecuController = Get.find<ECUDataController>();
         ecuController.updateDataFromBluetooth(dataString);
         logger.d('Data updated to ECU Controller');
+
+        // ถ้ามีข้อมูล ECU เข้ามา = ECU connected แล้ว (auto-detect)
+        if (ecuConnectionStatus.value != EcuConnectionStatus.connected) {
+          ecuConnectionStatus.value = EcuConnectionStatus.connected;
+          logger.i('ECU Connection auto-detected from data stream');
+        }
       } catch (e) {
         // ECUDataController ยังไม่ถูก initialize
         logger.w('ECUDataController not found', error: e);
@@ -352,8 +358,17 @@ class BluetoothController extends GetxController {
 
     if (match != null) {
       final statusValue = match.group(1) ?? 'No_response';
-      ecuConnectionStatus.value = EcuConnectionStatus.fromString(statusValue);
+      final newStatus = EcuConnectionStatus.fromString(statusValue);
 
+      // ถ้าสถานะปัจจุบันเป็น connected แล้ว ไม่ให้กลับไปเป็น connecting
+      // (ป้องกันการกระพริบ เพราะ Dongle อาจส่ง Connecting... สลับกับข้อมูล ECU)
+      if (ecuConnectionStatus.value == EcuConnectionStatus.connected &&
+          newStatus == EcuConnectionStatus.connecting) {
+        logger.d('Ignoring Connecting status - already connected');
+        return true;
+      }
+
+      ecuConnectionStatus.value = newStatus;
       logger.i('ECU Connection Status: ${ecuConnectionStatus.value.rawValue}');
 
       return true;
