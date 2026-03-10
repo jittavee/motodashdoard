@@ -186,7 +186,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                         // Data Display (Left Side)
                         Positioned(
                           top: pxH(0.5),
-                          left: pxW(0.15),
+                          left: pxW(0.13),
                           child: Container(
                             height: pxH(0.26),
                             padding: EdgeInsets.all(pxH(0.03)),
