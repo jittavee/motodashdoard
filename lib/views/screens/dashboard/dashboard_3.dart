@@ -54,201 +54,216 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
       _setLandscape();
     });
 
+    // Aspect ratio ของพื้นหลัง (ปรับตามขนาดจริงของ mile.png)
+    const double bgAspectRatio = 16 / 9;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = MediaQuery.of(context).size.width;
-            final screenHeight = MediaQuery.of(context).size.height;
+        child: Stack(
+          children: [
+            Center(
+              child: AspectRatio(
+            aspectRatio: bgAspectRatio,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bgWidth = constraints.maxWidth;
+                final bgHeight = constraints.maxHeight;
 
-            return Stack(
-              children: [
-                Row(
+                return Stack(
                   children: [
-                    // ส่วนซ้าย - แสดงข้อมูล ETC, MAP, IAT, AFR
-                    Expanded(
-                      child: Obx(() {
-                        final data = ecuController.currentData.value;
-                        return _buildDataContainer(
-                          data: data,
-                          alignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          titleFactor: 0.06,
-                          unitFactor: 0.03,
-                          valueFactor: 0.065,
-                          items: [
-                            {
-                              'title': 'ECT',
-                              'unit': 'C',
-                              'getValue': (ECUData? d) =>
-                                  (d?.waterTemp ?? 0).toStringAsFixed(0),
-                            },
-                            {
-                              'title': 'MAP',
-                              'unit': 'kPa',
-                              'getValue': (ECUData? d) =>
-                                  (d?.map ?? 0).toStringAsFixed(0),
-                            },
-                            {
-                              'title': 'IAT',
-                              'unit': 'C',
-                              'getValue': (ECUData? d) =>
-                                  (d?.airTemp ?? 0).toStringAsFixed(0),
-                            },
-                            {
-                              'title': 'AFR',
-                              'unit': ' ',
-                              'getValue': (ECUData? d) =>
-                                  (d?.afr ?? 0).toStringAsFixed(1),
-                            },
-                          ],
-                        );
-                      }),
-                    ),
-                    // ส่วนกลาง - speedometer with needle (ยึดเป็นขนาดหลัก)
-                    Center(
-                      child: Container(
-                        child: LayoutBuilder(
-                          builder: (context, speedometerConstraints) {
-                            // ใช้ความสูงของหน้าจอเป็นตัวกำหนดขนาด speedometer
-                            return Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Background speedometer
-                                Image.asset(
-                                  'assets/ui-3/mile.png',
-                                  fit: BoxFit.fitHeight,
-                                ),
-                                // Needle with rotation based on rpm
-                                Obx(() {
-                                  final rpm = ecuController.currentData.value?.rpm ?? 0;
-                                  return AnimatedGaugeNeedle(
-                                    targetValue: rpm,
-                                    maxValue: 20000,
-                                    size: screenHeight * 0.25,
-                                    offsetAngle: 0,
-                                    rotationRange: 300,
-                                    animationDuration: const Duration(milliseconds: 300),
-                                    animationCurve: Curves.easeInOut,
-                                    builder: (angle, currentValue) {
-                                      return Transform.translate(
-                                        offset: Offset(0, screenHeight * 0.25 * 0.5),
-                                        child: SizedBox(
-                                          width: screenHeight * 0.25,
-                                          height: screenHeight * 0.25,
-                                          child: Transform.rotate(
-                                            angle: angle * (pi / 180),
-                                            alignment: Alignment(0, -1),
-                                            child: Image.asset(
-                                              'assets/ui-3/needle.png',
-                                              fit: BoxFit.contain,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }),
-                                // Speed value display
-                                Obx(() {
-                                  final speed = gpsSpeedController.gpsSpeed.value;
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        speed.toInt().toString(),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: screenHeight * 0.15,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Ethnocentric',
-                                        ),
-                                      ),
-                                      Text(
-                                        'km/h',
-                                        style: TextStyle(
-                                          color: Color(0xFFFF6522),
-                                          fontSize: screenHeight * 0.05,
-                                          fontFamily: 'Ethnocentric',
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }),
+                    Row(
+                      children: [
+                        // ส่วนซ้าย - แสดงข้อมูล ETC, MAP, IAT, AFR
+                        Expanded(
+                          child: Obx(() {
+                            final data = ecuController.currentData.value;
+                            return _buildDataContainer(
+                              data: data,
+                              alignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              titleFactor: 0.05,
+                              unitFactor: 0.03,
+                              valueFactor: 0.05,
+                              items: [
+                                {
+                                  'title': 'ECT',
+                                  'unit': 'C',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.waterTemp ?? 0).toStringAsFixed(0),
+                                },
+                                {
+                                  'title': 'MAP',
+                                  'unit': 'kPa',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.map ?? 0).toStringAsFixed(0),
+                                },
+                                {
+                                  'title': 'IAT',
+                                  'unit': 'C',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.airTemp ?? 0).toStringAsFixed(0),
+                                },
+                                {
+                                  'title': 'AFR',
+                                  'unit': ' ',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.afr ?? 0).toStringAsFixed(1),
+                                },
                               ],
                             );
-                          },
+                          }),
                         ),
-                      ),
+                        // ส่วนกลาง - speedometer with needle (ยึดเป็นขนาดหลัก)
+                        Center(
+                          child: LayoutBuilder(
+                            builder: (context, speedometerConstraints) {
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Background speedometer
+                                  Image.asset(
+                                    'assets/ui-3/mile.png',
+                                    height: bgHeight,
+                                    fit: BoxFit.fitHeight,
+                                  ),
+                                  // Needle with rotation based on rpm
+                                  Obx(() {
+                                    final rpm = ecuController.currentData.value?.rpm ?? 0;
+                                    final needleSize = bgHeight * 0.25;
+                                    return AnimatedGaugeNeedle(
+                                      targetValue: rpm,
+                                      maxValue: 20000,
+                                      size: needleSize,
+                                      offsetAngle: 0,
+                                      rotationRange: 300,
+                                      animationDuration: const Duration(milliseconds: 300),
+                                      animationCurve: Curves.easeInOut,
+                                      builder: (angle, currentValue) {
+                                        return Transform.translate(
+                                          offset: Offset(0, needleSize * 0.5),
+                                          child: SizedBox(
+                                            width: needleSize,
+                                            height: needleSize,
+                                            child: Transform.rotate(
+                                              angle: angle * (pi / 180),
+                                              alignment: Alignment(0, -1),
+                                              child: Image.asset(
+                                                'assets/ui-3/needle.png',
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }),
+                                  // Speed value display
+                                  Obx(() {
+                                    final speed = gpsSpeedController.gpsSpeed.value;
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          speed.toInt().toString(),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: bgHeight * 0.15,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Ethnocentric',
+                                          ),
+                                        ),
+                                        Text(
+                                          'km/h',
+                                          style: TextStyle(
+                                            color: Color(0xFFFF6522),
+                                            fontSize: bgHeight * 0.05,
+                                            fontFamily: 'Ethnocentric',
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                        // ส่วนขวา - แสดงข้อมูล TPS, BAT, IGN, INJ
+                        Expanded(
+                          child: Obx(() {
+                            final data = ecuController.currentData.value;
+                            return _buildDataContainer(
+                              data: data,
+                              alignment: MainAxisAlignment.spaceAround,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              titleFactor: 0.05,
+                              unitFactor: 0.03,
+                              valueFactor: 0.05,
+                              items: [
+                                {
+                                  'title': 'TPS',
+                                  'unit': '%',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.tps ?? 0).toStringAsFixed(0),
+                                },
+                                {
+                                  'title': 'BATT',
+                                  'unit': 'V',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.battery ?? 0).toStringAsFixed(1),
+                                },
+                                {
+                                  'title': 'IGN',
+                                  'unit': 'deg',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.ignition ?? 0).toStringAsFixed(1),
+                                },
+                                {
+                                  'title': 'INJ',
+                                  'unit': 'ms',
+                                  'getValue': (ECUData? d) =>
+                                      (d?.inject ?? 0).toStringAsFixed(1),
+                                },
+                              ],
+                            );
+                          }),
+                        ),
+                      ],
                     ),
-                    // ส่วนขวา - แสดงข้อมูล TPS, BAT, IGN, INJ
-                    Expanded(
-                      child: Obx(() {
-                        final data = ecuController.currentData.value;
-                        return _buildDataContainer(
-                          data: data,
-                          alignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          titleFactor: 0.065,
-                          unitFactor: 0.03,
-                          valueFactor: 0.065,
-                          items: [
-                            {
-                              'title': 'TPS',
-                              'unit': '%',
-                              'getValue': (ECUData? d) =>
-                                  (d?.tps ?? 0).toStringAsFixed(0),
-                            },
-                            {
-                              'title': 'BATT',
-                              'unit': 'V',
-                              'getValue': (ECUData? d) =>
-                                  (d?.battery ?? 0).toStringAsFixed(1),
-                            },
-                            {
-                              'title': 'IGN',
-                              'unit': 'deg',
-                              'getValue': (ECUData? d) =>
-                                  (d?.ignition ?? 0).toStringAsFixed(1),
-                            },
-                            {
-                              'title': 'INJ',
-                              'unit': 'ms',
-                              'getValue': (ECUData? d) =>
-                                  (d?.inject ?? 0).toStringAsFixed(1),
-                            },
-                          ],
-                        );
-                      }),
+                    // Recording Indicator (Top Center)
+                    Positioned(
+                      top: bgHeight * 0.02,
+                      left: 0,
+                      right: 0,
+                      child: const Center(child: RecordingIndicator()),
+                    ),
+                    // ECU Status Indicator (Bottom Left)
+                    Positioned(
+                      bottom: bgHeight * 0.02,
+                      left: bgWidth * 0.02,
+                      child: const EcuStatusIndicator(),
                     ),
                   ],
-                ),
-                // Settings Button (Top Right)
-                 Positioned(top: 10, right: screenWidth * 0.3, child: SettingsButton()),
-                // Recording Indicator (Top Center)
-                const Positioned(
-                  top: 10,
-                  left: 0,
-                  right: 0,
-                  child: Center(child: RecordingIndicator()),
-                ),
-                // ECU Status Indicator (Bottom Left)
-                const Positioned(
-                  bottom: 10,
-                  left: 10,
-                  child: EcuStatusIndicator(),
-                ),
-              ],
-            );
-          },
+                );
+              },
+            ),
+          ),
+        ),
+        // Settings Button (Top Right) - ยึดมุมขวาบนของจอ
+        const Positioned(
+          top: 10,
+          right: 10,
+          child: SettingsButton(),
+        ),
+          ],
         ),
       ),
     );
   }
 
 
-  /// Helper: Build data row with title, unit, value
+  /// Helper: Build data row with title, unit on top and value below
   Widget _buildDataRow({
     required String title,
     required String unit,
@@ -258,41 +273,36 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
     required double sizeValue,
     bool useExpanded = true,
   }) {
-    final labelRow = Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Flexible(
-          child: Text(
-            title,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: sizeTitle,
-              fontFamily: 'Ethnocentric',
+        // Title และ Unit อยู่บรรทัดเดียวกัน
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: sizeTitle,
+                fontFamily: 'Ethnocentric',
+              ),
             ),
-            overflow: TextOverflow.ellipsis,
-          ),
+            if (unit.isNotEmpty) ...[
+              SizedBox(width: 4),
+              Text(
+                unit,
+                style: TextStyle(
+                  color: Color(0xFFFF6522),
+                  fontSize: sizeUnit,
+                  fontFamily: 'Ethnocentric',
+                ),
+              ),
+            ],
+          ],
         ),
-        if (unit.isNotEmpty) ...[
-          SizedBox(width: 4),
-          Text(
-            unit,
-            style: TextStyle(
-              color: Color(0xFFFF6522),
-              fontSize: sizeUnit,
-              fontFamily: 'Ethnocentric',
-            ),
-          ),
-        ],
-      ],
-    );
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (useExpanded)
-          Expanded(child: labelRow)
-        else
-          labelRow,
+        // Value อยู่ข้างล่างชิดซ้าย
         Text(
           value,
           style: TextStyle(
@@ -302,7 +312,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
             fontFamily: 'Ethnocentric',
           ),
         ),
-        SizedBox(width: 10),
       ],
     );
   }
