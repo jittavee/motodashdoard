@@ -336,12 +336,12 @@ class BluetoothController extends GetxController {
 
       logger.i('ECU Model received from Dongle: ${currentEcuModel.value.description}');
 
-      Get.snackbar(
-        'ECU Model',
-        'Dongle ตั้งค่าเป็น: ${currentEcuModel.value.description}',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
+      // Get.snackbar(
+      //   'ECU Model',
+      //   'Dongle ตั้งค่าเป็น: ${currentEcuModel.value.description}',
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   duration: const Duration(seconds: 2),
+      // );
 
       return true;
     }
@@ -386,11 +386,11 @@ class BluetoothController extends GetxController {
     isSettingEcuModel.value = false;
     _ecuModelTimeout?.cancel();
     ecuConnectionStatus.value = EcuConnectionStatus.noResponse;
-    Get.snackbar(
-      'การเชื่อมต่อหลุด',
-      'การเชื่อมต่อกับกล่อง ECU ถูกตัดขาด',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Get.snackbar(
+    //   'การเชื่อมต่อหลุด',
+    //   'การเชื่อมต่อกับกล่อง ECU ถูกตัดขาด',
+    //   snackPosition: SnackPosition.BOTTOM,
+    // );
   }
 
   Future<void> disconnect() async {
@@ -469,11 +469,11 @@ class BluetoothController extends GetxController {
   Future<void> setEcuModel(EcuModel model) async {
     if (connectionStatus.value != BluetoothConnectionStatus.connected) {
       errorMessage.value = 'กรุณาเชื่อมต่อ Bluetooth ก่อน';
-      Get.snackbar(
-        'ไม่ได้เชื่อมต่อ',
-        'กรุณาเชื่อมต่อกับ Dongle ก่อนเลือก ECU Model',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   'ไม่ได้เชื่อมต่อ',
+      //   'กรุณาเชื่อมต่อกับ Dongle ก่อนเลือก ECU Model',
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
       return;
     }
 
@@ -506,11 +506,11 @@ class BluetoothController extends GetxController {
       }
     });
 
-    Get.snackbar(
-      'ECU Model',
-      'กำลังส่งคำสั่งไปยัง Dongle: ${model.description}',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+    // Get.snackbar(
+    //   'ECU Model',
+    //   'กำลังส่งคำสั่งไปยัง Dongle: ${model.description}',
+    //   snackPosition: SnackPosition.BOTTOM,
+    //   duration: const Duration(seconds: 2),
+    // );
   }
 }
