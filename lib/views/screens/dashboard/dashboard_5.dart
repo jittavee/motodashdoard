@@ -9,6 +9,8 @@ import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
+import '../../widgets/history_button.dart';
+import '../../widgets/playback_timeline.dart';
 
 class TemplateFiveScreen extends StatefulWidget {
   const TemplateFiveScreen({super.key});
@@ -131,7 +133,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                           top: pxH(0.28),
                           left: pxW(0.22),
                           child: Obx(() {
-                            final rpm = ecuController.currentData.value?.rpm ?? 0;
+                            final rpm = ecuController.displayData?.rpm ?? 0;
                             return AnimatedGaugeNeedle(
                               targetValue: rpm,
                               maxValue: 15000,
@@ -176,7 +178,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                           top: pxH(0.19),
                           left: pxW(0.48),
                           child: Obx(() {
-                            final data = ecuController.currentData.value;
+                            final data = ecuController.displayData;
                             return _buildTopRightDataPanel(data, imageHeight: imageHeight, imageWidth: imageWidth);
                           }),
                         ),
@@ -186,7 +188,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                           bottom: pxH(0.22),
                           left: pxW(0.55),
                           child: Obx(() {
-                            final data = ecuController.currentData.value;
+                            final data = ecuController.displayData;
                             return Container(
                               child: _buildCenterDataPanel(data, imageHeight: imageHeight));
                           }),
@@ -197,7 +199,7 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                           bottom: pxH(0.11),
                           left: pxW(0.47),
                           child: Obx(() {
-                            final data = ecuController.currentData.value;
+                            final data = ecuController.displayData;
                             final afr = data?.afr ?? 0;
                             final tps = data?.tps ?? 0;
                             return _buildBottomDataPanel(afr, tps, imageHeight: imageHeight, imageWidth: imageWidth);
@@ -206,6 +208,13 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                       ],
                     ),
                   ),
+                ),
+
+                // History Button (Top Right - before Settings)
+                const Positioned(
+                  top: 10,
+                  right: 60,
+                  child: HistoryButton(),
                 ),
 
                 // Settings Button (Top Right) - outside image area
@@ -228,6 +237,14 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                   bottom: 10,
                   left: 10,
                   child: EcuStatusIndicator(),
+                ),
+
+                // Playback Timeline (Bottom)
+                const Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: PlaybackTimeline(),
                 ),
               ],
             );

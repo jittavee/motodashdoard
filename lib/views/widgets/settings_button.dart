@@ -14,18 +14,14 @@ class SettingsButton extends StatelessWidget {
         Get.toNamed('/settings');
       },
       child: Container(
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.5),
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white70, width: 2),
         ),
-        child: const Icon(
-          Icons.settings,
-          color: Colors.white,
-          size: 28,
-        ),
+        child: const Icon(Icons.settings, color: Colors.white, size: 28),
       ),
     );
   }

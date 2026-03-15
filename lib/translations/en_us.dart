@@ -201,4 +201,9 @@ const Map<String, String> enUs = {
   'ecu_connected': 'Connected',
   'ecu_connecting': 'Connecting...',
   'ecu_no_response': 'No Response',
+
+  // Playback / Session
+  'select_session': 'Select Driving Session',
+  'no_sessions_found': 'No sessions found',
+  'enable_data_logging': 'Enable Data Logging in Settings to start recording',
 };

@@ -9,6 +9,8 @@ import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
+import '../../widgets/history_button.dart';
+import '../../widgets/playback_timeline.dart';
 
 class TemplateOneScreen extends StatefulWidget {
   const TemplateOneScreen({super.key});
@@ -80,7 +82,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                           bottom: pxH(0.19),
                           right: pxW(0.19),
                           child: Obx(() {
-                            final tps = ecuController.currentData.value?.tps ?? 0;
+                            final tps = ecuController.displayData?.tps ?? 0;
                             return Container(
                               width: pxW(0.140),
                               height: pxH(0.04),
@@ -105,7 +107,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                           top: pxH(0.51),
                           left: pxW(0.47),
                           child: Obx(() {
-                            final rpm = ecuController.currentData.value?.rpm ?? 0;
+                            final rpm = ecuController.displayData?.rpm ?? 0;
                             return AnimatedGaugeNeedle(
                               targetValue: rpm,
                               maxValue: 15000,
@@ -136,7 +138,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                           bottom: pxH(0.3),
                           right: pxW(0.12),
                           child: Obx(() {
-                            final rpm = ecuController.currentData.value?.rpm ?? 0;
+                            final rpm = ecuController.displayData?.rpm ?? 0;
                             return _buildNumberRPM(rpm: rpm, imageHeight: imageHeight);
                           }),
                         ),
@@ -191,7 +193,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                             height: pxH(0.26),
                             padding: EdgeInsets.all(pxH(0.03)),
                             child: Obx(() {
-                              final data = ecuController.currentData.value;
+                              final data = ecuController.displayData;
                               return _buildLedtDataPanel(data, imageHeight: imageHeight);
                             }),
                           ),
@@ -204,7 +206,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                           child: SizedBox(
                             height: pxH(0.23),
                             child: Obx(() {
-                              final data = ecuController.currentData.value;
+                              final data = ecuController.displayData;
                               return _buildSecondaryDataPanel(data, imageHeight: imageHeight);
                             }),
                           ),
@@ -214,6 +216,13 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
                   },
                 ),
               ),
+            ),
+
+            // History Button (Top Right - before Settings)
+            const Positioned(
+              top: 10,
+              left: 60,
+              child: HistoryButton(),
             ),
 
             // Settings Button (Top Right) - outside AspectRatio
@@ -236,6 +245,14 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
               bottom: 10,
               left: 10,
               child: EcuStatusIndicator(),
+            ),
+
+            // Playback Timeline (Bottom)
+            const Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: PlaybackTimeline(),
             ),
           ],
         ),

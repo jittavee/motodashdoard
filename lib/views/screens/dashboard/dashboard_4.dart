@@ -6,6 +6,8 @@ import '../../../controllers/gps_speed_controller.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
+import '../../widgets/history_button.dart';
+import '../../widgets/playback_timeline.dart';
 
 class TemplateFourScreen extends StatefulWidget {
   const TemplateFourScreen({super.key});
@@ -87,7 +89,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.airTemp ?? 0)
                                                   .toStringAsFixed(0),
@@ -99,7 +101,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.waterTemp ?? 0)
                                                   .toStringAsFixed(0),
@@ -119,7 +121,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.map ?? 0)
                                                   .toStringAsFixed(0),
@@ -131,7 +133,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.battery ?? 0)
                                                   .toStringAsFixed(1),
@@ -147,7 +149,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                   Expanded(
                                     child: Obx(() {
                                       final data =
-                                          ecuController.currentData.value;
+                                          ecuController.displayData;
                                       return _buildCircleGauge(
                                         value: ((data?.rpm ?? 0) / 1000)
                                             .toStringAsFixed(1),
@@ -208,7 +210,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.ignition ?? 0)
                                                   .toStringAsFixed(1),
@@ -220,7 +222,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.ignition ?? 0)
                                                   .toStringAsFixed(1),
@@ -240,7 +242,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.inject ?? 0)
                                                   .toStringAsFixed(1),
@@ -252,7 +254,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                         Expanded(
                                           child: Obx(() {
                                             final data =
-                                                ecuController.currentData.value;
+                                                ecuController.displayData;
                                             return _buildCircleGauge(
                                               value: (data?.inject ?? 0)
                                                   .toStringAsFixed(1),
@@ -268,7 +270,7 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                                   Expanded(
                                     child: Obx(() {
                                       final data =
-                                          ecuController.currentData.value;
+                                          ecuController.displayData;
                                       return _buildCircleGauge(
                                         value:
                                             (data?.tps ?? 0).toStringAsFixed(0),
@@ -303,11 +305,24 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
                 ),
               ),
             ),
+            // History Button (Top Right - before Settings)
+            const Positioned(
+              top: 10,
+              right: 60,
+              child: HistoryButton(),
+            ),
             // Settings Button (Top Right) - ยึดมุมขวาบนของจอ
             const Positioned(
               top: 10,
               right: 10,
               child: SettingsButton(),
+            ),
+            // Playback Timeline (Bottom)
+            const Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: PlaybackTimeline(),
             ),
           ],
         ),

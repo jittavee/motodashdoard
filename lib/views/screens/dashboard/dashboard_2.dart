@@ -7,6 +7,8 @@ import '../../../models/ecu_data.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
+import '../../widgets/history_button.dart';
+import '../../widgets/playback_timeline.dart';
 
 class TemplateTwoScreen extends StatefulWidget {
   const TemplateTwoScreen({super.key});
@@ -71,7 +73,7 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                   children: [
                     // RPM Bar
                     Obx(() {
-                      final rpm = ecuController.currentData.value?.rpm ?? 0;
+                      final rpm = ecuController.displayData?.rpm ?? 0;
                       final rpmPercent = (rpm / 16000).clamp(0.0, 1.0);
                       return Positioned(
                         left: 0,
@@ -105,7 +107,7 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                               // Left Data Column
                               Expanded(
                                 child: Obx(() {
-                                  final data = ecuController.currentData.value;
+                                  final data = ecuController.displayData;
                                   return _buildDataContainer(
                                     alignment: MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment:
@@ -176,7 +178,7 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                               // Right Data Column
                               Expanded(
                                 child: Obx(() {
-                                  final data = ecuController.currentData.value;
+                                  final data = ecuController.displayData;
                                   return _buildDataContainer(
                                     alignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
@@ -209,7 +211,7 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                         Expanded(
                           flex: 30,
                           child: Obx(() {
-                            final data = ecuController.currentData.value;
+                            final data = ecuController.displayData;
                             return Row(
                               children: [
                                 Expanded(
@@ -303,6 +305,12 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                       ],
                     ),
                   ),
+                  // History Button (Top Right - before Settings)
+                  Positioned(
+                    top: bgHeight * 0.02,
+                    left: bgWidth * 0.02,
+                    child: const HistoryButton(),
+                  ),
                   // Settings Button (Top Right)
                   Positioned(
                     top: bgHeight * 0.02,
@@ -321,6 +329,13 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                     bottom: bgHeight * 0.02,
                     left: bgWidth * 0.02,
                     child: const EcuStatusIndicator(),
+                  ),
+                  // Playback Timeline (Bottom)
+                  const Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: PlaybackTimeline(),
                   ),
                 ],
               );

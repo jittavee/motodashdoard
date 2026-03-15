@@ -18,6 +18,19 @@ class ECUDataController extends GetxController {
   final RxBool isAlertActive = false.obs;
   final RxString activeAlertMessage = ''.obs;
 
+  // Playback system
+  final RxBool isPlaybackMode = false.obs;
+  final RxBool isPlaying = false.obs;
+  final RxList<ECUData> playbackLogs = <ECUData>[].obs;
+  final RxInt playbackIndex = 0.obs;
+  final RxDouble playbackSpeed = 1.0.obs;
+  Timer? _playbackTimer;
+
+  // Getter สำหรับข้อมูลที่แสดง (ใช้ playback data ถ้าอยู่ใน playback mode)
+  ECUData? get displayData => isPlaybackMode.value
+      ? (playbackLogs.isNotEmpty ? playbackLogs[playbackIndex.value] : null)
+      : currentData.value;
+
   Timer? _loggingTimer;
   final Map<String, double> _dataBuffer = {}; // Buffer สำหรับเก็บข้อมูลที่รับมาทีละตัว
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
@@ -37,6 +50,7 @@ class ECUDataController extends GetxController {
   @override
   void onClose() {
     _loggingTimer?.cancel();
+    _playbackTimer?.cancel();
     super.onClose();
   }
 
@@ -337,5 +351,164 @@ class ECUDataController extends GetxController {
     currentData.value = null;
     dataHistory.clear();
     _dataBuffer.clear();
+  }
+
+  // ========== Playback System ==========
+
+  // โหลด session สำหรับ playback
+  Future<void> loadPlaybackSession(DateTime start, DateTime end) async {
+    try {
+      final logs = await _dbHelper.getECULogs(
+        limit: 10000,
+        startDate: start,
+        endDate: end,
+      );
+
+      if (logs.isEmpty) {
+        Get.snackbar(
+          'ไม่พบข้อมูล',
+          'ไม่มีข้อมูลในช่วงเวลาที่เลือก',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      // เรียงตาม timestamp จากเก่าไปใหม่ (สำหรับ playback)
+      logs.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+      playbackLogs.value = logs;
+      playbackIndex.value = 0;
+      isPlaybackMode.value = true;
+      isPlaying.value = false;
+
+      logger.d('Loaded ${logs.length} records for playback');
+    } catch (e) {
+      logger.e('Error loading playback session: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to load session: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  // เล่น playback
+  void playPlayback() {
+    if (playbackLogs.isEmpty) return;
+
+    isPlaying.value = true;
+
+    // คำนวณ interval ตาม playback speed
+    final intervalMs = (200 / playbackSpeed.value).round();
+
+    _playbackTimer = Timer.periodic(Duration(milliseconds: intervalMs), (timer) {
+      if (playbackIndex.value < playbackLogs.length - 1) {
+        playbackIndex.value++;
+      } else {
+        // จบ playback
+        pausePlayback();
+      }
+    });
+  }
+
+  // หยุด playback
+  void pausePlayback() {
+    isPlaying.value = false;
+    _playbackTimer?.cancel();
+    _playbackTimer = null;
+  }
+
+  // เลื่อนไปยังตำแหน่งที่ต้องการ
+  void seekPlayback(int index) {
+    if (index >= 0 && index < playbackLogs.length) {
+      playbackIndex.value = index;
+    }
+  }
+
+  // ปรับความเร็ว playback
+  void setPlaybackSpeed(double speed) {
+    playbackSpeed.value = speed;
+
+    // ถ้ากำลังเล่นอยู่ ให้ restart ด้วย speed ใหม่
+    if (isPlaying.value) {
+      pausePlayback();
+      playPlayback();
+    }
+  }
+
+  // ออกจาก playback mode
+  void exitPlayback() {
+    pausePlayback();
+    isPlaybackMode.value = false;
+    playbackLogs.clear();
+    playbackIndex.value = 0;
+    playbackSpeed.value = 1.0;
+  }
+
+  // ดึงรายการ sessions จาก database
+  Future<List<Map<String, dynamic>>> getPlaybackSessions() async {
+    try {
+      final allLogs = await _dbHelper.getECULogs(limit: 10000);
+
+      if (allLogs.isEmpty) return [];
+
+      // เรียงตาม timestamp
+      allLogs.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+      // แบ่ง session โดยดูจากช่วงเวลาที่ห่างกันเกิน 1 นาที
+      final sessions = <Map<String, dynamic>>[];
+      List<ECUData> currentSession = [allLogs[0]];
+
+      for (int i = 1; i < allLogs.length; i++) {
+        final prevTime = allLogs[i - 1].timestamp;
+        final currentTime = allLogs[i].timestamp;
+        final difference = currentTime.difference(prevTime);
+
+        if (difference.inSeconds > 60) {
+          // ห่างกันเกิน 1 นาที = session ใหม่
+          sessions.add(_calculateSessionStats(currentSession));
+          currentSession = [allLogs[i]];
+        } else {
+          currentSession.add(allLogs[i]);
+        }
+      }
+
+      // เพิ่ม session สุดท้าย
+      if (currentSession.isNotEmpty) {
+        sessions.add(_calculateSessionStats(currentSession));
+      }
+
+      // เรียงจากใหม่ไปเก่า
+      sessions.sort((a, b) => (b['start'] as DateTime).compareTo(a['start'] as DateTime));
+
+      return sessions;
+    } catch (e) {
+      logger.e('Error getting playback sessions: $e');
+      return [];
+    }
+  }
+
+  Map<String, dynamic> _calculateSessionStats(List<ECUData> sessionData) {
+    double maxSpeed = 0;
+    double maxRpm = 0;
+    double maxWaterTemp = 0;
+
+    for (var data in sessionData) {
+      if (data.speed > maxSpeed) maxSpeed = data.speed;
+      if (data.rpm > maxRpm) maxRpm = data.rpm;
+      if (data.waterTemp > maxWaterTemp) maxWaterTemp = data.waterTemp;
+    }
+
+    final duration = sessionData.last.timestamp.difference(sessionData.first.timestamp);
+
+    return {
+      'start': sessionData.first.timestamp,
+      'end': sessionData.last.timestamp,
+      'count': sessionData.length,
+      'maxSpeed': maxSpeed,
+      'maxRpm': maxRpm,
+      'maxWaterTemp': maxWaterTemp,
+      'duration': duration,
+    };
   }
 }

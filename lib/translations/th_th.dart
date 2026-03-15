@@ -201,4 +201,9 @@ const Map<String, String> thTh = {
   'ecu_connected': 'เชื่อมต่อแล้ว',
   'ecu_connecting': 'กำลังเชื่อมต่อ...',
   'ecu_no_response': 'ไม่ตอบสนอง',
+
+  // Playback / Session
+  'select_session': 'เลือก Session การขับขี่',
+  'no_sessions_found': 'ไม่พบข้อมูลการขับขี่',
+  'enable_data_logging': 'เปิดบันทึกข้อมูลในตั้งค่าเพื่อเริ่มบันทึก',
 };

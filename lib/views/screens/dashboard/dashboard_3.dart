@@ -9,6 +9,8 @@ import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
+import '../../widgets/history_button.dart';
+import '../../widgets/playback_timeline.dart';
 
 class TemplateThreeScreen extends StatefulWidget {
   const TemplateThreeScreen({super.key});
@@ -77,7 +79,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                         // ส่วนซ้าย - แสดงข้อมูล ETC, MAP, IAT, AFR
                         Expanded(
                           child: Obx(() {
-                            final data = ecuController.currentData.value;
+                            final data = ecuController.displayData;
                             return _buildDataContainer(
                               data: data,
                               alignment: MainAxisAlignment.spaceEvenly,
@@ -129,7 +131,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                                   ),
                                   // Needle with rotation based on rpm
                                   Obx(() {
-                                    final rpm = ecuController.currentData.value?.rpm ?? 0;
+                                    final rpm = ecuController.displayData?.rpm ?? 0;
                                     final needleSize = bgHeight * 0.25;
                                     return AnimatedGaugeNeedle(
                                       targetValue: rpm,
@@ -192,7 +194,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                         // ส่วนขวา - แสดงข้อมูล TPS, BAT, IGN, INJ
                         Expanded(
                           child: Obx(() {
-                            final data = ecuController.currentData.value;
+                            final data = ecuController.displayData;
                             return _buildDataContainer(
                               data: data,
                               alignment: MainAxisAlignment.spaceAround,
@@ -250,11 +252,24 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
             ),
           ),
         ),
+        // History Button (Top Right - before Settings)
+        const Positioned(
+          top: 10,
+          right: 60,
+          child: HistoryButton(),
+        ),
         // Settings Button (Top Right) - ยึดมุมขวาบนของจอ
         const Positioned(
           top: 10,
           right: 10,
           child: SettingsButton(),
+        ),
+        // Playback Timeline (Bottom)
+        const Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: PlaybackTimeline(),
         ),
           ],
         ),
