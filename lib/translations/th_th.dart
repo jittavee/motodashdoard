@@ -206,4 +206,15 @@ const Map<String, String> thTh = {
   'select_session': 'เลือก Session การขับขี่',
   'no_sessions_found': 'ไม่พบข้อมูลการขับขี่',
   'enable_data_logging': 'เปิดบันทึกข้อมูลในตั้งค่าเพื่อเริ่มบันทึก',
+
+  // Performance Test
+  'test_stopped': 'หยุดการทดสอบ',
+  'cancelled': 'ยกเลิก',
+  'time': 'เวลา',
+
+  // Performance Test ECU Data
+  'ecu_data': 'ข้อมูล ECU',
+  'max_tps': 'TPS สูงสุด',
+  'avg_afr': 'AFR เฉลี่ย',
+  'min_battery': 'แบตเตอรี่ต่ำสุด',
 };

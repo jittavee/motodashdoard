@@ -22,7 +22,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2, // Incremented version for migration
+      version: 3, // Incremented version for ECU data in performance tests
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -33,6 +33,48 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       // Add indexes for better query performance
       await _createIndexes(db);
+    }
+    if (oldVersion < 3) {
+      // Add ECU data columns to performance_tests (check if column exists first)
+      final columns = await db.rawQuery('PRAGMA table_info(performance_tests)');
+      final columnNames = columns.map((c) => c['name'] as String).toSet();
+
+      if (!columnNames.contains('ecuSessionStart')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN ecuSessionStart INTEGER');
+      }
+      if (!columnNames.contains('ecuSessionEnd')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN ecuSessionEnd INTEGER');
+      }
+      if (!columnNames.contains('maxRpm')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN maxRpm REAL');
+      }
+      if (!columnNames.contains('avgRpm')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN avgRpm REAL');
+      }
+      if (!columnNames.contains('maxWaterTemp')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN maxWaterTemp REAL');
+      }
+      if (!columnNames.contains('avgWaterTemp')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN avgWaterTemp REAL');
+      }
+      if (!columnNames.contains('maxTps')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN maxTps REAL');
+      }
+      if (!columnNames.contains('avgTps')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN avgTps REAL');
+      }
+      if (!columnNames.contains('maxAfr')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN maxAfr REAL');
+      }
+      if (!columnNames.contains('avgAfr')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN avgAfr REAL');
+      }
+      if (!columnNames.contains('minBattery')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN minBattery REAL');
+      }
+      if (!columnNames.contains('avgBattery')) {
+        await db.execute('ALTER TABLE performance_tests ADD COLUMN avgBattery REAL');
+      }
     }
   }
 
@@ -108,7 +150,19 @@ class DatabaseHelper {
         maxSpeed REAL NOT NULL,
         avgSpeed REAL NOT NULL,
         timestamp INTEGER NOT NULL,
-        note TEXT
+        note TEXT,
+        ecuSessionStart INTEGER,
+        ecuSessionEnd INTEGER,
+        maxRpm REAL,
+        avgRpm REAL,
+        maxWaterTemp REAL,
+        avgWaterTemp REAL,
+        maxTps REAL,
+        avgTps REAL,
+        maxAfr REAL,
+        avgAfr REAL,
+        minBattery REAL,
+        avgBattery REAL
       )
     ''');
 

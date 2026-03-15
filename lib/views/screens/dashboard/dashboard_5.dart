@@ -11,6 +11,7 @@ import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
 import '../../widgets/history_button.dart';
 import '../../widgets/playback_timeline.dart';
+import '../../widgets/performance_test_indicator.dart';
 
 class TemplateFiveScreen extends StatefulWidget {
   const TemplateFiveScreen({super.key});
@@ -237,6 +238,13 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                   bottom: 10,
                   left: 10,
                   child: EcuStatusIndicator(),
+                ),
+
+                // Performance Test Indicator (Bottom Right)
+                const Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: PerformanceTestIndicator(),
                 ),
 
                 // Playback Timeline (Bottom)

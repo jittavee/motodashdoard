@@ -16,10 +16,10 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   void initState() {
     super.initState();
 
-    // บังคับให้หน้า Bluetooth เป็นแนวตั้งเท่านั้น
+    // บังคับให้หน้า Bluetooth เป็นแนวนอนเท่านั้น
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
 
     final btController = Get.find<BluetoothController>();
@@ -30,8 +30,8 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   void dispose() {
     // คืนค่ากลับเป็นแนวนอนตามการตั้งค่าของแอพ
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }

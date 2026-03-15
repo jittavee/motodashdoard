@@ -206,4 +206,15 @@ const Map<String, String> enUs = {
   'select_session': 'Select Driving Session',
   'no_sessions_found': 'No sessions found',
   'enable_data_logging': 'Enable Data Logging in Settings to start recording',
+
+  // Performance Test
+  'test_stopped': 'Test Stopped',
+  'cancelled': 'Cancelled',
+  'time': 'Time',
+
+  // Performance Test ECU Data
+  'ecu_data': 'ECU Data',
+  'max_tps': 'Max TPS',
+  'avg_afr': 'Avg AFR',
+  'min_battery': 'Min Battery',
 };

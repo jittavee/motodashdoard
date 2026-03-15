@@ -95,10 +95,10 @@ class _DataLogChartScreenState extends State<DataLogChartScreen> {
 
   @override
   void dispose() {
-    // คืนค่าให้รองรับทุกแนว
+    // คืนค่าให้เป็นแนวนอน
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }

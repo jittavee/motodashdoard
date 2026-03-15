@@ -19,7 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _setPortrait();
+    _setLandscape();
   }
 
   @override
@@ -30,20 +30,13 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // เมื่อ app กลับมา foreground (หลังเลื่อนแถบแจ้งเตือน) ให้บังคับแนวตั้งใหม่
+    // เมื่อ app กลับมา foreground (หลังเลื่อนแถบแจ้งเตือน) ให้บังคับแนวนอนใหม่
     if (state == AppLifecycleState.resumed) {
-      _setPortrait();
+      _setLandscape();
     }
   }
 
-  void _setPortrait() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-  }
-
-  void _resetToLandscape() {
+  void _setLandscape() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -95,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
-          _resetToLandscape();
+          _setLandscape();
         }
       },
       child: Scaffold(
@@ -162,53 +155,53 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
 
           // 4. Data Logging - เปิดใช้งานก่อนออกตัว
-          Obx(() => ListTile(
-                leading: const Icon(Icons.data_usage),
-                title: Text('data_logging'.tr),
-                subtitle: Text(
-                  ecuController.isLogging.value
-                      ? 'recording_ecu_data'.tr
-                      : 'not_recording'.tr,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: ecuController.isLogging.value
-                        ? Colors.green
-                        : Colors.grey,
-                  ),
-                ),
-                trailing: Switch(
-                  value: ecuController.isLogging.value,
-                  onChanged: (value) {
-                    if (value) {
-                      ecuController.startLogging();
-                      Get.snackbar(
-                        'data_logging'.tr,
-                        'started_recording'.tr,
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 2),
-                      );
-                    } else {
-                      ecuController.stopLogging();
-                      Get.snackbar(
-                        'data_logging'.tr,
-                        'stopped_recording'.tr,
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 2),
-                      );
-                    }
-                  },
-                ),
-              )),
+          // Obx(() => ListTile(
+          //       leading: const Icon(Icons.data_usage),
+          //       title: Text('data_logging'.tr),
+          //       subtitle: Text(
+          //         ecuController.isLogging.value
+          //             ? 'recording_ecu_data'.tr
+          //             : 'not_recording'.tr,
+          //         style: TextStyle(
+          //           fontSize: 12,
+          //           color: ecuController.isLogging.value
+          //               ? Colors.green
+          //               : Colors.grey,
+          //         ),
+          //       ),
+          //       trailing: Switch(
+          //         value: ecuController.isLogging.value,
+          //         onChanged: (value) {
+          //           if (value) {
+          //             ecuController.startLogging();
+          //             Get.snackbar(
+          //               'data_logging'.tr,
+          //               'started_recording'.tr,
+          //               snackPosition: SnackPosition.BOTTOM,
+          //               duration: const Duration(seconds: 2),
+          //             );
+          //           } else {
+          //             ecuController.stopLogging();
+          //             Get.snackbar(
+          //               'data_logging'.tr,
+          //               'stopped_recording'.tr,
+          //               snackPosition: SnackPosition.BOTTOM,
+          //               duration: const Duration(seconds: 2),
+          //             );
+          //           }
+          //         },
+          //       ),
+          //     )),
 
           // 5. View History / Performance Test - ส่วนของการสรุปผล
-          ListTile(
-            leading: const Icon(Icons.show_chart),
-            title: Text('view_log_history'.tr),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              Get.toNamed(AppRoutes.dataLogChart);
-            },
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.show_chart),
+          //   title: Text('view_log_history'.tr),
+          //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          //   onTap: () {
+          //     Get.toNamed(AppRoutes.dataLogChart);
+          //   },
+          // ),
           ListTile(
             leading: const Icon(Icons.timer),
             title: Text('performance_test'.tr),

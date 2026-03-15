@@ -17,19 +17,19 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   @override
   void initState() {
     super.initState();
-    // บังคับให้หน้านี้เป็นแนวตั้งเท่านั้น
+    // บังคับให้หน้านี้เป็นแนวนอนเท่านั้น
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
   }
 
   @override
   void dispose() {
-    // คืนค่าให้รองรับทุกแนว
+    // คืนค่าให้เป็นแนวนอน
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }
@@ -286,10 +286,15 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
     );
   }
 
-  void _showTestHistory(
+  Future<void> _showTestHistory(
     BuildContext context,
     PerformanceTestController controller,
-  ) {
+  ) async {
+    // Reload history ก่อนแสดง
+    await controller.loadTestHistory();
+
+    if (!context.mounted) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -412,6 +417,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
               ],
             ),
             const Divider(height: 24),
+            // Speed & Time Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -429,6 +435,54 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 ),
               ],
             ),
+            // ECU Data Section (if available)
+            if (test.maxRpm != null) ...[
+              const Divider(height: 24),
+              Text(
+                'ecu_data'.tr,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildHistoryMetric(
+                    'max_rpm'.tr,
+                    '${test.maxRpm?.toStringAsFixed(0) ?? '-'}',
+                  ),
+                  _buildHistoryMetric(
+                    'max_water_temp'.tr,
+                    '${test.maxWaterTemp?.toStringAsFixed(0) ?? '-'}°C',
+                  ),
+                  _buildHistoryMetric(
+                    'max_tps'.tr,
+                    '${test.maxTps?.toStringAsFixed(0) ?? '-'}%',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildHistoryMetric(
+                    'avg_rpm'.tr,
+                    '${test.avgRpm?.toStringAsFixed(0) ?? '-'}',
+                  ),
+                  _buildHistoryMetric(
+                    'avg_afr'.tr,
+                    '${test.avgAfr?.toStringAsFixed(1) ?? '-'}',
+                  ),
+                  _buildHistoryMetric(
+                    'min_battery'.tr,
+                    '${test.minBattery?.toStringAsFixed(1) ?? '-'}V',
+                  ),
+                ],
+              ),
+            ],
             if (test.note != null && test.note!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(

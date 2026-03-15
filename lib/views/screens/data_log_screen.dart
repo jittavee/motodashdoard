@@ -34,20 +34,20 @@ class _DataLogScreenState extends State<DataLogScreen> {
   @override
   void initState() {
     super.initState();
-    // บังคับให้หน้านี้เป็นแนวตั้งเท่านั้น
+    // บังคับให้หน้านี้เป็นแนวนอนเท่านั้น
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
     _loadLogs();
   }
 
   @override
   void dispose() {
-    // คืนค่าให้รองรับทุกแนว
+    // คืนค่าให้เป็นแนวนอน
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }

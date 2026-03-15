@@ -15,10 +15,10 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    // บังคับให้หน้า Alert Settings เป็นแนวตั้งเท่านั้น
+    // บังคับให้หน้า Alert Settings เป็นแนวนอนเท่านั้น
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
   }
 
@@ -26,8 +26,8 @@ class _AlertSettingsScreenState extends State<AlertSettingsScreen> {
   void dispose() {
     // คืนค่าให้กลับเป็นแนวนอนตามค่าเริ่มต้นของแอป
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
   }

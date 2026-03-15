@@ -9,6 +9,7 @@ import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
 import '../../widgets/history_button.dart';
 import '../../widgets/playback_timeline.dart';
+import '../../widgets/performance_test_indicator.dart';
 
 class TemplateTwoScreen extends StatefulWidget {
   const TemplateTwoScreen({super.key});
@@ -329,6 +330,12 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                     bottom: bgHeight * 0.02,
                     left: bgWidth * 0.02,
                     child: const EcuStatusIndicator(),
+                  ),
+                  // Performance Test Indicator (Bottom Right)
+                  Positioned(
+                    bottom: bgHeight * 0.02,
+                    right: bgWidth * 0.02,
+                    child: const PerformanceTestIndicator(),
                   ),
                   // Playback Timeline (Bottom)
                   const Positioned(

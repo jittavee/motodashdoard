@@ -17,7 +17,7 @@ class _DashboardTemplateScreenState extends State<DashboardTemplateScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _setPortrait();
+    _setLandscape();
   }
 
   @override
@@ -29,14 +29,14 @@ class _DashboardTemplateScreenState extends State<DashboardTemplateScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _setPortrait();
+      _setLandscape();
     }
   }
 
-  void _setPortrait() {
+  void _setLandscape() {
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
   }
 
