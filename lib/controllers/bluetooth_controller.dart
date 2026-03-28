@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import '../utils/logger.dart';
@@ -80,7 +81,10 @@ class BluetoothController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _checkBluetoothState();
+    // รอให้ UI พร้อมก่อนค่อยขอเปิด BT (ต้องมี context สำหรับ dialog)
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _checkBluetoothState();
+    });
   }
 
   @override
@@ -99,6 +103,20 @@ class BluetoothController extends GetxController {
       errorMessage.value = 'Bluetooth ไม่รองรับบนอุปกรณ์นี้';
       return;
     }
+
+    final adapterState = await FlutterBluePlus.adapterState.first;
+    if (adapterState != BluetoothAdapterState.on) {
+      if (GetPlatform.isAndroid) {
+        await FlutterBluePlus.turnOn();
+      } else {
+        Get.defaultDialog(
+          title: 'Bluetooth ปิดอยู่',
+          middleText: 'กรุณาเปิด Bluetooth ในการตั้งค่าเพื่อใช้งานแอป',
+          textConfirm: 'ตกลง',
+          onConfirm: () => Get.back(),
+        );
+      }
+    }
   }
 
   Future<void> startScan() async {
@@ -114,9 +132,30 @@ class BluetoothController extends GetxController {
       // ตรวจสอบว่า Bluetooth เปิดอยู่หรือไม่
       final adapterState = await FlutterBluePlus.adapterState.first;
       if (adapterState != BluetoothAdapterState.on) {
-        errorMessage.value = 'กรุณาเปิด Bluetooth';
-        isScanning.value = false;
-        return;
+        if (GetPlatform.isAndroid) {
+          // Android: เด้ง dialog ขอเปิด Bluetooth อัตโนมัติ
+          await FlutterBluePlus.turnOn();
+          // รอให้ BT เปิดจริงก่อนสแกน (timeout 10 วินาที)
+          final turned = await FlutterBluePlus.adapterState
+              .where((s) => s == BluetoothAdapterState.on)
+              .first
+              .timeout(const Duration(seconds: 10), onTimeout: () => BluetoothAdapterState.off);
+          if (turned != BluetoothAdapterState.on) {
+            errorMessage.value = 'กรุณาเปิด Bluetooth';
+            isScanning.value = false;
+            return;
+          }
+        } else {
+          // iOS: ไม่สามารถเปิดแทนผู้ใช้ได้
+          Get.defaultDialog(
+            title: 'Bluetooth ปิดอยู่',
+            middleText: 'กรุณาเปิด Bluetooth ในการตั้งค่าเพื่อสแกนอุปกรณ์',
+            textConfirm: 'ตกลง',
+            onConfirm: () => Get.back(),
+          );
+          isScanning.value = false;
+          return;
+        }
       }
 
       // เริ่มสแกน
