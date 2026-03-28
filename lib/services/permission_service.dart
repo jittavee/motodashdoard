@@ -1,4 +1,3 @@
-import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,12 +18,10 @@ class PermissionService extends GetxService {
     checkAllPermissions();
   }
 
-  // Check all permissions at once (เช็คทั้ง Bluetooth และ Location ตอนเปิดแอพ)
+  // Request all permissions at once (บังคับขอทั้ง Bluetooth และ Location ตอนเปิดแอพ)
   Future<void> checkAllPermissions() async {
-    logger.i('Checking all permissions');
+    logger.i('Requesting all permissions');
     await checkBluetoothPermissions();
-    await checkLocationPermissions();
-   
     await requestAlwaysPermission();
   }
 
@@ -133,7 +130,7 @@ class PermissionService extends GetxService {
       isLocationServiceEnabled.value = serviceEnabled;
 
       if (!serviceEnabled) {
-        _showLocationServiceDialog();
+        logger.w('Location services are disabled');
         return false;
       }
 
@@ -180,7 +177,7 @@ class PermissionService extends GetxService {
       isLocationServiceEnabled.value = serviceEnabled;
 
       if (!serviceEnabled) {
-        _showLocationServiceDialog();
+        logger.w('Location services are disabled');
         return false;
       }
 
@@ -199,21 +196,12 @@ class PermissionService extends GetxService {
         return false;
       }
 
-      // Step 5: ตรวจสอบว่าได้ Always permission หรือไม่
-      final hasAlways = permission == LocationPermission.always;
-      hasLocationPermission.value = hasAlways;
+      // Step 5: ตรวจสอบว่าได้ permission แล้ว (whileInUse ก็ถือว่าโอเค)
+      final hasPermission = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+      hasLocationPermission.value = hasPermission;
 
-      // ถ้าได้แค่ whileInUse แต่ต้องการ always ให้แจ้งเตือน
-      if (permission == LocationPermission.whileInUse) {
-        Get.snackbar(
-          'Permission Notice',
-          'Location permission is granted only while using the app. For background tracking, please enable "Always" in app settings.',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 5),
-        );
-      }
-
-      return hasAlways;
+      return hasPermission;
     } catch (e) {
       logger.e('Error requesting always permission', error: e);
       hasLocationPermission.value = false;
@@ -242,15 +230,6 @@ class PermissionService extends GetxService {
         Get.back();
         openSettings();
       },
-    );
-  }
-
-  void _showLocationServiceDialog() {
-    Get.snackbar(
-      'Location Service Disabled',
-      'Please enable location services in your device settings',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 4),
     );
   }
 
