@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
@@ -176,30 +177,49 @@ class PermissionService extends GetxService {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       isLocationServiceEnabled.value = serviceEnabled;
 
-      if (!serviceEnabled) {
-        logger.w('Location services are disabled');
-        return false;
-      }
-
-      // Step 2: เช็ค permission ปัจจุบัน
+      // Step 2: เช็ค permission ก่อน (ต้องได้ permission ก่อนค่อยขอเปิด GPS)
       LocationPermission permission = await Geolocator.checkPermission();
 
-      // Step 3: ถ้า permission ถูกปฏิเสธ ให้ขออีกครั้ง
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
 
-      // Step 4: ถ้าผู้ใช้กด "Don't ask again" (deniedForever)
       if (permission == LocationPermission.deniedForever) {
         _showPermanentlyDeniedDialog('Location');
         hasLocationPermission.value = false;
         return false;
       }
 
-      // Step 5: ตรวจสอบว่าได้ permission แล้ว (whileInUse ก็ถือว่าโอเค)
       final hasPermission = permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
       hasLocationPermission.value = hasPermission;
+
+      if (!hasPermission) return false;
+
+      // Step 3: ได้ permission แล้ว ถ้า GPS ปิดอยู่ให้เด้ง dialog ขอเปิด
+      if (!serviceEnabled) {
+        await Get.dialog(
+          AlertDialog(
+            title: const Text('GPS ปิดอยู่'),
+            content: const Text('กรุณาเปิด Location Services เพื่อใช้งานฟีเจอร์ GPS'),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text('ยกเลิก'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  Geolocator.openLocationSettings();
+                },
+                child: const Text('เปิดการตั้งค่า'),
+              ),
+            ],
+          ),
+          barrierDismissible: false,
+        );
+        return false;
+      }
 
       return hasPermission;
     } catch (e) {

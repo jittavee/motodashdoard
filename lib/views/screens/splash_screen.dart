@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../services/permission_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -43,8 +44,11 @@ class _SplashScreenState extends State<SplashScreen>
     // เริ่ม animation
     _animationController.forward();
 
-    // เปลี่ยนไปหน้า Dashboard 1 หลังจาก 3 วินาที
-    Future.delayed(const Duration(seconds: 3), () {
+    // รอ animation + permission เสร็จก่อนค่อย navigate
+    Future.wait([
+      Future.delayed(const Duration(seconds: 3)),
+      PermissionService.instance.checkAllPermissions(),
+    ]).then((_) {
       Get.offAllNamed('/template-1');
     });
   }
