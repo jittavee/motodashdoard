@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/logger.dart';
 import 'ecu_data_controller.dart';
 
@@ -71,6 +72,8 @@ class BluetoothController extends GetxController {
   final Rx<EcuModel> currentEcuModel = EcuModel.simulation.obs;
   final RxBool isEcuModelSynced = false.obs;
 
+  static const String _ecuModelKey = 'last_ecu_model';
+
   // ECU Connection Status (Dongle ↔ Motorcycle)
   final Rx<EcuConnectionStatus> ecuConnectionStatus = EcuConnectionStatus.noResponse.obs;
 
@@ -81,10 +84,25 @@ class BluetoothController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadLastEcuModel();
     // รอให้ UI พร้อมก่อนค่อยขอเปิด BT (ต้องมี context สำหรับ dialog)
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _checkBluetoothState();
     });
+  }
+
+  Future<void> _loadLastEcuModel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getInt(_ecuModelKey);
+    if (saved != null) {
+      currentEcuModel.value = EcuModel.fromValue(saved);
+      logger.i('Loaded last ECU Model: ${currentEcuModel.value.description}');
+    }
+  }
+
+  Future<void> _saveLastEcuModel(EcuModel model) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_ecuModelKey, model.value);
   }
 
   @override
@@ -363,6 +381,7 @@ class BluetoothController extends GetxController {
       final modelValue = int.tryParse(match.group(1) ?? '0') ?? 0;
       currentEcuModel.value = EcuModel.fromValue(modelValue);
       isEcuModelSynced.value = true;
+      _saveLastEcuModel(currentEcuModel.value);
 
       // Reset ECU data buffer เพื่อให้ค่าใหม่จาก ECU ใหม่แสดงผล
       try {

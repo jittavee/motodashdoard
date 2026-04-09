@@ -9,6 +9,7 @@ import '../../widgets/ecu_status_indicator.dart';
 import '../../widgets/history_button.dart';
 import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
+import '../../widgets/raw_data_overlay.dart';
 
 class TemplateFourScreen extends StatefulWidget {
   const TemplateFourScreen({super.key});
@@ -318,6 +319,13 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
               right: 10,
               child: SettingsButton(),
             ),
+            // Raw Data Overlay (Bottom Right)
+            const Positioned(
+              bottom: 40,
+              right: 10,
+              child: RawDataOverlay(),
+            ),
+
             // Performance Test Indicator (Bottom Right)
             const Positioned(
               bottom: 10,
