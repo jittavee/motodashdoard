@@ -81,6 +81,9 @@ class BluetoothController extends GetxController {
   final RxBool isSettingEcuModel = false.obs;
   Timer? _ecuModelTimeout;
 
+  // Flag สำหรับ auto-sync model หลัง connect: ยิง model=0 ก่อน แล้วยิง model ที่จำไว้
+  bool _waitingForSimulationAck = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -305,6 +308,13 @@ class BluetoothController extends GetxController {
       if (writeCharacteristic == null) {
         logger.w('No suitable characteristic found for writing data');
       }
+
+      // ยิง model=0 (Simulation) ก่อนเสมอ แล้วรอ ack ก่อนค่อยยิง model ที่จำไว้
+      if (writeCharacteristic != null) {
+        _waitingForSimulationAck = currentEcuModel.value != EcuModel.simulation;
+        logger.i('Auto-sync: sending model=0 first (will follow with ${currentEcuModel.value.description})');
+        await sendData('model=${EcuModel.simulation.value}');
+      }
     } catch (e) {
       errorMessage.value = 'เกิดข้อผิดพลาดในการค้นหา services: $e';
       logger.e('Error discovering services', error: e);
@@ -334,6 +344,12 @@ class BluetoothController extends GetxController {
 
       // Log ข้อมูลที่รับได้
       logger.d('Bluetooth Data Received: $dataString');
+
+      // กรอง echo ของคำสั่งที่เราส่งออกไป (Dongle echo กลับมา)
+      if (RegExp(r'^model=\d$', caseSensitive: false).hasMatch(dataString.trim())) {
+        logger.d('Ignoring command echo: $dataString');
+        return;
+      }
 
       // ตรวจสอบว่าเป็นข้อมูล EcuModel response หรือไม่
       if (_handleEcuModelResponse(dataString)) {
@@ -379,7 +395,20 @@ class BluetoothController extends GetxController {
       isSettingEcuModel.value = false;
 
       final modelValue = int.tryParse(match.group(1) ?? '0') ?? 0;
-      currentEcuModel.value = EcuModel.fromValue(modelValue);
+      final receivedModel = EcuModel.fromValue(modelValue);
+
+      // ถ้ากำลังรอ ack ของ model=0 และ Dongle ยืนยัน model=0 แล้ว
+      // ให้ยิง model ที่จำไว้ต่อเลย
+      if (_waitingForSimulationAck && receivedModel == EcuModel.simulation) {
+        _waitingForSimulationAck = false;
+        final savedModel = currentEcuModel.value;
+        logger.i('Simulation ack received, now sending saved model: ${savedModel.description}');
+        sendData('model=${savedModel.value}');
+        return true;
+      }
+
+      _waitingForSimulationAck = false;
+      currentEcuModel.value = receivedModel;
       isEcuModelSynced.value = true;
       _saveLastEcuModel(currentEcuModel.value);
 
@@ -442,6 +471,7 @@ class BluetoothController extends GetxController {
     writeCharacteristic = null;
     isEcuModelSynced.value = false;
     isSettingEcuModel.value = false;
+    _waitingForSimulationAck = false;
     _ecuModelTimeout?.cancel();
     ecuConnectionStatus.value = EcuConnectionStatus.noResponse;
     // Get.snackbar(
