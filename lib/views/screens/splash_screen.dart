@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/settings_controller.dart';
 import '../../services/permission_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -49,7 +50,8 @@ class _SplashScreenState extends State<SplashScreen>
       Future.delayed(const Duration(seconds: 3)),
       PermissionService.instance.checkAllPermissions(),
     ]).then((_) {
-      Get.offAllNamed('/template-1');
+      final settings = Get.find<SettingsController>();
+      Get.offAllNamed(settings.getDashboardRoute());
     });
   }
 
