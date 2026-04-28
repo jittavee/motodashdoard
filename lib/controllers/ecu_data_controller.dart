@@ -32,6 +32,8 @@ class ECUDataController extends GetxController {
       : currentData.value;
 
   Timer? _loggingTimer;
+  Timer? _uiThrottleTimer;
+  bool _pendingUIUpdate = false;
   final Map<String, double> _dataBuffer = {}; // Buffer สำหรับเก็บข้อมูลที่รับมาทีละตัว
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
@@ -51,6 +53,7 @@ class ECUDataController extends GetxController {
   void onClose() {
     _loggingTimer?.cancel();
     _playbackTimer?.cancel();
+    _uiThrottleTimer?.cancel();
     super.onClose();
   }
 
@@ -89,6 +92,8 @@ class ECUDataController extends GetxController {
         return;
       }
 
+      logger.d('Received ECU data - $key: $value');
+
       // Validate value bounds
       if (!_isValueInValidRange(key, value)) {
         logger.w('Value out of range for $key: $value');
@@ -98,8 +103,13 @@ class ECUDataController extends GetxController {
       // เก็บค่าลง buffer
       _dataBuffer[key] = value;
 
-      // อัพเดท UI ทันทีแบบ real-time (ไม่รอ averaging timer)
-      _updateUI();
+      // Throttle UI updates to max 20fps (50ms) for smooth animation
+      _pendingUIUpdate = true;
+      _uiThrottleTimer ??= Timer(const Duration(milliseconds: 50), () {
+        if (_pendingUIUpdate) _updateUI();
+        _uiThrottleTimer = null;
+        _pendingUIUpdate = false;
+      });
     } catch (e) {
       logger.e('Error parsing ECU data: $e');
     }
@@ -113,7 +123,7 @@ class ECUDataController extends GetxController {
       case 'SPEED': // km/h
         return value >= 0 && value <= 400;
       case 'WATER': // Water temp (°C)
-        return value >= -40 && value <= 200;
+        return value >= -40 && value <= 500;
       case 'AIR.T': // Air temp (°C)
         return value >= -40 && value <= 150;
       case 'MAP': // kPa
@@ -145,11 +155,8 @@ class ECUDataController extends GetxController {
       // สร้าง ECU Data object จาก buffer
       final newData = ECUData.fromJson(_dataBuffer);
 
-      // อัพเดทค่าใหม่ - Rxn จะ trigger Obx โดยอัตโนมัติ
       currentData.value = newData;
-      currentData.refresh(); // บังคับ refresh เพื่อให้แน่ใจว่า Obx จะ rebuild
 
-      // Debug: ยืนยันว่า currentData อัพเดทแล้ว
       logger.d('ECU UI Updated - RPM: ${newData.rpm}, Speed: ${newData.speed}, Water: ${newData.waterTemp}');
 
       // เพิ่มลงใน history (จำกัด 100 รายการ)

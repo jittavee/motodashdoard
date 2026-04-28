@@ -13,10 +13,10 @@ class AlertThreshold {
     required this.parameter,
     required this.minValue,
     required this.maxValue,
-    this.enabled = true,
-    this.soundAlert = true,
-    this.popupAlert = true,
-    this.flashAlert = true,
+    this.enabled = false,
+    this.soundAlert = false,
+    this.popupAlert = false,
+    this.flashAlert = false,
   });
 
   Map<String, dynamic> toMap() {
