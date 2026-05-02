@@ -37,7 +37,10 @@ class ECUDataController extends GetxController {
   Timer? _loggingTimer;
   Timer? _uiThrottleTimer;
   bool _pendingUIUpdate = false;
-  final Map<String, double> _dataBuffer = {}; // Buffer สำหรับเก็บข้อมูลที่รับมาทีละตัว
+  final Map<String, double> _dataBuffer = {};
+  // RPM throttle: buffer TECHO separately, flush to _dataBuffer at most every 200ms
+  Timer? _rpmThrottleTimer;
+  double? _pendingRpm;
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Valid ECU parameter keys
@@ -57,6 +60,7 @@ class ECUDataController extends GetxController {
     _loggingTimer?.cancel();
     _playbackTimer?.cancel();
     _uiThrottleTimer?.cancel();
+    _rpmThrottleTimer?.cancel();
     super.onClose();
   }
 
@@ -100,6 +104,23 @@ class ECUDataController extends GetxController {
       // Validate value bounds
       if (!_isValueInValidRange(key, value)) {
         logger.w('Value out of range for $key: $value');
+        return;
+      }
+
+      // RPM throttle: hold TECHO updates for 200ms before flushing to buffer
+      if (key == 'TECHO') {
+        _pendingRpm = value;
+        _rpmThrottleTimer ??= Timer(const Duration(milliseconds: 500), () {
+          if (_pendingRpm != null) _dataBuffer['TECHO'] = _pendingRpm!;
+          _rpmThrottleTimer = null;
+          _pendingRpm = null;
+          _pendingUIUpdate = true;
+          _uiThrottleTimer ??= Timer(const Duration(milliseconds: 50), () {
+            if (_pendingUIUpdate) _updateUI();
+            _uiThrottleTimer = null;
+            _pendingUIUpdate = false;
+          });
+        });
         return;
       }
 
