@@ -26,6 +26,9 @@ class ECUDataController extends GetxController {
   final RxDouble playbackSpeed = 1.0.obs;
   Timer? _playbackTimer;
 
+  // Simulation mode state
+  final RxBool isSimulating = false.obs;
+
   // Getter สำหรับข้อมูลที่แสดง (ใช้ playback data ถ้าอยู่ใน playback mode)
   ECUData? get displayData => isPlaybackMode.value
       ? (playbackLogs.isNotEmpty ? playbackLogs[playbackIndex.value] : null)

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../controllers/language_controller.dart';
 import '../../controllers/ecu_data_controller.dart';
 import '../../controllers/bluetooth_controller.dart';
+import '../../utils/debug_data_generator.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -226,6 +227,27 @@ class _SettingsScreenState extends State<SettingsScreen>
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () => _showLanguageDialog(context, languageController),
           ),
+          Obx(() => SwitchListTile(
+                secondary: Icon(
+                  Icons.bolt,
+                  color: ecuController.isSimulating.value ? Colors.orange : null,
+                ),
+                title: const Text('Simulation Mode'),
+                subtitle: Text(
+                  ecuController.isSimulating.value
+                      ? 'Running (15ms interval)'
+                      : 'Off',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: ecuController.isSimulating.value
+                        ? Colors.orange
+                        : Colors.grey,
+                  ),
+                ),
+                value: ecuController.isSimulating.value,
+                onChanged: (_) => ecuController.toggleSimulation(),
+              )),
+
           ListTile(
             leading: const Icon(Icons.info),
             title: Text('about'.tr),
