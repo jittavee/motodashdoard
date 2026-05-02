@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 /// Animated Gauge Needle Widget with Smooth Lerp Interpolation
 ///
@@ -6,8 +7,8 @@ import 'package:flutter/material.dart';
 /// แทนที่จะกระโดดแบบ digital step
 ///
 /// Features:
-/// - Frame-by-frame Linear Interpolation (Lerp)
-/// - Configurable animation duration and curve
+/// - Frame-by-frame Linear Interpolation (Lerp) via Ticker — ไม่ reset ทุกครั้งที่ค่าเปลี่ยน
+/// - lerpSpeed: ความเร็วในการไล่ตาม target (0.0–1.0 ต่อ frame, default 0.12)
 /// - Works with any gauge type (RPM, Speed, Temperature, etc.)
 class AnimatedGaugeNeedle extends StatefulWidget {
   /// ค่าเป้าหมาย (target value) ที่เข็มจะค่อยๆ เคลื่อนที่ไป
@@ -25,10 +26,12 @@ class AnimatedGaugeNeedle extends StatefulWidget {
   /// ช่วงการหมุนของเข็ม (degrees) - เช่น 240, 270, 320
   final double rotationRange;
 
-  /// ระยะเวลาของ animation (default: 300ms)
-  final Duration animationDuration;
+  /// ความเร็ว lerp ต่อ frame (0.0–1.0) — ค่าน้อย = สมูทกว่า, ค่ามาก = ตามเร็วกว่า
+  /// 0.12 ≈ ถึงเป้าใน ~150ms ที่ 60fps
+  final double lerpSpeed;
 
-  /// Curve ของ animation (default: easeInOut)
+  // ยังคง parameter เดิมไว้เพื่อ backward-compat (ไม่ได้ใช้งานใน lerp mode)
+  final Duration animationDuration;
   final Curve animationCurve;
 
   /// Widget builder สำหรับ render เข็มตามมุมที่คำนวณแล้ว
@@ -44,6 +47,7 @@ class AnimatedGaugeNeedle extends StatefulWidget {
     required this.offsetAngle,
     required this.rotationRange,
     required this.builder,
+    this.lerpSpeed = 0.02,
     this.animationDuration = const Duration(milliseconds: 300),
     this.animationCurve = Curves.easeInOut,
   });
@@ -54,8 +58,7 @@ class AnimatedGaugeNeedle extends StatefulWidget {
 
 class _AnimatedGaugeNeedleState extends State<AnimatedGaugeNeedle>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+  late Ticker _ticker;
   double _currentValue = 0;
 
   @override
@@ -63,59 +66,31 @@ class _AnimatedGaugeNeedleState extends State<AnimatedGaugeNeedle>
     super.initState();
     _currentValue = widget.targetValue;
 
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.animationDuration,
-    );
-
-    _animation = Tween<double>(
-      begin: _currentValue,
-      end: widget.targetValue,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.animationCurve,
-    ))
-      ..addListener(() {
-        setState(() {
-          _currentValue = _animation.value;
-        });
-      });
-
-    _controller.forward();
+    _ticker = createTicker(_onTick)..start();
   }
 
-  @override
-  void didUpdateWidget(AnimatedGaugeNeedle oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // เมื่อ targetValue เปลี่ยน ให้ animate ไปยังค่าใหม่
-    if (oldWidget.targetValue != widget.targetValue) {
-      // อัพเดท animation duration และ curve ถ้ามีการเปลี่ยนแปลง
-      if (oldWidget.animationDuration != widget.animationDuration) {
-        _controller.duration = widget.animationDuration;
+  void _onTick(Duration elapsed) {
+    final target = widget.targetValue;
+    if ((_currentValue - target).abs() < 0.5) {
+      // ถึงเป้าแล้ว ไม่ต้อง setState
+      if (_currentValue != target) {
+        setState(() => _currentValue = target);
       }
-
-      _animation = Tween<double>(
-        begin: _currentValue,
-        end: widget.targetValue,
-      ).animate(CurvedAnimation(
-        parent: _controller,
-        curve: widget.animationCurve,
-      ))
-        ..addListener(() {
-          setState(() {
-            _currentValue = _animation.value;
-          });
-        });
-
-      _controller.reset();
-      _controller.forward();
+      return;
     }
+    setState(() {
+      _currentValue = _lerpValue(_currentValue, target, widget.lerpSpeed);
+    });
+  }
+
+  /// Lerp ที่ปรับเร็วตามระยะห่าง — ยิ่งห่างยิ่งไวขึ้น แต่ใกล้เป้าจะนุ่มนวล
+  double _lerpValue(double current, double target, double t) {
+    return current + (target - current) * t;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ticker.dispose();
     super.dispose();
   }
 

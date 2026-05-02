@@ -110,7 +110,7 @@ class ECUDataController extends GetxController {
       // RPM throttle: hold TECHO updates for 200ms before flushing to buffer
       if (key == 'TECHO') {
         _pendingRpm = value;
-        _rpmThrottleTimer ??= Timer(const Duration(milliseconds: 500), () {
+        _rpmThrottleTimer ??= Timer(const Duration(milliseconds: 1000), () {
           if (_pendingRpm != null) _dataBuffer['TECHO'] = _pendingRpm!;
           _rpmThrottleTimer = null;
           _pendingRpm = null;
