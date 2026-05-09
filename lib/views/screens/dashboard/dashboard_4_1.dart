@@ -73,9 +73,9 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                       double pW(double p) => w * p;
                       double pH(double p) => h * p;
 
-                      final speedSize = pW(0.30);
-                      final smallSize = pW(0.115);
-                      final rightSize = pW(0.130);
+                      final speedSize = pW(0.40);
+                      final smallSize = pW(0.17);
+                      final rightSize = pW(0.2);
 
                       return Stack(
                         children: [
@@ -83,7 +83,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                           // ── Logo — บนกึ่งกลาง speed gauge
                           Positioned(
                             top: pH(0.02),
-                            left: pW(0.5) - speedSize * 0.28,
+                            left: pW(0.6) - speedSize * 0.28,
                             child: Image.asset(
                               'assets/ui-4/Component 2 logo.png',
                               width: speedSize * 0.56,
@@ -94,7 +94,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                           // Speed — กลาง
                           Positioned(
                             top: pH(0.5) - speedSize / 2,
-                            left: pW(0.5) - speedSize / 2,
+                            left: pW(0.6) - speedSize / 2,
                             child: Obx(() => SpeedArcGauge(
                                   value: gps.gpsSpeed.value,
                                   maxValue: 180,
@@ -102,10 +102,24 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                 )),
                           ),
 
+                          // ── AFR bar — กึ่งกลางใต้ speed gauge
+                          Positioned(
+                            top: pH(0.5) + speedSize / 2 + pH(0.05),
+                            left: pW(0.6) - speedSize * 0.45,
+                            child: Obx(() => AfrBarGauge(
+                                  value: ecu.displayData?.afr ?? 14.7,
+                                  minValue: 10,
+                                  maxValue: 18,
+                                  label: 'AFR',
+                                  width: speedSize * 0.9,
+                                  height: pH(0.05),
+                                )),
+                          ),
+                         
                           // ── ซ้าย row 1: IAT | ECT
                           Positioned(
                             top: pH(0.04),
-                            left: pW(0.01),
+                            left: pW(0),
                             child: Obx(() => ArcGauge(
                                   value: ecu.displayData?.airTemp ?? 0,
                                   maxValue: 80,
@@ -116,7 +130,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                           ),
                           Positioned(
                             top: pH(0.04),
-                            left: pW(0.135),
+                            left: pW(0.2),
                             child: Obx(() => ArcGauge(
                                   value: ecu.displayData?.waterTemp ?? 0,
                                   maxValue: 120,
@@ -129,7 +143,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                           // ── ซ้าย row 2: MAP | BATT
                           Positioned(
                             top: pH(0.37),
-                            left: pW(0.01),
+                            left: pW(0),
                             child: Obx(() => ArcGauge(
                                   value: ecu.displayData?.map ?? 0,
                                   maxValue: 200,
@@ -140,7 +154,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                           ),
                           Positioned(
                             top: pH(0.37),
-                            left: pW(0.135),
+                            left: pW(0.2),
                             child: Obx(() => ArcGauge(
                                   value: ecu.displayData?.battery ?? 0,
                                   maxValue: 16,
@@ -164,7 +178,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                           ),
                           Positioned(
                             top: pH(0.68),
-                            left: pW(0.135),
+                            left: pW(0.2),
                             child: Obx(() => ArcGauge(
                                   value: ecu.displayData?.inject ?? 0,
                                   maxValue: 20,
@@ -174,19 +188,6 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                 )),
                           ),
 
-                          // ── AFR bar — กึ่งกลางใต้ speed gauge
-                          Positioned(
-                            top: pH(0.5) + speedSize / 2 - pH(0.04),
-                            left: pW(0.5) - speedSize * 0.45,
-                            child: Obx(() => AfrBarGauge(
-                                  value: ecu.displayData?.afr ?? 14.7,
-                                  minValue: 10,
-                                  maxValue: 18,
-                                  label: 'AFR',
-                                  width: speedSize * 0.9,
-                                  height: pH(0.06),
-                                )),
-                          ),
 
                           // ── ขวา: RPM | TPS
                           Positioned(
@@ -208,7 +209,6 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                   maxValue: 100,
                                   label: 'TPS',
                                   unit: '%',
-                                  activeColor: const Color(0xFF00BFFF),
                                   size: rightSize,
                                 )),
                           ),

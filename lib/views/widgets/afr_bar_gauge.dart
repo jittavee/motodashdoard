@@ -110,7 +110,7 @@ class _AfrBarLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double labelFontSize = height * 0.9;
-    final double barHeight = height * 1.6;
+    final double barHeight = height * .6;
     final double labelAreaHeight = height * 1.4;
 
     return SizedBox(
@@ -173,99 +173,79 @@ class _ChevronBarPainter extends CustomPainter {
         ((animValue - minValue) / (maxValue - minValue)).clamp(0.0, 1.0);
     final int filledSegments = (filledFraction * segments).round();
 
-    // Each segment slot; the arrow tip overlaps into the next slot
-    final double tip = size.height * 0.30;
-    final double slotWidth = size.width / segments;
-    final double gap = 2.5;
+    final double h = size.height;
+    final double mid = h / 2;
 
-    // Build all paths first, then draw back-to-front so left segments sit on top
-    final List<Path> paths = [];
+    // skew: horizontal offset at top-left / bottom-right corners (parallelogram lean)
+    final double skew = h * 0.30;
+    final double gap = 10.0;
+    // pitch: distance between segment anchors
+    final double pitch = size.width / segments;
+    // visible body width of each parallelogram (before gap)
+    final double bodyW = pitch - gap;
+
     for (int i = 0; i < segments; i++) {
-      final double x0 = i * slotWidth;       // slot left
-      final double x1 = x0 + slotWidth;      // slot right (= tip base)
-      final double mid = size.height / 2;
-
-      final Path p = Path();
-      if (i == 0) {
-        // Flat left, pointed right
-        p.moveTo(x0 + gap, 0);
-        p.lineTo(x1 - gap, 0);
-        p.lineTo(x1 - gap + tip, mid);
-        p.lineTo(x1 - gap, size.height);
-        p.lineTo(x0 + gap, size.height);
-      } else if (i == segments - 1) {
-        // Notched left, flat right
-        p.moveTo(x0 - gap, 0);
-        p.lineTo(x1 - gap, 0);
-        p.lineTo(x1 - gap, size.height);
-        p.lineTo(x0 - gap, size.height);
-        p.lineTo(x0 - gap - tip, mid);
-      } else {
-        // Notched left, pointed right
-        p.moveTo(x0 - gap, 0);
-        p.lineTo(x1 - gap, 0);
-        p.lineTo(x1 - gap + tip, mid);
-        p.lineTo(x1 - gap, size.height);
-        p.lineTo(x0 - gap, size.height);
-        p.lineTo(x0 - gap - tip, mid);
-      }
-      p.close();
-      paths.add(p);
-    }
-
-    // Draw right-to-left so left segments paint over right ones (gap line visible)
-    for (int i = segments - 1; i >= 0; i--) {
       final bool active = i < filledSegments;
       final Color baseColor = active ? activeColor : inactiveColor;
-      final Path path = paths[i];
-      final double x0 = i * slotWidth;
+
+      // left anchor of this segment's bounding box
+      final double x = i * pitch;
+
+      // Parallelogram: top-left shifted right by skew, bottom-left flush
+      // top-left=(x+skew, 0), top-right=(x+bodyW+skew, 0)
+      // bottom-right=(x+bodyW, h), bottom-left=(x, h)
+      final Path p = Path()
+        ..moveTo(x + skew, 0)
+        ..lineTo(x + bodyW + skew, 0)
+        ..lineTo(x + bodyW, h)
+        ..lineTo(x, h)
+        ..close();
 
       // Fill
-      canvas.drawPath(path, Paint()..color = baseColor);
+      canvas.drawPath(p, Paint()..color = baseColor);
 
-      // Gradient
-      if (active) {
-        canvas.drawPath(
-          path,
-          Paint()
-            ..shader = LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white.withValues(alpha: 0.3),
-                Colors.transparent,
-                Colors.black.withValues(alpha: 0.15),
-              ],
-              stops: const [0.0, 0.5, 1.0],
-            ).createShader(Rect.fromLTWH(x0, 0, slotWidth + tip, size.height)),
-        );
-      }
+      // Gradient overlay
+      canvas.drawPath(
+        p,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white.withValues(alpha: active ? 0.30 : 0.08),
+              Colors.transparent,
+              Colors.black.withValues(alpha: active ? 0.20 : 0.10),
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ).createShader(Rect.fromLTWH(x, 0, bodyW + skew, h)),
+      );
 
-      // Number label centred in slot body
+      // Number label centred horizontally in the parallelogram body
       final int labelValue = (minValue + i).round();
       final TextPainter tp = TextPainter(
         text: TextSpan(
           text: labelValue.toString(),
           style: TextStyle(
             fontFamily: 'Ethnocentric',
-            fontSize: size.height * 0.50,
+            fontSize: h * 0.50,
             color: active
-                ? Colors.black.withValues(alpha: 0.80)
-                : Colors.white.withValues(alpha: 0.25),
+                ? Colors.black.withValues(alpha: 0.82)
+                : Colors.white.withValues(alpha: 0.30),
             fontWeight: FontWeight.bold,
           ),
         ),
         textDirection: TextDirection.ltr,
       );
       tp.layout();
-      final double cx = x0 + slotWidth / 2;
-      tp.paint(canvas, Offset(cx - tp.width / 2, size.height / 2 - tp.height / 2));
+      // visual centre of the parallelogram
+      final double cx = x + (bodyW + skew) / 2;
+      tp.paint(canvas, Offset(cx - tp.width / 2, mid - tp.height / 2));
 
-      // Border
+      // Black border
       canvas.drawPath(
-        path,
+        p,
         Paint()
-          ..color = Colors.black.withValues(alpha: 0.7)
+          ..color = Colors.black
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5,
       );
