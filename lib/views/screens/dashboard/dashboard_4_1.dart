@@ -84,7 +84,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                             left: pW(0.5) - gaugeSize / 2,
                             child: Obx(() => SpeedArcGauge(
                                   value: gps.gpsSpeed.value,
-                                  maxValue: 250,
+                                  maxValue: 180,
                                   size: gaugeSize,
                                 )),
                           ),
