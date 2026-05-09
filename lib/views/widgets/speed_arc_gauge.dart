@@ -67,17 +67,6 @@ class _SpeedArcGaugeState extends State<SpeedArcGauge>
   @override
   Widget build(BuildContext context) {
     final s = widget.size;
-    // คำนวณตำแหน่งปลาย arc (startAngle + sweepAngle) บน canvas ขนาด s×s
-    const startDeg = _SpeedArcPainter._startAngleDeg;
-    const sweepDeg = _SpeedArcPainter._sweepAngleDeg;
-    final endRad = (startDeg + sweepDeg) * pi / 180;
-    final radius = s * 0.44;
-    // จุดกึ่งกลาง canvas
-    final cx = s / 2;
-    final cy = s / 2;
-    // ตำแหน่งปลาย arc
-    final ex = cx + radius * cos(endRad);
-    final ey = cy + radius * sin(endRad);
 
     return AnimatedBuilder(
       animation: _anim,
@@ -85,18 +74,20 @@ class _SpeedArcGaugeState extends State<SpeedArcGauge>
         return SizedBox(
           width: s,
           height: s,
-          child: Stack(
-            children: [
-              CustomPaint(
-                size: Size(s, s),
-                painter: _SpeedArcPainter(
-                  value: _anim.value,
-                  maxValue: widget.maxValue,
-                  activeColor: widget.activeColor,
-                  inactiveColor: widget.inactiveColor,
-                ),
-                child: Center(
-                  child: Text(
+          child: CustomPaint(
+            size: Size(s, s),
+            painter: _SpeedArcPainter(
+              value: _anim.value,
+              maxValue: widget.maxValue,
+              activeColor: widget.activeColor,
+              inactiveColor: widget.inactiveColor,
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
                     _anim.value.toInt().toString(),
                     style: TextStyle(
                       fontFamily: 'Digital7',
@@ -106,22 +97,18 @@ class _SpeedArcGaugeState extends State<SpeedArcGauge>
                       height: 1.0,
                     ),
                   ),
-                ),
-              ),
-              // km/h วางที่ปลาย arc, ตัวหนังสืออ่านได้ปกติ
-              Positioned(
-                left: ex - s *  0.01,
-                top: ey + s * 0.04,
-                child: Text(
-                  '${widget.maxValue.toInt()}',
-                  style: TextStyle(
-                    fontFamily: 'Miamagon',
-                    fontSize: s * 0.07,
-                    color: const Color(0xFFFF6522),
+                  Text(
+                    'km/h',
+                    style: TextStyle(
+                      fontFamily: 'Ethnocentric',
+                      fontSize: s * 0.06,
+                      color: const Color(0xFFFF6522),
+                      height: 1.0,
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
