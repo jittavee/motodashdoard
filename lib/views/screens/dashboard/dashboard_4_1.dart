@@ -11,6 +11,7 @@ import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
 import '../../widgets/raw_data_overlay.dart';
 import '../../widgets/speed_arc_gauge.dart';
+import '../../widgets/afr_bar_gauge.dart';
 
 class TemplateFourOneScreen extends StatefulWidget {
   const TemplateFourOneScreen({super.key});
@@ -79,6 +80,17 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                       return Stack(
                         children: [
                           
+                          // ── Logo — บนกึ่งกลาง speed gauge
+                          Positioned(
+                            top: pH(0.02),
+                            left: pW(0.5) - speedSize * 0.28,
+                            child: Image.asset(
+                              'assets/ui-4/Component 2 logo.png',
+                              width: speedSize * 0.56,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+
                           // Speed — กลาง
                           Positioned(
                             top: pH(0.5) - speedSize / 2,
@@ -98,7 +110,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                   value: ecu.displayData?.airTemp ?? 0,
                                   maxValue: 80,
                                   label: 'IAT',
-                                  unit: 'C',
+                                  unit: 'c.',
                                   size: smallSize,
                                 )),
                           ),
@@ -109,7 +121,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                   value: ecu.displayData?.waterTemp ?? 0,
                                   maxValue: 120,
                                   label: 'ECT',
-                                  unit: 'C',
+                                  unit: 'c.',
                                   size: smallSize,
                                 )),
                           ),
@@ -122,7 +134,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                   value: ecu.displayData?.map ?? 0,
                                   maxValue: 200,
                                   label: 'MAP',
-                                  unit: 'kPa',
+                                  unit: 'kPa.',
                                   size: smallSize,
                                 )),
                           ),
@@ -133,7 +145,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                   value: ecu.displayData?.battery ?? 0,
                                   maxValue: 16,
                                   label: 'BATT',
-                                  unit: 'V',
+                                  unit: 'V.',
                                   size: smallSize,
                                 )),
                           ),
@@ -146,7 +158,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                   value: ecu.displayData?.ignition ?? 0,
                                   maxValue: 60,
                                   label: 'IGN',
-                                  unit: 'Deg',
+                                  unit: 'Deg.',
                                   size: smallSize,
                                 )),
                           ),
@@ -159,6 +171,20 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                                   label: 'INJ',
                                   unit: 'ms',
                                   size: smallSize,
+                                )),
+                          ),
+
+                          // ── AFR bar — กึ่งกลางใต้ speed gauge
+                          Positioned(
+                            top: pH(0.5) + speedSize / 2 - pH(0.04),
+                            left: pW(0.5) - speedSize * 0.45,
+                            child: Obx(() => AfrBarGauge(
+                                  value: ecu.displayData?.afr ?? 14.7,
+                                  minValue: 10,
+                                  maxValue: 18,
+                                  label: 'AFR',
+                                  width: speedSize * 0.9,
+                                  height: pH(0.06),
                                 )),
                           ),
 
