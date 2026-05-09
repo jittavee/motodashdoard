@@ -165,27 +165,22 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                                   // Speed value display
                                   Obx(() {
                                     final speed = gpsSpeedController.gpsSpeed.value;
-                                    return Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          speed.toInt().toString(),
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: bgHeight * 0.15,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Ethnocentric',
+                                    return Transform.translate(
+                                      offset: Offset(0, -bgHeight * 0.05),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            speed.toInt().toString(),
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: bgHeight * 0.15,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'Ethnocentric',
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          'km/h',
-                                          style: TextStyle(
-                                            color: Color(0xFFFF6522),
-                                            fontSize: bgHeight * 0.05,
-                                            fontFamily: 'Ethnocentric',
-                                          ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     );
                                   }),
                                 ],
@@ -255,11 +250,11 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
           ),
         ),
         // History Button (Top Right - before Settings)
-        const Positioned(
-          top: 10,
-          right: 60,
-          child: HistoryButton(),
-        ),
+        // const Positioned(
+        //   top: 10,
+        //   right: 60,
+        //   child: HistoryButton(),
+        // ),
         // Settings Button (Top Right) - ยึดมุมขวาบนของจอ
         const Positioned(
           top: 10,
