@@ -168,23 +168,33 @@ class _ArcPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width * 0.44;
+    final radius = size.width * 0.38;
     final strokeW = size.width * 0.07;
-    final gapFraction = 0.18; // gap between segments as fraction of segment arc
+    final gapFraction = 0.18;
 
     final filledFraction = (value / maxValue).clamp(0.0, 1.0);
     final filledSegments = (filledFraction * segments).round();
 
     final totalArcRad = sweepAngleDeg * pi / 180;
     final segArc = totalArcRad / segments;
-    final gapArc = segArc * gapFraction;
-    final drawArc = segArc - gapArc;
-
+    final drawArc = segArc * (1 - gapFraction);
     final startRad = startAngleDeg * pi / 180;
 
-    // white outer segment layer
-    final outerRadius = radius + strokeW * 1.05;
-    final outerStrokeW = strokeW * 0.55;
+    // เส้นรอบนอกสุด — ตามช่วง arc เดียวกับ segment
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius + strokeW * 1.1),
+      startRad,
+      totalArcRad,
+      false,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.width * 0.012,
+    );
+
+    // white segment layer — ระหว่างเส้นรอบนอกกับ active arc
+    final outerRadius = radius + strokeW * 0.6;
+    final outerStrokeW = strokeW * 0.45;
     for (int i = 0; i < segments; i++) {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: outerRadius),
@@ -199,34 +209,20 @@ class _ArcPainter extends CustomPainter {
       );
     }
 
+    // segments
     for (int i = 0; i < segments; i++) {
-      final segStart = startRad + i * segArc;
-      final paint = Paint()
-        ..color = i < filledSegments ? activeColor : inactiveColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeW
-        ..strokeCap = StrokeCap.butt;
-
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
-        segStart,
+        startRad + i * segArc,
         drawArc,
         false,
-        paint,
+        Paint()
+          ..color = i < filledSegments ? activeColor : inactiveColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeW
+          ..strokeCap = StrokeCap.butt,
       );
     }
-
-    // Thin outer ring
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius + strokeW * 0.65),
-      startRad,
-      totalArcRad,
-      false,
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.15)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = size.width * 0.008,
-    );
   }
 
   @override
