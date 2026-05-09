@@ -182,6 +182,23 @@ class _ArcPainter extends CustomPainter {
 
     final startRad = startAngleDeg * pi / 180;
 
+    // white outer segment layer
+    final outerRadius = radius + strokeW * 1.05;
+    final outerStrokeW = strokeW * 0.55;
+    for (int i = 0; i < segments; i++) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: outerRadius),
+        startRad + i * segArc,
+        drawArc,
+        false,
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.75)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = outerStrokeW
+          ..strokeCap = StrokeCap.butt,
+      );
+    }
+
     for (int i = 0; i < segments; i++) {
       final segStart = startRad + i * segArc;
       final paint = Paint()
