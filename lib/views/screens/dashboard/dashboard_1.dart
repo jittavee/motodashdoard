@@ -21,7 +21,10 @@ class TemplateOneScreen extends StatefulWidget {
   State<TemplateOneScreen> createState() => _TemplateOneScreenState();
 }
 
-class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindingObserver {
+class _TemplateOneScreenState extends State<TemplateOneScreen>
+    with WidgetsBindingObserver {
+  double _topSpeed = 0;
+
   @override
   void initState() {
     super.initState();
@@ -60,182 +63,199 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
       body: SafeArea(
         child: Stack(
           children: [
-            // Background with AspectRatio - widgets scale with image
+            // Background with FittedBox - scales 1920x1080 canvas to fit any screen
             Center(
-              child: AspectRatio(
-                aspectRatio: 1920 / 1080, // ใส่ตาม aspect ratio ของ background.png
-                child: Container(
-                  color: Colors.red,
-                  child: LayoutBuilder(
-                    builder: (context, imageConstraints) {
-                      final imageWidth = imageConstraints.maxWidth;
-                      final imageHeight = imageConstraints.maxHeight;
-                  
-                      // Helper functions for positioning
-                      double pxW(double percent) => imageWidth * percent;
-                      double pxH(double percent) => imageHeight * percent;
-                  
-                      // ขนาดเข็ม RPM และ Speed (เป็น % ของความสูงภาพ)
-                      final rpmNeedleSize = pxH(0.22);  // ~85px ที่ 1080p
-                      final speedNeedleSize = pxH(0.13); // ~50px ที่ 1080p
-                  
-                      return Stack(
-                        children: [
-                          // TPS Progress Bar (below image)
-                          Positioned(
-                            bottom: pxH(0.25),
-                            right: pxW(.11),
-                            child: Obx(() {
-                              final tps = ecuController.displayData?.tps ?? 0;
-                              return Container(
-                                width: pxW(0.165),
-                                height: pxH(0.04),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withValues(alpha: 0.5),
-                                ),
-                                child: _buildTPSProgressBar(tps),
-                              );
-                            }),
-                          ),
-                  
-                          // Background Image
-                          Positioned.fill(
-                            child: Image.asset(
-                              'assets/ui-1/background.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                    
-                          // Main Gauge (RPM)
-                          Positioned(
-                            top: pxH(0.51),
-                            left: pxW(0.47),
-                            child: Obx(() {
-                              final rpm = ecuController.displayData?.rpm ?? 0;
-                              return AnimatedGaugeNeedle(
-                                targetValue: rpm,
-                                maxValue: 15000,
-                                size: rpmNeedleSize,
-                                offsetAngle: 140.0 - 135,
-                                rotationRange: 240.0,
-                                animationDuration: const Duration(milliseconds: 300),
-                                animationCurve: Curves.easeInOut,
-                                builder: (angle, currentValue) {
-                                  return SizedBox(
-                                    width: rpmNeedleSize,
-                                    height: rpmNeedleSize,
-                                    child: Transform.rotate(
-                                      angle: angle * (pi / 180),
-                                      alignment: Alignment(0, -1),
-                                      child: Image.asset(
-                                        'assets/ui-1/needle.png',
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }),
-                          ),
-                  
-                          Positioned(
-                            bottom: pxH(0.3),
-                            right: pxW(0.12),
-                            child: Obx(() {
-                              final rpm = ecuController.displayData?.rpm ?? 0;
-                              return _buildNumberRPM(rpm: rpm, imageHeight: imageHeight);
-                            }),
-                          ),
-                  
-                          // Speed Gauge
-                          Positioned(
-                            top: pxH(0.52),
-                            left: pxW(0.26),
-                            child: Obx(() {
-                              final speed = gpsSpeedController.gpsSpeed.value;
-                              return AnimatedGaugeNeedle(
-                                targetValue: speed,
-                                maxValue: 250,
-                                size: speedNeedleSize,
-                                offsetAngle: 100.0 - 135,
-                                rotationRange: 247.0,
-                                animationDuration: const Duration(milliseconds: 300),
-                                animationCurve: Curves.easeInOut,
-                                builder: (angle, currentValue) {
-                                  return SizedBox(
-                                    width: speedNeedleSize,
-                                    height: speedNeedleSize,
-                                    child: Transform.rotate(
-                                      angle: angle * (pi / 180),
-                                      alignment: Alignment(0, -1),
-                                      child: Image.asset(
-                                        'assets/ui-1/needle.png',
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }),
-                          ),
-                  
-                          // Top Speed Number Display
-                          Positioned(
-                            top: pxH(0.44),
-                            left: pxW(0.05),
-                            child: Obx(() {
-                              final speed = gpsSpeedController.gpsSpeed.value;
-                              return _buildSpeedometer(speed, imageHeight: imageHeight);
-                            }),
-                          ),
-                  
-                          // Data Display (Left Side)
-                          Positioned(
-                            top: pxH(0.5),
-                            left: pxW(0.13),
-                            child: Container(
-                              height: pxH(0.26),
-                              padding: EdgeInsets.all(pxH(0.03)),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: 2412,
+                  height: 1080,
+                  child: Container(
+                    color: Colors.transparent,
+                    child: LayoutBuilder(
+                      builder: (context, imageConstraints) {
+                        final imageWidth = imageConstraints.maxWidth;
+                        final imageHeight = imageConstraints.maxHeight;
+
+                        // Helper functions for positioning
+                        double pxW(double percent) => imageWidth * percent;
+                        double pxH(double percent) => imageHeight * percent;
+
+                        // ขนาดเข็ม RPM และ Speed (เป็น % ของความสูงภาพ)
+                        final rpmNeedleSize = pxH(0.22); // ~85px ที่ 1080p
+                        final speedNeedleSize = pxH(0.13); // ~50px ที่ 1080p
+
+                        return Stack(
+                          children: [
+                            // TPS Progress Bar (below image)
+                            Positioned(
+                              bottom: pxH(0.18),
+                              right: pxW(.086),
                               child: Obx(() {
-                                final data = ecuController.displayData;
-                                return _buildLedtDataPanel(data, imageHeight: imageHeight);
+                                final tps = ecuController.displayData?.tps ?? 0;
+                                return Container(
+                                  width: pxW(0.165),
+                                  height: pxH(0.05),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withValues(alpha: 0.5),
+                                  ),
+                                  child: _buildTPSProgressBar(tps),
+                                );
                               }),
                             ),
-                          ),
-                  
-                          // Data Display (Right Side)
-                          Positioned(
-                            bottom: pxH(0.48),
-                            right: pxW(0.18),
-                            child: SizedBox(
-                              height: pxH(0.23),
+
+                            // Background Image
+                            Positioned.fill(
+                              child: Image.asset(
+                                'assets/ui-1/background.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+
+                            // Main Gauge (RPM)
+                            Positioned(
+                              top: pxH(0.52),
+                              left: pxW(0.5),
                               child: Obx(() {
-                                final data = ecuController.displayData;
-                                return _buildSecondaryDataPanel(data, imageHeight: imageHeight);
+                                final rpm = ecuController.displayData?.rpm ?? 0;
+                                return AnimatedGaugeNeedle(
+                                  targetValue: rpm,
+                                  maxValue: 15000,
+                                  size: rpmNeedleSize,
+                                  offsetAngle: 140.0 - 135,
+                                  rotationRange: 240.0,
+                                  animationDuration: const Duration(
+                                    milliseconds: 300,
+                                  ),
+                                  animationCurve: Curves.easeInOut,
+                                  builder: (angle, currentValue) {
+                                    return SizedBox(
+                                      width: rpmNeedleSize,
+                                      height: rpmNeedleSize,
+                                      child: Transform.rotate(
+                                        angle: angle * (pi / 180),
+                                        alignment: Alignment(0, -1),
+                                        child: Image.asset(
+                                          'assets/ui-1/needle.png',
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
                               }),
                             ),
-                          ),
-                        ],
-                      );
-                    },
+
+                            Positioned(
+                              bottom: pxH(0.27),
+                              right: pxW(0.12),
+                              child: Obx(() {
+                                final rpm = ecuController.displayData?.rpm ?? 0;
+                                return _buildNumberRPM(
+                                  rpm: rpm,
+                                  imageHeight: imageHeight,
+                                );
+                              }),
+                            ),
+
+                            // Speed Gauge
+                            Positioned(
+                              top: pxH(0.53),
+                              left: pxW(0.28),
+                              child: Obx(() {
+                                final speed = gpsSpeedController.gpsSpeed.value;
+                                return AnimatedGaugeNeedle(
+                                  targetValue: speed,
+                                  maxValue: 250,
+                                  size: speedNeedleSize,
+                                  offsetAngle: 100.0 - 135,
+                                  rotationRange: 247.0,
+                                  animationDuration: const Duration(
+                                    milliseconds: 300,
+                                  ),
+                                  animationCurve: Curves.easeInOut,
+                                  builder: (angle, currentValue) {
+                                    return SizedBox(
+                                      width: speedNeedleSize,
+                                      height: speedNeedleSize,
+                                      child: Transform.rotate(
+                                        angle: angle * (pi / 180),
+                                        alignment: Alignment(0, -1),
+                                        child: Image.asset(
+                                          'assets/ui-1/needle.png',
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }),
+                            ),
+
+                            // Top Speed Number Display
+                            Positioned(
+                              top: pxH(0.44),
+                              left: pxW(0.05),
+                              child: Obx(() {
+                                final speed = gpsSpeedController.gpsSpeed.value;
+                                return _buildSpeedometer(
+                                  speed,
+                                  imageHeight: imageHeight,
+                                );
+                              }),
+                            ),
+
+                            // Data Display (Left Side)
+                            Positioned(
+                              top: pxH(0.55),
+                              left: pxW(0.16),
+                              child: Container(
+                                color: Colors.transparent,
+                                height: pxH(0.21),
+                                child: Obx(() {
+                                  final data = ecuController.displayData;
+                                  return _buildLedtDataPanel(
+                                    data,
+                                    imageHeight: imageHeight,
+                                  );
+                                }),
+                              ),
+                            ),
+
+                            // Data Display (Right Side)
+                            Positioned(
+                              bottom: pxH(0.55),
+                              right: pxW(0.145),
+                              child: Container(
+                                color: Colors.transparent,
+                                height: pxH(0.16),
+                                child: Obx(() {
+                                  final data = ecuController.displayData;
+                                  return _buildSecondaryDataPanel(
+                                    data,
+                                    imageHeight: imageHeight,
+                                  );
+                                }),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
 
             // History Button (Top Right - before Settings)
-            const Positioned(
-              top: 10,
-              left: 60,
-              child: HistoryButton(),
-            ),
+            // const Positioned(
+            //   top: 10,
+            //   left: 60,
+            //   child: HistoryButton(),
+            // ),
 
             // Settings Button (Top Right) - outside AspectRatio
-            const Positioned(
-              top: 10,
-              right: 10,
-              child: SettingsButton(),
-            ),
+            const Positioned(top: 10, right: 10, child: SettingsButton()),
 
             // Recording Indicator (Top Center)
             const Positioned(
@@ -246,18 +266,10 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
             ),
 
             // ECU Status Indicator (Bottom Left)
-            const Positioned(
-              bottom: 10,
-              left: 10,
-              child: EcuStatusIndicator(),
-            ),
+            const Positioned(bottom: 10, left: 10, child: EcuStatusIndicator()),
 
             // Raw Data Overlay (Bottom Right)
-            const Positioned(
-              bottom: 40,
-              right: 10,
-              child: RawDataOverlay(),
-            ),
+            const Positioned(bottom: 40, right: 10, child: RawDataOverlay()),
 
             // Performance Test Indicator (Bottom Right)
             const Positioned(
@@ -281,22 +293,31 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
 
   /// Left Data Panel
   Column _buildLedtDataPanel(ECUData? data, {required double imageHeight}) {
-    final fontSize = imageHeight * 0.034;
+    final fontSize = imageHeight * 0.033;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildDataRow(data?.map.toStringAsFixed(0) ?? '0', fontSize: fontSize),
-        _buildDataRow(data?.battery.toStringAsFixed(1) ?? '0', fontSize: fontSize),
-        _buildDataRow(data?.airTemp.toStringAsFixed(0) ?? '0', fontSize: fontSize),
-        _buildDataRow(data?.waterTemp.toStringAsFixed(0) ?? '0', fontSize: fontSize),
+        _buildDataRow(
+          data?.battery.toStringAsFixed(1) ?? '0',
+          fontSize: fontSize,
+        ),
+        _buildDataRow(
+          data?.airTemp.toStringAsFixed(0) ?? '0',
+          fontSize: fontSize,
+        ),
+        _buildDataRow(
+          data?.waterTemp.toStringAsFixed(0) ?? '0',
+          fontSize: fontSize,
+        ),
       ],
     );
   }
 
   /// RPM Number Display
   Widget _buildNumberRPM({required double rpm, required double imageHeight}) {
-    final fontSize = imageHeight * 0.05;
+    final fontSize = imageHeight * 0.07;
     return Container(
       width: imageHeight * 0.3,
       height: imageHeight * 0.08,
@@ -311,13 +332,18 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
 
   /// Speedometer Display
   Widget _buildSpeedometer(double speed, {required double imageHeight}) {
-    final fontSize = imageHeight * 0.06;
+    if (speed > _topSpeed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() => _topSpeed = speed);
+      });
+    }
+    final fontSize = imageHeight * 0.07;
     return Container(
       width: imageHeight * 0.18,
       height: imageHeight * 0.1,
       alignment: Alignment.centerRight,
       child: Text(
-        speed.toInt().toString(),
+        _topSpeed.toInt().toString(),
         style: TextStyle(
           color: Colors.white,
           fontSize: fontSize,
@@ -329,15 +355,19 @@ class _TemplateOneScreenState extends State<TemplateOneScreen> with WidgetsBindi
 
   /// Right Data Panel
   Widget _buildSecondaryDataPanel(dynamic data, {required double imageHeight}) {
-    final fontSize = imageHeight * 0.035;
+    final fontSize = imageHeight * 0.045;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildDataRow(data?.ignition.toStringAsFixed(1) ?? '0', fontSize: fontSize),
-        _buildDataRow(data?.inject.toStringAsFixed(1) ?? '0', fontSize: fontSize),
-        _buildDataRow(data?.tps.toStringAsFixed(0) ?? '0', fontSize: fontSize),
-        _buildDataRow(data?.afr.toStringAsFixed(1) ?? '0', fontSize: fontSize),
+        _buildDataRow(
+          data?.ignition.toStringAsFixed(1) ?? '0',
+          fontSize: fontSize,
+        ),
+        _buildDataRow(
+          data?.inject.toStringAsFixed(1) ?? '0',
+          fontSize: fontSize,
+        ),
       ],
     );
   }
