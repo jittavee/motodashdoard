@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../../controllers/ecu_data_controller.dart';
 import '../../../controllers/gps_speed_controller.dart';
+import '../../widgets/arc_gauge.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
@@ -49,6 +51,7 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
 
   @override
   Widget build(BuildContext context) {
+    final ecu = Get.find<ECUDataController>();
     final gps = Get.find<GpsSpeedController>();
 
     return Scaffold(
@@ -69,23 +72,118 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
                       double pW(double p) => w * p;
                       double pH(double p) => h * p;
 
-                      final gaugeSize = pW(0.30);
+                      final speedSize = pW(0.30);
+                      final smallSize = pW(0.115);
+                      final rightSize = pW(0.130);
 
                       return Stack(
                         children: [
-                          // Positioned.fill(
-                          //   child: Image.asset(
-                          //     'assets/ui-4/00401.png',
-                          //     fit: BoxFit.fill,
-                          //   ),
-                          // ),
+                          
+                          // Speed — กลาง
                           Positioned(
-                            top: pH(0.5) - gaugeSize / 2,
-                            left: pW(0.5) - gaugeSize / 2,
+                            top: pH(0.5) - speedSize / 2,
+                            left: pW(0.5) - speedSize / 2,
                             child: Obx(() => SpeedArcGauge(
                                   value: gps.gpsSpeed.value,
                                   maxValue: 180,
-                                  size: gaugeSize,
+                                  size: speedSize,
+                                )),
+                          ),
+
+                          // ── ซ้าย row 1: IAT | ECT
+                          Positioned(
+                            top: pH(0.04),
+                            left: pW(0.01),
+                            child: Obx(() => ArcGauge(
+                                  value: ecu.displayData?.airTemp ?? 0,
+                                  maxValue: 80,
+                                  label: 'IAT',
+                                  unit: 'C',
+                                  size: smallSize,
+                                )),
+                          ),
+                          Positioned(
+                            top: pH(0.04),
+                            left: pW(0.135),
+                            child: Obx(() => ArcGauge(
+                                  value: ecu.displayData?.waterTemp ?? 0,
+                                  maxValue: 120,
+                                  label: 'ECT',
+                                  unit: 'C',
+                                  size: smallSize,
+                                )),
+                          ),
+
+                          // ── ซ้าย row 2: MAP | BATT
+                          Positioned(
+                            top: pH(0.37),
+                            left: pW(0.01),
+                            child: Obx(() => ArcGauge(
+                                  value: ecu.displayData?.map ?? 0,
+                                  maxValue: 200,
+                                  label: 'MAP',
+                                  unit: 'kPa',
+                                  size: smallSize,
+                                )),
+                          ),
+                          Positioned(
+                            top: pH(0.37),
+                            left: pW(0.135),
+                            child: Obx(() => ArcGauge(
+                                  value: ecu.displayData?.battery ?? 0,
+                                  maxValue: 16,
+                                  label: 'BATT',
+                                  unit: 'V',
+                                  size: smallSize,
+                                )),
+                          ),
+
+                          // ── ซ้าย row 3: IGN | INJ
+                          Positioned(
+                            top: pH(0.68),
+                            left: pW(0.01),
+                            child: Obx(() => ArcGauge(
+                                  value: ecu.displayData?.ignition ?? 0,
+                                  maxValue: 60,
+                                  label: 'IGN',
+                                  unit: 'Deg',
+                                  size: smallSize,
+                                )),
+                          ),
+                          Positioned(
+                            top: pH(0.68),
+                            left: pW(0.135),
+                            child: Obx(() => ArcGauge(
+                                  value: ecu.displayData?.inject ?? 0,
+                                  maxValue: 20,
+                                  label: 'INJ',
+                                  unit: 'ms',
+                                  size: smallSize,
+                                )),
+                          ),
+
+                          // ── ขวา: RPM | TPS
+                          Positioned(
+                            top: pH(0.04),
+                            right: pW(0.01),
+                            child: Obx(() => ArcGauge(
+                                  value: (ecu.displayData?.rpm ?? 0) / 1000,
+                                  maxValue: 15,
+                                  label: 'RPM',
+                                  unit: 'x1000R/M',
+                                  size: rightSize,
+                                )),
+                          ),
+                          Positioned(
+                            top: pH(0.55),
+                            right: pW(0.01),
+                            child: Obx(() => ArcGauge(
+                                  value: ecu.displayData?.tps ?? 0,
+                                  maxValue: 100,
+                                  label: 'TPS',
+                                  unit: '%',
+                                  activeColor: const Color(0xFF00BFFF),
+                                  size: rightSize,
                                 )),
                           ),
                         ],
