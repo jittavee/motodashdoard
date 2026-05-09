@@ -68,47 +68,88 @@ class _SpeedArcGaugeState extends State<SpeedArcGauge>
   Widget build(BuildContext context) {
     final s = widget.size;
 
+    // ตำแหน่งปลาย arc สำหรับ maxValue label
+    const startDeg = _SpeedArcPainter._startAngleDeg;
+    const sweepDeg = _SpeedArcPainter._sweepAngleDeg;
+    final startRad = startDeg * pi / 180;
+    final endRad = (startDeg + sweepDeg) * pi / 180;
+    final radius = s * 0.44;
+    final sx = s / 2 + radius * cos(startRad);
+    final sy = s / 2 + radius * sin(startRad);
+    final ex = s / 2 + radius * cos(endRad);
+    final ey = s / 2 + radius * sin(endRad);
+
     return AnimatedBuilder(
       animation: _anim,
       builder: (_, __) {
         return SizedBox(
           width: s,
           height: s,
-          child: CustomPaint(
-            size: Size(s, s),
-            painter: _SpeedArcPainter(
-              value: _anim.value,
-              maxValue: widget.maxValue,
-              activeColor: widget.activeColor,
-              inactiveColor: widget.inactiveColor,
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    _anim.value.toInt().toString(),
-                    style: TextStyle(
-                      fontFamily: 'Digital7',
-                      fontSize: s * 0.28,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      height: 1.0,
-                    ),
+          child: Stack(
+            children: [
+              CustomPaint(
+                size: Size(s, s),
+                painter: _SpeedArcPainter(
+                  value: _anim.value,
+                  maxValue: widget.maxValue,
+                  activeColor: widget.activeColor,
+                  inactiveColor: widget.inactiveColor,
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        _anim.value.toInt().toString(),
+                        style: TextStyle(
+                          fontFamily: 'Digital7',
+                          fontSize: s * 0.28,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          height: 1.0,
+                        ),
+                      ),
+                      Text(
+                        'km/h',
+                        style: TextStyle(
+                          fontFamily: 'Ethnocentric',
+                          fontSize: s * 0.06,
+                          color: const Color(0xFFFF6522),
+                          height: 1.0,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    'km/h',
-                    style: TextStyle(
-                      fontFamily: 'Ethnocentric',
-                      fontSize: s * 0.06,
-                      color: const Color(0xFFFF6522),
-                      height: 1.0,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              // 0 ที่ต้น arc
+              Positioned(
+                left: sx - s * 0.04,
+                top: sy - s * 0.10,
+                child: Text(
+                  '0',
+                  style: TextStyle(
+                    fontFamily: 'Ethnocentric',
+                    fontSize: s * 0.07,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+              // maxValue ที่ปลาย arc
+              Positioned(
+                left: ex - s * 0.04,
+                top: ey + s * 0.02,
+                child: Text(
+                  '${widget.maxValue.toInt()}',
+                  style: TextStyle(
+                    fontFamily: 'Ethnocentric',
+                    fontSize: s * 0.07,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
