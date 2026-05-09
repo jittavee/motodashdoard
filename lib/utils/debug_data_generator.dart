@@ -217,7 +217,7 @@ class DebugDataGenerator {
       _timer?.cancel();
       int tick = 0;
 
-      _timer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
+      _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
         tick++;
 
         // Simulate a realistic running engine with fast-changing values

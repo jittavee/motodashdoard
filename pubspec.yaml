@@ -125,6 +125,9 @@ flutter:
   - family: Digital7
     fonts:
       - asset: assets/fonts/digital-7.ttf
+  - family: Miamagon
+    fonts:
+      - asset: assets/fonts/Miamagon.otf
 
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
