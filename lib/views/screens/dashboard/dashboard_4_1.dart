@@ -73,12 +73,12 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
 
                       return Stack(
                         children: [
-                          Positioned.fill(
-                            child: Image.asset(
-                              'assets/ui-4/00401.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
+                          // Positioned.fill(
+                          //   child: Image.asset(
+                          //     'assets/ui-4/00401.png',
+                          //     fit: BoxFit.fill,
+                          //   ),
+                          // ),
                           Positioned(
                             top: pH(0.5) - gaugeSize / 2,
                             left: pW(0.5) - gaugeSize / 2,

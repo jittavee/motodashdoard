@@ -145,8 +145,24 @@ class _SpeedArcPainter extends CustomPainter {
     final drawRad = segRad - gapRad;
     final startRad = _startAngleDeg * pi / 180;
 
+    // white outer layer — same segment shape, larger radius
+    final outerRadius = radius + strokeW * 1.05;
+    final outerStrokeW = strokeW * 0.55;
     for (int i = 0; i < _segments; i++) {
-      // สีไล่ระดับตาม segment: เขียว → เหลือง → ส้ม → แดง
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: outerRadius),
+        startRad + i * segRad,
+        drawRad,
+        false,
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.75)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = outerStrokeW
+          ..strokeCap = StrokeCap.butt,
+      );
+    }
+
+    for (int i = 0; i < _segments; i++) {
       final color = i < filledSegments
           ? _segmentColor(i, _segments)
           : inactiveColor;
