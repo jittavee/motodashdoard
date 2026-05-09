@@ -308,11 +308,11 @@ class _TemplateFourScreenState extends State<TemplateFourScreen>
               ),
             ),
             // History Button (Top Right - before Settings)
-            const Positioned(
-              top: 10,
-              right: 60,
-              child: HistoryButton(),
-            ),
+            // const Positioned(
+            //   top: 10,
+            //   right: 60,
+            //   child: HistoryButton(),
+            // ),
             // Settings Button (Top Right) - ยึดมุมขวาบนของจอ
             const Positioned(
               top: 10,

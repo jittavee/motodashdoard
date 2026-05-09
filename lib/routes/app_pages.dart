@@ -11,7 +11,7 @@ import '../views/screens/performance_test_screen.dart';
 import '../views/screens/dashboard/dashboard_1.dart';
 import '../views/screens/dashboard/dashboard_2.dart';
 import '../views/screens/dashboard/dashboard_3.dart';
-import '../views/screens/dashboard/dashboard_4.dart';
+import '../views/screens/dashboard/dashboard_4_1.dart';
 import '../views/screens/dashboard/dashboard_5.dart';
 import 'app_routes.dart';
 
@@ -69,7 +69,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.template4,
-      page: () => const TemplateFourScreen(),
+      page: () => const TemplateFourOneScreen(),
     ),
     GetPage(
       name: AppRoutes.template5,
