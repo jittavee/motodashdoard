@@ -190,9 +190,21 @@ class _SpeedArcPainter extends CustomPainter {
     final drawRad = segRad - gapRad;
     final startRad = _startAngleDeg * pi / 180;
 
-    // white outer layer — same segment shape, larger radius
-    final outerRadius = radius + strokeW * 1.05;
-    final outerStrokeW = strokeW * 0.55;
+    // เส้นรอบนอกสุด — ตามช่วง arc
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius + strokeW * 1.1),
+      startRad,
+      totalRad,
+      false,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.width * 0.012,
+    );
+
+    // white segment layer — ระหว่างเส้นรอบนอกกับ active arc
+    final outerRadius = radius + strokeW * 0.6;
+    final outerStrokeW = strokeW * 0.45;
     for (int i = 0; i < _segments; i++) {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: outerRadius),
@@ -225,29 +237,6 @@ class _SpeedArcPainter extends CustomPainter {
       );
     }
 
-    // outer ring
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius + strokeW * 0.65),
-      startRad,
-      totalRad,
-      false,
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.12)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = size.width * 0.007,
-    );
-
-    // inner ring
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeW * 0.65),
-      startRad,
-      totalRad,
-      false,
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.06)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = size.width * 0.005,
-    );
   }
 
   Color _segmentColor(int index, int total) {
