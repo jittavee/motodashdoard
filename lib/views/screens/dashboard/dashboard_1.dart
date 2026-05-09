@@ -25,6 +25,9 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
     with WidgetsBindingObserver {
   double _topSpeed = 0;
 
+  TextStyle _digital(double fontSize, {Color color = Colors.white}) =>
+      TextStyle(fontFamily: 'Digital7', fontSize: fontSize, color: color, fontWeight: FontWeight.bold);
+
   @override
   void initState() {
     super.initState();
@@ -147,7 +150,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                             ),
 
                             Positioned(
-                              bottom: pxH(0.27),
+                              bottom: pxH(0.28),
                               right: pxW(0.12),
                               child: Obx(() {
                                 final rpm = ecuController.displayData?.rpm ?? 0;
@@ -207,14 +210,14 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
 
                             // Data Display (Left Side)
                             Positioned(
-                              top: pxH(0.55),
+                              top: pxH(0.54),
                               left: pxW(0.16),
                               child: Container(
                                 color: Colors.transparent,
-                                height: pxH(0.21),
+                                height: pxH(0.23),
                                 child: Obx(() {
                                   final data = ecuController.displayData;
-                                  return _buildLedtDataPanel(
+                                  return _buildLeftDataPanel(
                                     data,
                                     imageHeight: imageHeight,
                                   );
@@ -224,11 +227,11 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
 
                             // Data Display (Right Side)
                             Positioned(
-                              bottom: pxH(0.55),
+                              top: pxH(0.27),
                               right: pxW(0.145),
                               child: Container(
                                 color: Colors.transparent,
-                                height: pxH(0.16),
+                                height: pxH(0.19),
                                 child: Obx(() {
                                   final data = ecuController.displayData;
                                   return _buildSecondaryDataPanel(
@@ -292,8 +295,8 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
   }
 
   /// Left Data Panel
-  Column _buildLedtDataPanel(ECUData? data, {required double imageHeight}) {
-    final fontSize = imageHeight * 0.033;
+  Column _buildLeftDataPanel(ECUData? data, {required double imageHeight}) {
+    final fontSize = imageHeight * 0.04;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -317,14 +320,14 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
 
   /// RPM Number Display
   Widget _buildNumberRPM({required double rpm, required double imageHeight}) {
-    final fontSize = imageHeight * 0.07;
+    final fontSize = imageHeight * 0.08;
     return Container(
       width: imageHeight * 0.3,
-      height: imageHeight * 0.08,
+      height: imageHeight * 0.085,
       alignment: Alignment.center,
       child: Text(
         " ${rpm.toInt()}",
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
+        style: _digital(fontSize),
         textAlign: TextAlign.center,
       ),
     );
@@ -344,18 +347,14 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
       alignment: Alignment.centerRight,
       child: Text(
         _topSpeed.toInt().toString(),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-        ),
+        style: _digital(fontSize),
       ),
     );
   }
 
   /// Right Data Panel
   Widget _buildSecondaryDataPanel(dynamic data, {required double imageHeight}) {
-    final fontSize = imageHeight * 0.045;
+    final fontSize = imageHeight * 0.06;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -378,11 +377,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
       children: [
         Text(
           value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-          ),
+          style: _digital(fontSize),
         ),
       ],
     );

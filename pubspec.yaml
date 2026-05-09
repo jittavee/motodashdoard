@@ -122,6 +122,9 @@ flutter:
   - family: Ethnocentric
     fonts:
       - asset: assets/fonts/Ethnocentric-Regular.otf
+  - family: Digital7
+    fonts:
+      - asset: assets/fonts/digital-7.ttf
 
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
