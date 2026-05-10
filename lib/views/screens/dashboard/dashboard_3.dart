@@ -238,22 +238,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                       right: 0,
                       child: const Center(child: RecordingIndicator()),
                     ),
-                    // AFR Arc Gauge (Right side)
-                    Positioned(
-                      top: 0,
-                      bottom: 0,
-                      right: 0,
-                      child: Obx(() {
-                        final afr = ecuController.displayData?.afr ?? 10.0;
-                        return AfrArcGauge(
-                          value: afr,
-                          minValue: 10,
-                          maxValue: 18,
-                          width: bgWidth * 0.18,
-                          height: bgHeight,
-                        );
-                      }),
-                    ),
+                    
                     // ECU Status Indicator (Bottom Left)
                     Positioned(
                       bottom: bgHeight * 0.02,
