@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum AfrTitlePosition { top, bottom, left, right }
+
 class AfrBarGauge extends StatefulWidget {
   final double value;
   final double minValue;
@@ -9,6 +11,7 @@ class AfrBarGauge extends StatefulWidget {
   final Color inactiveColor;
   final double width;
   final double height;
+  final AfrTitlePosition titlePosition;
 
   const AfrBarGauge({
     super.key,
@@ -20,6 +23,7 @@ class AfrBarGauge extends StatefulWidget {
     this.inactiveColor = const Color(0xFF1A2A00),
     required this.width,
     required this.height,
+    this.titlePosition = AfrTitlePosition.bottom,
   });
 
   @override
@@ -80,6 +84,7 @@ class _AfrBarGaugeState extends State<AfrBarGauge>
           inactiveColor: widget.inactiveColor,
           width: widget.width,
           height: widget.height,
+          titlePosition: widget.titlePosition,
         );
       },
     );
@@ -95,6 +100,7 @@ class _AfrBarLayout extends StatelessWidget {
   final Color inactiveColor;
   final double width;
   final double height;
+  final AfrTitlePosition titlePosition;
 
   const _AfrBarLayout({
     required this.animValue,
@@ -105,6 +111,7 @@ class _AfrBarLayout extends StatelessWidget {
     required this.inactiveColor,
     required this.width,
     required this.height,
+    required this.titlePosition,
   });
 
   @override
@@ -113,39 +120,59 @@ class _AfrBarLayout extends StatelessWidget {
     final double barHeight = height * .6;
     final double labelAreaHeight = height * 1.4;
 
+    final bar = SizedBox(
+      width: width,
+      height: barHeight,
+      child: CustomPaint(
+        painter: _ChevronBarPainter(
+          animValue: animValue,
+          minValue: minValue,
+          maxValue: maxValue,
+          activeColor: activeColor,
+          inactiveColor: inactiveColor,
+        ),
+      ),
+    );
+
+    final titleWidget = Text(
+      label,
+      style: TextStyle(
+        fontFamily: 'Ethnocentric',
+        fontSize: labelFontSize,
+        color: const Color(0xFFFF6522),
+        fontWeight: FontWeight.bold,
+        letterSpacing: 2,
+      ),
+    );
+
+    final isHorizontal = titlePosition == AfrTitlePosition.left ||
+        titlePosition == AfrTitlePosition.right;
+
+    if (isHorizontal) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: titlePosition == AfrTitlePosition.left
+            ? [titleWidget, const SizedBox(width: 8), bar]
+            : [bar, const SizedBox(width: 8), titleWidget],
+      );
+    }
+
     return SizedBox(
       width: width,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: width,
-            height: barHeight,
-            child: CustomPaint(
-              painter: _ChevronBarPainter(
-                animValue: animValue,
-                minValue: minValue,
-                maxValue: maxValue,
-                activeColor: activeColor,
-                inactiveColor: inactiveColor,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          SizedBox(
-            height: labelAreaHeight,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Ethnocentric',
-                fontSize: labelFontSize,
-                color: const Color(0xFFFF6522),
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
-            ),
-          ),
-        ],
+        children: titlePosition == AfrTitlePosition.top
+            ? [
+                SizedBox(height: labelAreaHeight, child: titleWidget),
+                const SizedBox(height: 4),
+                bar,
+              ]
+            : [
+                bar,
+                const SizedBox(height: 4),
+                SizedBox(height: labelAreaHeight, child: titleWidget),
+              ],
       ),
     );
   }

@@ -13,6 +13,7 @@ import '../../widgets/history_button.dart';
 import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
 import '../../widgets/raw_data_overlay.dart';
+import '../../widgets/afr_arc_gauge.dart';
 
 class TemplateThreeScreen extends StatefulWidget {
   const TemplateThreeScreen({super.key});
@@ -236,6 +237,22 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                       left: 0,
                       right: 0,
                       child: const Center(child: RecordingIndicator()),
+                    ),
+                    // AFR Arc Gauge (Right side)
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      right: 0,
+                      child: Obx(() {
+                        final afr = ecuController.displayData?.afr ?? 10.0;
+                        return AfrArcGauge(
+                          value: afr,
+                          minValue: 10,
+                          maxValue: 18,
+                          width: bgWidth * 0.18,
+                          height: bgHeight,
+                        );
+                      }),
                     ),
                     // ECU Status Indicator (Bottom Left)
                     Positioned(

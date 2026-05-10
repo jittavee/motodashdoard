@@ -13,6 +13,7 @@ import '../../widgets/history_button.dart';
 import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
 import '../../widgets/raw_data_overlay.dart';
+import '../../widgets/afr_bar_gauge.dart';
 
 class TemplateOneScreen extends StatefulWidget {
   const TemplateOneScreen({super.key});
@@ -237,6 +238,25 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                                   return _buildSecondaryDataPanel(
                                     data,
                                     imageHeight: imageHeight,
+                                  );
+                                }),
+                              ),
+                            ),
+
+                            // AFR Bar Gauge
+                            Positioned(
+                              bottom: pxH(0.001),
+                              left: 0,
+                              right: 0,
+                              child: Align(
+                                alignment: Alignment(0.1, 0),
+                                child: Obx(() {
+                                  final afr = ecuController.displayData?.afr ?? 14.7;
+                                  return AfrBarGauge(
+                                    value: afr,
+                                    width: pxW(0.165),
+                                    height: pxH(0.05),
+                                    titlePosition: AfrTitlePosition.left,
                                   );
                                 }),
                               ),
