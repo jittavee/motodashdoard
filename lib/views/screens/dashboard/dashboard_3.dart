@@ -221,7 +221,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                                 },
                                 {
                                   'title': 'INJ',
-                                  'unit': 'ms',
+                                  'unit': 'Pw',
                                   'getValue': (ECUData? d) =>
                                       (d?.inject ?? 0).toStringAsFixed(1),
                                 },
