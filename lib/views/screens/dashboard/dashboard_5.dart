@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:api_tech_moto/models/ecu_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -175,37 +174,68 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                           }),
                         ),
 
-                        // MAP, BATTERY, IAT, ECT Data Panel (Center)
+                        // MAP
                         Positioned(
-                          top: pxH(0.19),
+                          top: pxH(0.22),
+                          left: pxW(0.46),
+                          child: Obx(() => _buildDataItem(
+                            'MAP', '${ecuController.displayData?.map.toInt() ?? 0}', imageHeight)),
+                        ),
+
+                        // BATTERY
+                        Positioned(
+                          top: pxH(0.22),
+                          left: pxW(0.6),
+                          child: Obx(() => _buildDataItem(
+                            'BATT', ecuController.displayData?.battery.toStringAsFixed(1) ?? '0', imageHeight)),
+                        ),
+
+                        // IAT
+                        Positioned(
+                          top: pxH(0.33),
                           left: pxW(0.48),
-                          child: Obx(() {
-                            final data = ecuController.displayData;
-                            return _buildTopRightDataPanel(data, imageHeight: imageHeight, imageWidth: imageWidth);
-                          }),
+                          child: Obx(() => _buildDataItem(
+                            'IAT', '${ecuController.displayData?.airTemp.toInt() ?? 0}', imageHeight)),
                         ),
 
-                        // IGN & INJ Data Panel (Center Bottom)
+                        // ECT
                         Positioned(
-                          bottom: pxH(0.22),
-                          left: pxW(0.55),
-                          child: Obx(() {
-                            final data = ecuController.displayData;
-                            return Container(
-                              child: _buildCenterDataPanel(data, imageHeight: imageHeight));
-                          }),
+                          top: pxH(0.33),
+                          left: pxW(0.58),
+                          child: Obx(() => _buildDataItem(
+                            'ECT', '${ecuController.displayData?.waterTemp.toInt() ?? 0}', imageHeight)),
                         ),
 
-                        // AFR and TPS Display (Bottom Center)
+                        // IGN
                         Positioned(
-                          bottom: pxH(0.11),
+                          bottom: pxH(0.432),
+                          left: pxW(0.52),
+                          child: Obx(() => _buildDataItem(
+                            'IGN', ecuController.displayData?.ignition.toStringAsFixed(0) ?? '0', imageHeight)),
+                        ),
+
+                        // INJ
+                        Positioned(
+                          bottom: pxH(0.276),
+                          left: pxW(0.52),
+                          child: Obx(() => _buildDataItem(
+                            'INJ', ecuController.displayData?.inject.toStringAsFixed(1) ?? '0', imageHeight)),
+                        ),
+
+                        // AFR
+                        Positioned(
+                          bottom: pxH(0.075),
                           left: pxW(0.47),
-                          child: Obx(() {
-                            final data = ecuController.displayData;
-                            final afr = data?.afr ?? 0;
-                            final tps = data?.tps ?? 0;
-                            return _buildBottomDataPanel(afr, tps, imageHeight: imageHeight, imageWidth: imageWidth);
-                          }),
+                          child: Obx(() => _buildDataItem(
+                            'AFR', ecuController.displayData?.afr.toStringAsFixed(1) ?? '0', imageHeight)),
+                        ),
+
+                        // TPS
+                        Positioned(
+                          bottom: pxH(0.075),
+                          left: pxW(0.59),
+                          child: Obx(() => _buildDataItem(
+                            'TPS', '${ecuController.displayData?.tps.toInt() ?? 0}', imageHeight)),
                         ),
                       ],
                     ),
@@ -213,11 +243,11 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                 ),
 
                 // History Button (Top Right - before Settings)
-                const Positioned(
-                  top: 10,
-                  right: 60,
-                  child: HistoryButton(),
-                ),
+                // const Positioned(
+                //   top: 10,
+                //   right: 60,
+                //   child: HistoryButton(),
+                // ),
 
                 // Settings Button (Top Right) - outside image area
                 const Positioned(
@@ -256,27 +286,17 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                 ),
 
                 // Playback Timeline (Bottom)
-                const Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: PlaybackTimeline(),
-                ),
+                // const Positioned(
+                //   bottom: 0,
+                //   left: 0,
+                //   right: 0,
+                //   child: PlaybackTimeline(),
+                // ),
               ],
             );
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomDataPanel(double afr, double tps, {required double imageHeight, required double imageWidth}) {
-    return Row(
-      children: [
-        _buildDataLabel('AFR', afr.toStringAsFixed(1), imageHeight: imageHeight),
-        SizedBox(width: imageWidth * 0.098),
-        _buildDataLabel('TPS', tps.toInt().toString(), imageHeight: imageHeight),
-      ],
     );
   }
 
@@ -296,80 +316,15 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
     );
   }
 
-  /// Data Label Widget (for AFR, TPS display)
-  Widget _buildDataLabel(String label, String value, {required double imageHeight}) {
-    return Row(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: imageHeight * 0.05,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
+  Widget _buildDataItem(String label, String value, double imageHeight) {
+    return Text(
+      value,
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: imageHeight * 0.045,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 
-  /// Center Data Panel (IGN, INJ display)
-  Widget _buildCenterDataPanel(ECUData? data, {required double imageHeight}) {
-    final spacing = imageHeight * 0.028;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0', imageHeight: imageHeight),
-        SizedBox(height: spacing),
-        _buildDataLabel('IGN', data?.ignition.toStringAsFixed(0) ?? '0', imageHeight: imageHeight),
-        SizedBox(height: spacing),
-        _buildDataLabel('INJ', data?.inject.toStringAsFixed(1) ?? '0', imageHeight: imageHeight),
-        SizedBox(height: spacing),
-        _buildDataLabel('INJ', data?.inject.toStringAsFixed(0) ?? '0', imageHeight: imageHeight),
-      ],
-    );
-  }
-
-  /// Top Right Data Panel (MAP, BATTERY, IAT, ECT display)
-  Widget _buildTopRightDataPanel(ECUData? data, {required double imageHeight, required double imageWidth}) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            _buildTopRightDataItem('MAP', data?.map.toInt().toString() ?? '0', imageHeight: imageHeight),
-            SizedBox(width: imageWidth * 0.11),
-            _buildTopRightDataItem('BATTERY', data?.battery.toStringAsFixed(1) ?? '0', imageHeight: imageHeight),
-          ],
-        ),
-        SizedBox(height: imageHeight * 0.045),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(width: imageWidth * 0.012),
-            _buildTopRightDataItem('IAT', data?.airTemp.toInt().toString() ?? '0', imageHeight: imageHeight),
-            SizedBox(width: imageWidth * 0.1),
-            _buildTopRightDataItem('ECT', data?.waterTemp.toInt().toString() ?? '0', imageHeight: imageHeight),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// Top Right Data Item
-  Widget _buildTopRightDataItem(String label, String value, {required double imageHeight}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: imageHeight * 0.04,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
 }
