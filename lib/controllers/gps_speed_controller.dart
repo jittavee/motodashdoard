@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,10 +12,26 @@ class GpsSpeedController extends GetxController with WidgetsBindingObserver {
 
   StreamSubscription<Position>? _positionSubscription;
 
-  static const LocationSettings _locationSettings = LocationSettings(
-    accuracy: LocationAccuracy.high,
-    distanceFilter: 0,
-  );
+  static LocationSettings get _locationSettings {
+    if (Platform.isAndroid) {
+      return AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 0,
+        intervalDuration: const Duration(milliseconds: 500),
+      );
+    } else if (Platform.isIOS) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.bestForNavigation,
+        distanceFilter: 0,
+        activityType: ActivityType.automotiveNavigation,
+        pauseLocationUpdatesAutomatically: false,
+      );
+    }
+    return const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 0,
+    );
+  }
 
   @override
   void onInit() {
