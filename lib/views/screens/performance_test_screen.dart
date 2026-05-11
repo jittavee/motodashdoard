@@ -108,43 +108,41 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  Obx(
-                    () => Column(
-                      children: [
-                        _buildTestCard(
-                          context,
-                          perfController,
-                          '0-100 m',
-                          '0-100m',
-                          Icons.speed,
-                          'quarter_kilometer_sprint'.tr,
-                        ),
-                        _buildTestCard(
-                          context,
-                          perfController,
-                          '0-201 m',
-                          '0-201m',
-                          Icons.directions_run,
-                          'eighth_mile'.tr,
-                        ),
-                        _buildTestCard(
-                          context,
-                          perfController,
-                          '0-402 m',
-                          '0-402m',
-                          Icons.local_fire_department,
-                          'quarter_mile'.tr,
-                        ),
-                        _buildTestCard(
-                          context,
-                          perfController,
-                          '0-1000 m',
-                          '0-1000m',
-                          Icons.rocket_launch,
-                          'kilometer_sprint'.tr,
-                        ),
-                      ],
-                    ),
+                  Column(
+                    children: [
+                      _buildTestCard(
+                        context,
+                        perfController,
+                        '0-100 m',
+                        '0-100m',
+                        Icons.speed,
+                        'quarter_kilometer_sprint'.tr,
+                      ),
+                      _buildTestCard(
+                        context,
+                        perfController,
+                        '0-201 m',
+                        '0-201m',
+                        Icons.directions_run,
+                        'eighth_mile'.tr,
+                      ),
+                      _buildTestCard(
+                        context,
+                        perfController,
+                        '0-402 m',
+                        '0-402m',
+                        Icons.local_fire_department,
+                        'quarter_mile'.tr,
+                      ),
+                      _buildTestCard(
+                        context,
+                        perfController,
+                        '0-1000 m',
+                        '0-1000m',
+                        Icons.rocket_launch,
+                        'kilometer_sprint'.tr,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -230,45 +228,47 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
     IconData icon,
     String subtitle,
   ) {
-    final isSelected = controller.selectedTestType.value == testType;
-    final isActive = controller.isTestActive.value;
+    return Obx(() {
+      final isSelected = controller.selectedTestType.value == testType;
+      final isActive = controller.isTestActive.value;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      color: isSelected
-          ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-          : null,
-      child: ListTile(
-        leading: Icon(
-          icon,
-          size: 32,
-          color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? Theme.of(context).primaryColor : null,
-          ),
-        ),
-        subtitle: Text(subtitle),
-        trailing: isSelected
-            ? ElevatedButton.icon(
-                onPressed: isActive
-                    ? null
-                    : () => controller.startTest(testType),
-                icon: const Icon(Icons.play_arrow),
-                label: Text('start_test'.tr.toUpperCase()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-              )
+      return Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        color: isSelected
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
             : null,
-        onTap: isActive ? null : () => controller.selectTestType(testType),
-      ),
-    );
+        child: ListTile(
+          leading: Icon(
+            icon,
+            size: 32,
+            color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? Theme.of(context).primaryColor : null,
+            ),
+          ),
+          subtitle: Text(subtitle),
+          trailing: isSelected
+              ? ElevatedButton.icon(
+                  onPressed: isActive
+                      ? null
+                      : () => controller.startTest(testType),
+                  icon: const Icon(Icons.play_arrow),
+                  label: Text('start_test'.tr.toUpperCase()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                )
+              : null,
+          onTap: isActive ? null : () => controller.selectTestType(testType),
+        ),
+      );
+    });
   }
 
   Widget _buildTestMetric(String label, String value, IconData icon) {
