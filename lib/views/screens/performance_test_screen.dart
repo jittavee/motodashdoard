@@ -53,49 +53,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Current Speed Display
-            Obx(() {
-              final currentSpeed = ecuController.currentData.value?.speed ?? 0;
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withValues(alpha: 0.7),
-                    ],
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'current_speed'.tr,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      currentSpeed.toStringAsFixed(0),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 72,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Text(
-                      'km/h',
-                      style: TextStyle(color: Colors.white70, fontSize: 18),
-                    ),
-                  ],
-                ),
-              );
-            }),
+           
 
             // Test Selection
             Padding(
