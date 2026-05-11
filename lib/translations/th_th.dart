@@ -5,6 +5,9 @@ const Map<String, String> thTh = {
   'save': 'บันทึก',
   'cancel': 'ยกเลิก',
   'delete': 'ลบ',
+  'delete_all': 'ลบทั้งหมด',
+  'delete_record': 'ลบบันทึก',
+  'confirm_delete_all': 'ลบประวัติการทดสอบทั้งหมด? ไม่สามารถเรียกคืนได้',
   'edit': 'แก้ไข',
   'confirm': 'ยืนยัน',
   'ok': 'ตกลง',
@@ -160,7 +163,7 @@ const Map<String, String> thTh = {
   'popup_alert': 'แจ้งเตือน',
   'add': 'เพิ่ม',
   'edit_alert': 'แก้ไข',
-  'confirm_delete': 'ยืนยันการลบ',
+  'confirm_delete': 'ลบบันทึกนี้:',
   'confirm_delete_alert': 'คุณต้องการลบการแจ้งเตือนสำหรับ {parameter} หรือไม่?',
 
   // Settings Screen

@@ -5,6 +5,9 @@ const Map<String, String> enUs = {
   'save': 'Save',
   'cancel': 'Cancel',
   'delete': 'Delete',
+  'delete_all': 'Delete All',
+  'delete_record': 'Delete Record',
+  'confirm_delete_all': 'Delete all test history? This cannot be undone.',
   'edit': 'Edit',
   'confirm': 'Confirm',
   'ok': 'OK',
@@ -160,7 +163,7 @@ const Map<String, String> enUs = {
   'popup_alert': 'Popup Alert',
   'add': 'Add',
   'edit_alert': 'Edit',
-  'confirm_delete': 'Confirm Delete',
+  'confirm_delete': 'Delete this record:',
   'confirm_delete_alert': 'Do you want to delete alert for {parameter}?',
 
   // Settings Screen

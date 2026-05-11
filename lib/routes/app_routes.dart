@@ -14,6 +14,7 @@ class AppRoutes {
   static const String dataLog = '/data-log';
   static const String dataLogChart = '/data-log-chart';
   static const String performanceTest = '/performance-test';
+  static const String performanceTestClassic = '/performance-test-classic';
 
   // Templates
   static const String template1 = '/template-1';

@@ -37,7 +37,6 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   @override
   Widget build(BuildContext context) {
     final perfController = Get.find<PerformanceTestController>();
-    final ecuController = Get.find<ECUDataController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -285,6 +284,16 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                       ),
                     ),
                     const Spacer(),
+                    Obx(() {
+                      if (controller.testHistory.isNotEmpty) {
+                        return IconButton(
+                          icon: const Icon(Icons.delete_sweep, color: Colors.white),
+                          tooltip: 'delete_all'.tr,
+                          onPressed: () => _confirmDeleteAll(context, controller),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
@@ -323,7 +332,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                     itemCount: controller.testHistory.length,
                     itemBuilder: (context, index) {
                       final test = controller.testHistory[index];
-                      return _buildHistoryCard(test);
+                      return _buildHistoryCard(context, test, controller);
                     },
                   );
                 }),
@@ -335,7 +344,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
     );
   }
 
-  Widget _buildHistoryCard(PerformanceTest test) {
+  Widget _buildHistoryCard(BuildContext context, PerformanceTest test, PerformanceTestController controller) {
     final formattedDate = DateFormat(
       'MMM dd, yyyy HH:mm',
     ).format(test.timestamp);
@@ -371,6 +380,15 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 Text(
                   formattedDate,
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: () => _confirmDeleteOne(context, test, controller),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(Icons.delete_outline, size: 20, color: Colors.red[300]),
+                  ),
                 ),
               ],
             ),
@@ -410,7 +428,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 children: [
                   _buildHistoryMetric(
                     'max_rpm'.tr,
-                    '${test.maxRpm?.toStringAsFixed(0) ?? '-'}',
+                    test.maxRpm?.toStringAsFixed(0) ?? '-',
                   ),
                   _buildHistoryMetric(
                     'max_water_temp'.tr,
@@ -428,11 +446,11 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                 children: [
                   _buildHistoryMetric(
                     'avg_rpm'.tr,
-                    '${test.avgRpm?.toStringAsFixed(0) ?? '-'}',
+                    test.avgRpm?.toStringAsFixed(0) ?? '-',
                   ),
                   _buildHistoryMetric(
                     'avg_afr'.tr,
-                    '${test.avgAfr?.toStringAsFixed(1) ?? '-'}',
+                    test.avgAfr?.toStringAsFixed(1) ?? '-',
                   ),
                   _buildHistoryMetric(
                     'min_battery'.tr,
@@ -456,6 +474,63 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDeleteOne(
+    BuildContext context,
+    PerformanceTest test,
+    PerformanceTestController controller,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('delete_record'.tr),
+        content: Text('${'confirm_delete'.tr} ${test.testType.toUpperCase()}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text('delete'.tr),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && test.id != null) {
+      await controller.deleteTest(test.id!);
+    }
+  }
+
+  Future<void> _confirmDeleteAll(
+    BuildContext context,
+    PerformanceTestController controller,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('delete_all'.tr),
+        content: Text('confirm_delete_all'.tr),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text('delete_all'.tr),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      for (final test in List.from(controller.testHistory)) {
+        if (test.id != null) await controller.deleteTest(test.id!);
+      }
+    }
   }
 
   Widget _buildHistoryMetric(String label, String value) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/performance_test.dart';
+import '../routes/app_routes.dart';
 import '../services/database_helper.dart';
 import '../services/permission_service.dart';
 import 'ecu_data_controller.dart';
@@ -417,6 +418,8 @@ class PerformanceTestController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 3),
     );
+
+    Get.toNamed(AppRoutes.performanceTest);
   }
 
   Future<void> deleteTest(int id) async {

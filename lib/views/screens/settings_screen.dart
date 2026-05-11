@@ -211,6 +211,14 @@ class _SettingsScreenState extends State<SettingsScreen>
               Get.toNamed(AppRoutes.performanceTest);
             },
           ),
+          // ListTile(
+          //   leading: const Icon(Icons.timer_outlined),
+          //   title: Text('${'performance_test'.tr} (Classic)'),
+          //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          //   onTap: () {
+          //     Get.toNamed(AppRoutes.performanceTestClassic);
+          //   },
+          // ),
 
           // 6. Alert Settings / Language / About - ส่วนเสริมและข้อมูลระบบ
           ListTile(
