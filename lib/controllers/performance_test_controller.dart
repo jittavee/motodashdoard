@@ -10,6 +10,8 @@ import 'settings_controller.dart';
 
 class PerformanceTestController extends GetxController {
   final RxBool isTestRunning = false.obs;
+  final RxBool isCountingDown = false.obs;
+  final RxInt countdownValue = 0.obs;
   final RxString currentTestType = ''.obs;
   final RxString selectedTestType = ''.obs;
   final RxDouble currentDistance = 0.0.obs;
@@ -164,14 +166,25 @@ class PerformanceTestController extends GetxController {
       return;
     }
 
-    // ตั้งค่า state ทันที
-    isTestRunning.value = true;
+    // ตั้งค่า state เริ่มต้น
     currentTestType.value = testType;
     selectedTestType.value = testType;
     currentDistance.value = 0.0;
     currentTime.value = 0.0;
     currentSpeed.value = 0.0;
     maxSpeed.value = 0.0;
+
+    // Countdown 5 → 1
+    isCountingDown.value = true;
+    for (int i = 5; i >= 1; i--) {
+      countdownValue.value = i;
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    isCountingDown.value = false;
+    countdownValue.value = 0;
+
+    // ตั้งค่า state ทันที
+    isTestRunning.value = true;
 
     // Reset ECU tracking
     _resetEcuTracking();
@@ -340,6 +353,8 @@ class PerformanceTestController extends GetxController {
 
     // หยุดการทดสอบ
     isTestRunning.value = false;
+    isCountingDown.value = false;
+    countdownValue.value = 0;
     _testTimer?.cancel();
     _positionSubscription?.cancel();
 

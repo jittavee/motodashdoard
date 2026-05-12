@@ -47,27 +47,32 @@ class _PerformanceTestScreenV2State extends State<PerformanceTestScreenV2> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTimer(ctrl, primary),
-                  const SizedBox(height: 16),
-                  _buildStatusBadge(ctrl, primary),
-                  const SizedBox(height: 24),
-                  _buildDistanceTabs(ctrl, primary),
-                  const SizedBox(height: 24),
-                  _buildBestRecords(ctrl, primary),
-                  const SizedBox(height: 8),
-                ],
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTimer(ctrl, primary),
+                      const SizedBox(height: 16),
+                      _buildStatusBadge(ctrl, primary),
+                      const SizedBox(height: 24),
+                      _buildDistanceTabs(ctrl, primary),
+                      const SizedBox(height: 24),
+                      _buildBestRecords(ctrl, primary),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              _buildStartButton(ctrl, primary),
+            ],
           ),
-          _buildStartButton(ctrl, primary),
+          _buildCountdownOverlay(ctrl),
         ],
       ),
     );
@@ -268,11 +273,48 @@ class _PerformanceTestScreenV2State extends State<PerformanceTestScreenV2> {
     );
   }
 
+  Widget _buildCountdownOverlay(PerformanceTestController ctrl) {
+    return Obx(() {
+      if (!ctrl.isCountingDown.value) return const SizedBox.shrink();
+      final count = ctrl.countdownValue.value;
+      return Container(
+        color: Colors.black.withValues(alpha: 0.75),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '$count',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 120,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Ethnocentric',
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'GET READY',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 18,
+                  letterSpacing: 4,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
   Widget _buildStartButton(PerformanceTestController ctrl, Color primary) {
     return Obx(() {
       final running = ctrl.isTestRunning.value;
+      final counting = ctrl.isCountingDown.value;
       final selected = ctrl.selectedTestType.value;
-      final canStart = selected.isNotEmpty && !running;
+      final canStart = selected.isNotEmpty && !running && !counting;
 
       return Padding(
         padding: const EdgeInsets.all(16),
@@ -282,14 +324,16 @@ class _PerformanceTestScreenV2State extends State<PerformanceTestScreenV2> {
           child: ElevatedButton.icon(
             onPressed: running
                 ? () => ctrl.stopTest()
-                : (canStart ? () => ctrl.startTest(selected) : null),
-            icon: Icon(running ? Icons.stop : Icons.flag_outlined),
+                : counting
+                    ? () => ctrl.stopTest()
+                    : (canStart ? () => ctrl.startTest(selected) : null),
+            icon: Icon(running || counting ? Icons.stop : Icons.flag_outlined),
             label: Text(
-              running ? 'STOP RACE' : 'START RACE',
+              running ? 'STOP RACE' : counting ? 'CANCEL' : 'START RACE',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: running ? Colors.red : primary,
+              backgroundColor: running || counting ? Colors.red : primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
