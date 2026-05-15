@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../controllers/gps_speed_controller.dart';
+import '../../../controllers/settings_controller.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
@@ -60,6 +61,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
     final gpsSpeedController = Get.find<GpsSpeedController>();
+    final settingsController = Get.find<SettingsController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -123,6 +125,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                               child: Obx(() {
                                 final rpm = ecuController.displayData?.rpm ?? 0;
                                 final isRpmAlert = ecuController.activeAlertParameters.contains('rpm');
+                                final lerpSpeed = settingsController.needleLerpSpeed.value;
                                 return AnimatedGaugeNeedle(
                                   targetValue: rpm,
                                   maxValue: 15000,
@@ -130,6 +133,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                                   offsetAngle: 140.0 - 135,
                                   rotationRange: 240.0,
                                   isAlert: isRpmAlert,
+                                  lerpSpeed: lerpSpeed,
                                   animationDuration: const Duration(
                                     milliseconds: 300,
                                   ),
@@ -171,6 +175,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                               child: Obx(() {
                                 final speed = gpsSpeedController.gpsSpeed.value;
                                 final isSpeedAlert = ecuController.activeAlertParameters.contains('speed');
+                                final lerpSpeed = settingsController.needleLerpSpeed.value;
                                 return AnimatedGaugeNeedle(
                                   targetValue: speed,
                                   maxValue: 250,
@@ -178,6 +183,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                                   offsetAngle: 100.0 - 135,
                                   rotationRange: 247.0,
                                   isAlert: isSpeedAlert,
+                                  lerpSpeed: lerpSpeed,
                                   animationDuration: const Duration(
                                     milliseconds: 300,
                                   ),

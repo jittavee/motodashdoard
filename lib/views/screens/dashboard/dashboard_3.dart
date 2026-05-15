@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../controllers/gps_speed_controller.dart';
+import '../../../controllers/settings_controller.dart';
 import '../../../models/ecu_data.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
@@ -54,6 +55,7 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
     final gpsSpeedController = Get.find<GpsSpeedController>();
+    final settingsController = Get.find<SettingsController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setLandscape();
@@ -136,12 +138,16 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                                   Obx(() {
                                     final rpm = ecuController.displayData?.rpm ?? 0;
                                     final needleSize = bgHeight * 0.25;
+                                    final isRpmAlert = ecuController.activeAlertParameters.contains('rpm');
+                                    final lerpSpeed = settingsController.needleLerpSpeed.value;
                                     return AnimatedGaugeNeedle(
                                       targetValue: rpm,
                                       maxValue: 20000,
                                       size: needleSize,
                                       offsetAngle: 0,
                                       rotationRange: 300,
+                                      isAlert: isRpmAlert,
+                                      lerpSpeed: lerpSpeed,
                                       animationDuration: const Duration(milliseconds: 300),
                                       animationCurve: Curves.easeInOut,
                                       builder: (angle, currentValue) {

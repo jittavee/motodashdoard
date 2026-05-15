@@ -14,12 +14,15 @@ class SettingsController extends GetxController {
   final RxBool autoDayNightMode = false.obs;
   final RxBool isDarkMode = true.obs;
 
+  final RxDouble needleLerpSpeed = 0.08.obs;
+
   static const String _tempUnitKey = 'temperature_unit';
   static const String _speedUnitKey = 'speed_unit';
   static const String _languageKey = 'language';
   static const String _dashboardTemplateKey = 'dashboard_template';
   static const String _autoDayNightKey = 'auto_day_night';
   static const String _darkModeKey = 'dark_mode';
+  static const String _needleLerpSpeedKey = 'needle_lerp_speed';
 
   @override
   void onInit() {
@@ -44,6 +47,7 @@ class SettingsController extends GetxController {
 
     autoDayNightMode.value = prefs.getBool(_autoDayNightKey) ?? false;
     isDarkMode.value = prefs.getBool(_darkModeKey) ?? true;
+    needleLerpSpeed.value = prefs.getDouble(_needleLerpSpeedKey) ?? 0.08;
   }
 
   Future<void> setTemperatureUnit(TemperatureUnit unit) async {
@@ -94,6 +98,12 @@ class SettingsController extends GetxController {
       // ตรวจสอบเวลาและเปลี่ยนโหมดอัตโนมัติ
       _checkTimeAndUpdateMode();
     }
+  }
+
+  Future<void> setNeedleLerpSpeed(double speed) async {
+    needleLerpSpeed.value = speed;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_needleLerpSpeedKey, speed);
   }
 
   Future<void> setDarkMode(bool enabled) async {
