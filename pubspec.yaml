@@ -58,6 +58,9 @@ dependencies:
   csv: ^6.0.0
   share_plus: ^10.0.2
 
+  # Audio
+  audioplayers: ^6.1.0
+
   # Others
   intl: ^0.19.0
   shared_preferences: ^2.2.3
@@ -89,6 +92,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/sounds/
     - assets/ui-1/
     - assets/ui-2/
     - assets/ui-3/

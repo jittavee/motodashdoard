@@ -122,12 +122,14 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                               left: pxW(0.5),
                               child: Obx(() {
                                 final rpm = ecuController.displayData?.rpm ?? 0;
+                                final isRpmAlert = ecuController.activeAlertParameters.contains('rpm');
                                 return AnimatedGaugeNeedle(
                                   targetValue: rpm,
                                   maxValue: 15000,
                                   size: rpmNeedleSize,
                                   offsetAngle: 140.0 - 135,
                                   rotationRange: 240.0,
+                                  isAlert: isRpmAlert,
                                   animationDuration: const Duration(
                                     milliseconds: 300,
                                   ),
@@ -168,12 +170,14 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
                               left: pxW(0.28),
                               child: Obx(() {
                                 final speed = gpsSpeedController.gpsSpeed.value;
+                                final isSpeedAlert = ecuController.activeAlertParameters.contains('speed');
                                 return AnimatedGaugeNeedle(
                                   targetValue: speed,
                                   maxValue: 250,
                                   size: speedNeedleSize,
                                   offsetAngle: 100.0 - 135,
                                   rotationRange: 247.0,
+                                  isAlert: isSpeedAlert,
                                   animationDuration: const Duration(
                                     milliseconds: 300,
                                   ),
@@ -317,14 +321,21 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
   /// Left Data Panel
   Column _buildLeftDataPanel(ECUData? data, {required double imageHeight}) {
     final fontSize = imageHeight * 0.04;
+    final ecuController = Get.find<ECUDataController>();
+    final alertParams = ecuController.activeAlertParameters;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildDataRow(data?.map.toStringAsFixed(0) ?? '0', fontSize: fontSize),
+        _buildDataRow(
+          data?.map.toStringAsFixed(0) ?? '0',
+          fontSize: fontSize,
+          isAlert: alertParams.contains('map'),
+        ),
         _buildDataRow(
           data?.battery.toStringAsFixed(1) ?? '0',
           fontSize: fontSize,
+          isAlert: alertParams.contains('battery'),
         ),
         _buildDataRow(
           data?.airTemp.toStringAsFixed(0) ?? '0',
@@ -333,6 +344,7 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
         _buildDataRow(
           data?.waterTemp.toStringAsFixed(0) ?? '0',
           fontSize: fontSize,
+          isAlert: alertParams.contains('waterTemp'),
         ),
       ],
     );
@@ -392,12 +404,12 @@ class _TemplateOneScreenState extends State<TemplateOneScreen>
   }
 
   /// Data Row Widget
-  Widget _buildDataRow(String value, {required double fontSize}) {
+  Widget _buildDataRow(String value, {required double fontSize, bool isAlert = false}) {
     return Row(
       children: [
         Text(
           value,
-          style: _digital(fontSize),
+          style: _digital(fontSize, color: isAlert ? Colors.red : Colors.white),
         ),
       ],
     );

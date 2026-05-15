@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:api_tech_moto/utils/logger.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/ecu_data.dart';
 import '../models/alert_threshold.dart';
 import '../services/database_helper.dart';
@@ -17,6 +16,7 @@ class ECUDataController extends GetxController {
   final RxList<AlertThreshold> alertThresholds = <AlertThreshold>[].obs;
   final RxBool isAlertActive = false.obs;
   final RxString activeAlertMessage = ''.obs;
+  final RxSet<String> activeAlertParameters = <String>{}.obs;
 
   // Playback system
   final RxBool isPlaybackMode = false.obs;
@@ -36,6 +36,8 @@ class ECUDataController extends GetxController {
 
   Timer? _loggingTimer;
   Timer? _uiThrottleTimer;
+  DateTime? _lastAlertSoundTime;
+  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _pendingUIUpdate = false;
   final Map<String, double> _dataBuffer = {};
   // RPM throttle: buffer TECHO separately, flush to _dataBuffer at most every 200ms
@@ -210,6 +212,7 @@ class ECUDataController extends GetxController {
   void _checkAlerts(ECUData data) {
     isAlertActive.value = false;
     activeAlertMessage.value = '';
+    activeAlertParameters.clear();
 
     for (var threshold in alertThresholds) {
       if (!threshold.enabled) continue;
@@ -238,11 +241,16 @@ class ECUDataController extends GetxController {
           value = data.afr;
           paramName = 'AFR';
           break;
+        case 'map':
+          value = data.map;
+          paramName = 'MAP';
+          break;
       }
 
       if (value != null) {
         if (value < threshold.minValue || value > threshold.maxValue) {
           isAlertActive.value = true;
+          activeAlertParameters.add(threshold.parameter);
           activeAlertMessage.value =
               '$paramName: ${value.toStringAsFixed(1)} (${threshold.minValue}-${threshold.maxValue})';
 
@@ -251,37 +259,20 @@ class ECUDataController extends GetxController {
             _playAlertSound();
           }
 
-          // แสดง popup
-          if (threshold.popupAlert) {
-            _showAlertPopup(paramName, value, threshold);
-          }
-
-          break;
         }
       }
     }
   }
 
   void _playAlertSound() {
-    // เล่นเสียงแจ้งเตือน
-    SystemSound.play(SystemSoundType.alert);
+    final now = DateTime.now();
+    if (_lastAlertSoundTime != null &&
+        now.difference(_lastAlertSoundTime!).inSeconds < .1) {
+      return;
+    }
+    _lastAlertSoundTime = now;
+    _audioPlayer.play(AssetSource('sounds/alert.wav'));
   }
-
-  void _showAlertPopup(String paramName, double value, AlertThreshold threshold) {
-    Get.snackbar(
-      '⚠️ แจ้งเตือน',
-      '$paramName: ${value.toStringAsFixed(1)} (ควรอยู่ระหว่าง ${threshold.minValue}-${threshold.maxValue})',
-      snackPosition: SnackPosition.TOP,
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.red.withValues(alpha: 0.9),
-      colorText: Colors.white,
-      icon: const Icon(Icons.warning, color: Colors.white),
-      shouldIconPulse: true,
-      margin: const EdgeInsets.all(10),
-      borderRadius: 8,
-    );
-  }
-
 
   // จัดการ Alert Thresholds
   Future<void> addAlertThreshold(AlertThreshold threshold) async {

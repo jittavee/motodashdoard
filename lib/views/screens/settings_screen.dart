@@ -155,54 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             },
           ),
 
-          // 4. Data Logging - เปิดใช้งานก่อนออกตัว
-          // Obx(() => ListTile(
-          //       leading: const Icon(Icons.data_usage),
-          //       title: Text('data_logging'.tr),
-          //       subtitle: Text(
-          //         ecuController.isLogging.value
-          //             ? 'recording_ecu_data'.tr
-          //             : 'not_recording'.tr,
-          //         style: TextStyle(
-          //           fontSize: 12,
-          //           color: ecuController.isLogging.value
-          //               ? Colors.green
-          //               : Colors.grey,
-          //         ),
-          //       ),
-          //       trailing: Switch(
-          //         value: ecuController.isLogging.value,
-          //         onChanged: (value) {
-          //           if (value) {
-          //             ecuController.startLogging();
-          //             Get.snackbar(
-          //               'data_logging'.tr,
-          //               'started_recording'.tr,
-          //               snackPosition: SnackPosition.BOTTOM,
-          //               duration: const Duration(seconds: 2),
-          //             );
-          //           } else {
-          //             ecuController.stopLogging();
-          //             Get.snackbar(
-          //               'data_logging'.tr,
-          //               'stopped_recording'.tr,
-          //               snackPosition: SnackPosition.BOTTOM,
-          //               duration: const Duration(seconds: 2),
-          //             );
-          //           }
-          //         },
-          //       ),
-          //     )),
-
-          // 5. View History / Performance Test - ส่วนของการสรุปผล
-          // ListTile(
-          //   leading: const Icon(Icons.show_chart),
-          //   title: Text('view_log_history'.tr),
-          //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          //   onTap: () {
-          //     Get.toNamed(AppRoutes.dataLogChart);
-          //   },
-          // ),
+          
           ListTile(
             leading: const Icon(Icons.timer),
             title: Text('performance_test'.tr),
@@ -211,14 +164,6 @@ class _SettingsScreenState extends State<SettingsScreen>
               Get.toNamed(AppRoutes.performanceTest);
             },
           ),
-          // ListTile(
-          //   leading: const Icon(Icons.timer_outlined),
-          //   title: Text('${'performance_test'.tr} (Classic)'),
-          //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          //   onTap: () {
-          //     Get.toNamed(AppRoutes.performanceTestClassic);
-          //   },
-          // ),
 
           // 6. Alert Settings / Language / About - ส่วนเสริมและข้อมูลระบบ
           ListTile(

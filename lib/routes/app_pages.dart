@@ -7,7 +7,6 @@ import '../views/screens/ecu_model_screen.dart';
 import '../views/screens/dashboard_template_screen.dart';
 import '../views/screens/data_log_screen.dart';
 import '../views/screens/data_log_chart_screen.dart';
-import '../views/screens/performance_test_screen.dart';
 import '../views/screens/performance_test_screen_v2.dart';
 import '../views/screens/dashboard/dashboard_1.dart';
 import '../views/screens/dashboard/dashboard_2.dart';
@@ -55,10 +54,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.performanceTest,
       page: () => const PerformanceTestScreenV2(),
-    ),
-    GetPage(
-      name: AppRoutes.performanceTestClassic,
-      page: () => const PerformanceTestScreen(),
     ),
     GetPage(
       name: AppRoutes.template1,
