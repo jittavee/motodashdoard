@@ -4,17 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../controllers/gps_speed_controller.dart';
-import '../../../controllers/settings_controller.dart';
 import '../../../models/ecu_data.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
-import '../../widgets/history_button.dart';
 import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
 import '../../widgets/raw_data_overlay.dart';
-import '../../widgets/afr_arc_gauge.dart';
 
 class TemplateThreeScreen extends StatefulWidget {
   const TemplateThreeScreen({super.key});
@@ -55,7 +52,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
     final gpsSpeedController = Get.find<GpsSpeedController>();
-    final settingsController = Get.find<SettingsController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setLandscape();
@@ -139,7 +135,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                                     final rpm = ecuController.displayData?.rpm ?? 0;
                                     final needleSize = bgHeight * 0.25;
                                     final isRpmAlert = ecuController.activeAlertParameters.contains('rpm');
-                                    final lerpSpeed = settingsController.needleLerpSpeed.value;
                                     return AnimatedGaugeNeedle(
                                       targetValue: rpm,
                                       maxValue: 20000,
@@ -147,7 +142,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
                                       offsetAngle: 0,
                                       rotationRange: 300,
                                       isAlert: isRpmAlert,
-                                      lerpSpeed: lerpSpeed,
                                       animationDuration: const Duration(milliseconds: 300),
                                       animationCurve: Curves.easeInOut,
                                       builder: (angle, currentValue) {

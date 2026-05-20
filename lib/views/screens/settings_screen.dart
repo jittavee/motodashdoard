@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/language_controller.dart';
-import '../../controllers/ecu_data_controller.dart';
 import '../../controllers/bluetooth_controller.dart';
-import '../../controllers/settings_controller.dart';
-import '../../utils/debug_data_generator.dart';
+// import '../../utils/debug_data_generator.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -84,9 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     final languageController = Get.find<LanguageController>();
-    final ecuController = Get.find<ECUDataController>();
     final btController = Get.find<BluetoothController>();
-    final settingsController = Get.find<SettingsController>();
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
@@ -182,54 +178,26 @@ class _SettingsScreenState extends State<SettingsScreen>
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () => _showLanguageDialog(context, languageController),
           ),
-          Obx(() => SwitchListTile(
-                secondary: Icon(
-                  Icons.bolt,
-                  color: ecuController.isSimulating.value ? Colors.orange : null,
-                ),
-                title: const Text('Simulation Mode'),
-                subtitle: Text(
-                  ecuController.isSimulating.value
-                      ? 'Running (15ms interval)'
-                      : 'Off',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: ecuController.isSimulating.value
-                        ? Colors.orange
-                        : Colors.grey,
-                  ),
-                ),
-                value: ecuController.isSimulating.value,
-                onChanged: (_) => ecuController.toggleSimulation(),
-              )),
-
-          Obx(() => ListTile(
-                leading: const Icon(Icons.speed),
-                title: const Text('Needle Speed'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Slider(
-                      value: settingsController.needleLerpSpeed.value,
-                      min: 0.01,
-                      max: 0.5,
-                      divisions: 49,
-                      label: settingsController.needleLerpSpeed.value.toStringAsFixed(2),
-                      onChanged: settingsController.setNeedleLerpSpeed,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text('ช้า', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                          Text('เร็ว', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              )),
+          // Obx(() => SwitchListTile(
+          //       secondary: Icon(
+          //         Icons.bolt,
+          //         color: ecuController.isSimulating.value ? Colors.orange : null,
+          //       ),
+          //       title: const Text('Simulation Mode'),
+          //       subtitle: Text(
+          //         ecuController.isSimulating.value
+          //             ? 'Running (15ms interval)'
+          //             : 'Off',
+          //         style: TextStyle(
+          //           fontSize: 12,
+          //           color: ecuController.isSimulating.value
+          //               ? Colors.orange
+          //               : Colors.grey,
+          //         ),
+          //       ),
+          //       value: ecuController.isSimulating.value,
+          //       onChanged: (_) => ecuController.toggleSimulation(),
+          //     )),
 
           ListTile(
             leading: const Icon(Icons.info),

@@ -4,13 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ecu_data_controller.dart';
 import '../../../controllers/gps_speed_controller.dart';
-import '../../../controllers/settings_controller.dart';
 import '../../widgets/settings_button.dart';
 import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
-import '../../widgets/history_button.dart';
-import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
 import '../../widgets/raw_data_overlay.dart';
 
@@ -53,7 +50,6 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
   Widget build(BuildContext context) {
     final ecuController = Get.find<ECUDataController>();
     final gpsSpeedController = Get.find<GpsSpeedController>();
-    final settingsController = Get.find<SettingsController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF19171e),
@@ -106,14 +102,12 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                           right: pxW(0.16),
                           child: Obx(() {
                             final speed = gpsSpeedController.gpsSpeed.value;
-                            final lerpSpeed = settingsController.needleLerpSpeed.value;
                             return AnimatedGaugeNeedle(
                               targetValue: speed,
                               maxValue: 270,
                               size: speedNeedleSize,
                               offsetAngle: -15 - 135,
                               rotationRange: 270,
-                              lerpSpeed: lerpSpeed,
                               animationDuration: const Duration(milliseconds: 300),
                               animationCurve: Curves.easeInOut,
                               builder: (angle, currentValue) {
@@ -140,7 +134,6 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                           child: Obx(() {
                             final rpm = ecuController.displayData?.rpm ?? 0;
                             final isRpmAlert = ecuController.activeAlertParameters.contains('rpm');
-                            final lerpSpeed = settingsController.needleLerpSpeed.value;
                             return AnimatedGaugeNeedle(
                               targetValue: rpm,
                               maxValue: 15000,
@@ -148,7 +141,6 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                               offsetAngle: -65 - 135,
                               rotationRange: 320,
                               isAlert: isRpmAlert,
-                              lerpSpeed: lerpSpeed,
                               animationDuration: const Duration(milliseconds: 300),
                               animationCurve: Curves.easeInOut,
                               builder: (angle, currentValue) {
