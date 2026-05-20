@@ -65,7 +65,7 @@ class _EcuModelScreenState extends State<EcuModelScreen>
                       ),
                     ),
                   ),
-                  ...EcuModel.values.map((model) {
+                  ...EcuModel.values.where((model) => model != EcuModel.simulation).map((model) {
                     return RadioListTile<EcuModel>(
                       title: Text(model.description),
                       value: model,
