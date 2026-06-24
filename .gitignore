@@ -54,6 +54,7 @@ windows/
 
 # FVM Version Cache
 .fvm/
+!.fvmrc
 
 # Firebase
 google-services.json
