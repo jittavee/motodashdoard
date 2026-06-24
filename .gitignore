@@ -51,3 +51,10 @@ linux/
 macos/
 web/
 windows/
+
+# FVM Version Cache
+.fvm/
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
