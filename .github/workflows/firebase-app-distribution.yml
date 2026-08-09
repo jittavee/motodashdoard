@@ -44,10 +44,12 @@ jobs:
       - name: Deploy to Firebase App Distribution
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          RELEASE_NOTES: ${{ github.event.head_commit.message }}
         run: |
           firebase appdistribution:distribute \
             "build/app/outputs/flutter-apk/app-release.apk" \
-            --app "${{ secrets.FIREBASE_APP_ID }}" \
-            --release-notes "${{ github.event.head_commit.message }}" \
+            --app "$FIREBASE_APP_ID" \
+            --release-notes "$(echo "$RELEASE_NOTES" | head -n1)" \
             --groups "tester" \
             --token "$FIREBASE_TOKEN"
