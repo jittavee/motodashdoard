@@ -51,6 +51,7 @@ class ECUDataController extends GetxController {
     'BATT', 'IGNITI', 'INJECT', 'AFR', 'S.TRIM', 'L.TRIM', 'IACV'
   };
 
+
   @override
   void onInit() {
     super.onInit();
@@ -138,6 +139,45 @@ class ECUDataController extends GetxController {
       });
     } catch (e) {
       logger.e('Error parsing ECU data: $e');
+    }
+  }
+
+  // รับข้อมูลจาก Bluetooth binary packet (ครบทุก parameter มาพร้อมกันในชุดเดียว, ดู work.md)
+  void updateDataFromPacket(Map<String, double> values) {
+    try {
+      if (values.isEmpty) {
+        logger.w('Empty packet values received');
+        return;
+      }
+
+      for (final entry in values.entries) {
+        final key = entry.key;
+        final value = entry.value;
+
+        if (!_validKeys.contains(key)) {
+          logger.w('Unknown ECU parameter: $key');
+          continue;
+        }
+
+        if (!_isValueInValidRange(key, value)) {
+          logger.w('Value out of range for $key: $value');
+          continue;
+        }
+
+        _dataBuffer[key] = value;
+      }
+
+      logger.d('Received ECU packet: $values');
+
+      // Throttle UI updates to max 20fps (50ms) for smooth animation
+      _pendingUIUpdate = true;
+      _uiThrottleTimer ??= Timer(const Duration(milliseconds: 50), () {
+        if (_pendingUIUpdate) _updateUI();
+        _uiThrottleTimer = null;
+        _pendingUIUpdate = false;
+      });
+    } catch (e) {
+      logger.e('Error parsing ECU packet: $e');
     }
   }
 
