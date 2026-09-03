@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/ecu_data.dart';
@@ -9,6 +10,11 @@ class DatabaseHelper {
   static Database? _database;
 
   DatabaseHelper._init();
+
+  /// Constructor สำหรับ subclass เท่านั้น (เช่น fake ใน unit test)
+  /// production code ต้องใช้ [DatabaseHelper.instance]
+  @visibleForTesting
+  DatabaseHelper.forTesting();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -27,6 +33,16 @@ class DatabaseHelper {
       onUpgrade: _upgradeDB,
     );
   }
+
+  /// เปิดให้ test เรียก migration ตรงๆ บน in-memory database ได้
+  /// (production ใช้ผ่าน openDatabase onUpgrade เท่านั้น)
+  @visibleForTesting
+  Future<void> runUpgrade(Database db, int oldVersion, int newVersion) =>
+      _upgradeDB(db, oldVersion, newVersion);
+
+  /// เปิดให้ test สร้าง schema ล่าสุดบน in-memory database ได้
+  @visibleForTesting
+  Future<void> runCreate(Database db, int version) => _createDB(db, version);
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     // Migration logic for future schema changes

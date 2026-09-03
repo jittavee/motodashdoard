@@ -11,41 +11,80 @@ void main() {
   });
 
   tearDown(() {
-    controller.dispose();
     Get.reset();
   });
 
-  group('BluetoothController State Tests', () {
-    test('should initialize with disconnected status', () {
-      expect(
-        controller.connectionStatus.value,
-        equals(BluetoothConnectionStatus.disconnected),
-      );
-    });
-
-    test('should initialize with empty scan results', () {
-      expect(controller.scanResults.isEmpty, isTrue);
-    });
-
-    test('should initialize with isScanning false', () {
+  group('initial state', () {
+    test('starts disconnected with nothing scanned', () {
+      expect(controller.connectionStatus.value,
+          BluetoothConnectionStatus.disconnected);
+      expect(controller.scanResults, isEmpty);
       expect(controller.isScanning.value, isFalse);
-    });
-  });
-
-  group('BluetoothController Data Handling Tests', () {
-    test('should initialize with empty last received data', () {
       expect(controller.lastReceivedData.value, isEmpty);
-    });
-
-    test('should have no error message initially', () {
       expect(controller.errorMessage.value, isEmpty);
     });
+
+    test('starts with the ECU link reported as no response', () {
+      expect(controller.ecuConnectionStatus.value,
+          EcuConnectionStatus.noResponse);
+      expect(controller.isEcuModelSynced.value, isFalse);
+    });
+
+    test('defaults to the simulation ECU model', () {
+      // main.dart ยิง model=0 ก่อนเสมอ ค่าเริ่มต้นจึงต้องเป็น simulation
+      expect(controller.currentEcuModel.value, EcuModel.simulation);
+    });
   });
 
-  group('BluetoothController Cleanup Tests', () {
-    test('should cleanup resources on dispose', () {
-      controller.onClose();
-      // Verify no exceptions thrown during cleanup
+  group('EcuModel', () {
+    test('maps each supported value to its model', () {
+      expect(EcuModel.fromValue(0), EcuModel.simulation);
+      expect(EcuModel.fromValue(1), EcuModel.under150cc);
+      expect(EcuModel.fromValue(2), EcuModel.higher150cc);
+      expect(EcuModel.fromValue(3), EcuModel.smallBikes);
+    });
+
+    test('falls back to simulation for an unknown value', () {
+      // dongle รุ่นใหม่อาจส่งค่าที่แอปยังไม่รู้จัก — ต้องไม่ crash
+      expect(EcuModel.fromValue(99), EcuModel.simulation);
+      expect(EcuModel.fromValue(-1), EcuModel.simulation);
+    });
+
+    test('every model carries a non-empty description for the UI', () {
+      for (final model in EcuModel.values) {
+        expect(model.description, isNotEmpty);
+      }
+    });
+  });
+
+  group('EcuConnectionStatus', () {
+    test('parses each documented status string from the dongle', () {
+      expect(EcuConnectionStatus.fromString('Connected'),
+          EcuConnectionStatus.connected);
+      expect(EcuConnectionStatus.fromString('No_response'),
+          EcuConnectionStatus.noResponse);
+      expect(EcuConnectionStatus.fromString('Connecting...'),
+          EcuConnectionStatus.connecting);
+    });
+
+    test('parsing is case-insensitive', () {
+      expect(EcuConnectionStatus.fromString('connected'),
+          EcuConnectionStatus.connected);
+      expect(EcuConnectionStatus.fromString('CONNECTED'),
+          EcuConnectionStatus.connected);
+    });
+
+    test('falls back to no response for unrecognized text', () {
+      expect(EcuConnectionStatus.fromString('garbage'),
+          EcuConnectionStatus.noResponse);
+      expect(EcuConnectionStatus.fromString(''),
+          EcuConnectionStatus.noResponse);
+    });
+  });
+
+  group('cleanup', () {
+    test('onClose does not throw when never connected', () {
+      expect(() => controller.onClose(), returnsNormally);
     });
   });
 }

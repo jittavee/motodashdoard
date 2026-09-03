@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:api_tech_moto/utils/logger.dart';
 import 'package:get/get.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../models/ecu_data.dart';
 import '../models/alert_threshold.dart';
+import '../services/alert_sound_player.dart';
 import '../services/database_helper.dart';
+import '../utils/ecu_parser.dart';
 
 class ECUDataController extends GetxController {
   final Rx<ECUData?> currentData = Rx<ECUData?>(null);
@@ -37,19 +38,23 @@ class ECUDataController extends GetxController {
   Timer? _loggingTimer;
   Timer? _uiThrottleTimer;
   DateTime? _lastAlertSoundTime;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AlertSoundPlayer _alertSound;
   bool _pendingUIUpdate = false;
   final Map<String, double> _dataBuffer = {};
   // RPM throttle: buffer TECHO separately, flush to _dataBuffer at most every 200ms
   Timer? _rpmThrottleTimer;
   double? _pendingRpm;
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  final DatabaseHelper _dbHelper;
 
-  // Valid ECU parameter keys
-  static const Set<String> _validKeys = {
-    'TECHO', 'SPEED', 'WATER', 'AIR.T', 'MAP', 'TPS',
-    'BATT', 'IGNITI', 'INJECT', 'AFR', 'S.TRIM', 'L.TRIM', 'IACV'
-  };
+  /// Dependency injection ผ่าน optional parameter — production code
+  /// (`Get.put(ECUDataController())` ใน main.dart) ยังใช้ singleton เดิม
+  /// ส่วน test ยัด fake เข้ามาแทนได้โดยไม่ต้องแตะ sqflite/audio platform channel
+  ECUDataController({
+    DatabaseHelper? dbHelper,
+    AlertSoundPlayer? alertSound,
+  })  : _dbHelper = dbHelper ?? DatabaseHelper.instance,
+        _alertSound = alertSound ?? AudioPlayerAlertSound();
+
 
 
   @override
@@ -80,35 +85,17 @@ class ECUDataController extends GetxController {
         return;
       }
 
-      // แยก key=value
-      List<String> keyValue = rawData.trim().split('=');
-      if (keyValue.length != 2) {
-        logger.w('Invalid data format: $rawData');
+      // แยก + validate ผ่าน EcuParser (pure, ทดสอบแยกได้)
+      final parsed = EcuParser.parse(rawData);
+      if (parsed == null) {
+        logger.w('Rejected ECU data: $rawData');
         return;
       }
 
-      String key = keyValue[0].trim().toUpperCase();
-
-      // Validate key
-      if (!_validKeys.contains(key)) {
-        logger.w('Unknown ECU parameter: $key');
-        return;
-      }
-
-      // Parse value
-      double? value = double.tryParse(keyValue[1].trim());
-      if (value == null) {
-        logger.w('Invalid numeric value for $key: ${keyValue[1]}');
-        return;
-      }
+      final String key = parsed.key;
+      final double value = parsed.value;
 
       logger.d('Received ECU data - $key: $value');
-
-      // Validate value bounds
-      if (!_isValueInValidRange(key, value)) {
-        logger.w('Value out of range for $key: $value');
-        return;
-      }
 
       // RPM throttle: hold TECHO updates for 200ms before flushing to buffer
       if (key == 'TECHO') {
@@ -154,12 +141,12 @@ class ECUDataController extends GetxController {
         final key = entry.key;
         final value = entry.value;
 
-        if (!_validKeys.contains(key)) {
+        if (!EcuParser.validKeys.contains(key)) {
           logger.w('Unknown ECU parameter: $key');
           continue;
         }
 
-        if (!_isValueInValidRange(key, value)) {
+        if (!EcuParser.isValueInValidRange(key, value)) {
           logger.w('Value out of range for $key: $value');
           continue;
         }
@@ -178,40 +165,6 @@ class ECUDataController extends GetxController {
       });
     } catch (e) {
       logger.e('Error parsing ECU packet: $e');
-    }
-  }
-
-  // Validate ECU parameter values are within realistic ranges
-  bool _isValueInValidRange(String key, double value) {
-    switch (key) {
-      case 'TECHO': // RPM
-        return value >= 0 && value <= 20000;
-      case 'SPEED': // km/h
-        return value >= 0 && value <= 400;
-      case 'WATER': // Water temp (°C)
-        return value >= -40 && value <= 500;
-      case 'AIR.T': // Air temp (°C)
-        return value >= -40 && value <= 150;
-      case 'MAP': // kPa
-        return value >= 0 && value <= 300;
-      case 'TPS': // %
-        return value >= 0 && value <= 100;
-      case 'BATT': // Volts
-        return value >= 0 && value <= 20;
-      case 'IGNITI': // Degrees
-        return value >= -30 && value <= 60;
-      case 'INJECT': // ms
-        return value >= 0 && value <= 50;
-      case 'AFR': // Air-Fuel Ratio
-        return value >= 5 && value <= 25;
-      case 'S.TRIM': // %
-        return value >= 0 && value <= 200;
-      case 'L.TRIM': // %
-        return value >= 0 && value <= 200;
-      case 'IACV': // %
-        return value >= 0 && value <= 100;
-      default:
-        return true;
     }
   }
 
@@ -311,7 +264,7 @@ class ECUDataController extends GetxController {
       return;
     }
     _lastAlertSoundTime = now;
-    _audioPlayer.play(AssetSource('sounds/alert.wav'));
+    _alertSound.playAlert();
   }
 
   // จัดการ Alert Thresholds

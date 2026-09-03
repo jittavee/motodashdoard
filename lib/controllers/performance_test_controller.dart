@@ -5,6 +5,7 @@ import '../models/performance_test.dart';
 import '../routes/app_routes.dart';
 import '../services/database_helper.dart';
 import '../services/permission_service.dart';
+import '../utils/logger.dart';
 import 'ecu_data_controller.dart';
 import 'settings_controller.dart';
 
@@ -358,10 +359,14 @@ class PerformanceTestController extends GetxController {
     _testTimer?.cancel();
     _positionSubscription?.cancel();
 
-    // หยุด ECU logging ด้วย
-    final ecuController = Get.find<ECUDataController>();
-    if (ecuController.isLogging.value) {
-      ecuController.stopLogging();
+    // หยุด ECU logging ด้วย (controller อาจยังไม่ถูก register เช่นใน unit test)
+    try {
+      final ecuController = Get.find<ECUDataController>();
+      if (ecuController.isLogging.value) {
+        ecuController.stopLogging();
+      }
+    } catch (e) {
+      logger.w('ECUDataController not found while stopping test', error: e);
     }
 
     _testTimer = null;

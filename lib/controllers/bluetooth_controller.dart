@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/logger.dart';
 import 'ecu_data_controller.dart';
+import '../utils/dongle_message.dart';
+import '../utils/ecu_packet_decoder.dart';
 
 enum BluetoothConnectionStatus {
   disconnected,
@@ -323,9 +325,6 @@ class BluetoothController extends GetxController {
 
 
   // Binary packet framing (see work.md): 20 bytes, header 0x41, header2 0x42 at index 3
-  static const int _packetLength = 20;
-  static const int _headerByte = 0x41;
-  static const int _header2Byte = 0x42;
 
   void _handleReceivedData(List<int> data) {
     try {
@@ -355,20 +354,21 @@ class BluetoothController extends GetxController {
       // Log ข้อมูลที่รับได้
       logger.d('Bluetooth Data Received: $dataString');
 
-      // กรอง echo ของคำสั่งที่เราส่งออกไป (Dongle echo กลับมา)
-      if (RegExp(r'^model=\d$', caseSensitive: false).hasMatch(dataString.trim())) {
-        logger.d('Ignoring command echo: $dataString');
-        return;
-      }
+      // แยกประเภทข้อความก่อน (pure, ทดสอบแยกได้ใน dongle_message_test.dart)
+      final message = DongleMessage.classify(dataString);
 
-      // ตรวจสอบว่าเป็นข้อมูล EcuModel response หรือไม่
-      if (_handleEcuModelResponse(dataString)) {
-        return;
-      }
-
-      // ตรวจสอบว่าเป็นข้อมูล ECU connection status หรือไม่
-      if (_handleEcuConnectionStatus(dataString)) {
-        return;
+      switch (message) {
+        case CommandEcho():
+          logger.d('Ignoring command echo: $dataString');
+          return;
+        case EcuModelAck(:final modelValue):
+          _applyEcuModelAck(modelValue);
+          return;
+        case EcuStatusUpdate(:final rawStatus):
+          _applyEcuStatus(EcuConnectionStatus.fromString(rawStatus));
+          return;
+        case GaugeReading():
+          break;
       }
 
       // ส่งข้อมูลไปยัง ECU Data Controller
@@ -392,11 +392,8 @@ class BluetoothController extends GetxController {
     }
   }
 
-  bool _isBinaryPacket(List<int> data) {
-    return data.length == _packetLength &&
-        data[0] == _headerByte &&
-        data[3] == _header2Byte;
-  }
+  bool _isBinaryPacket(List<int> data) =>
+      EcuPacketDecoder.isBinaryPacket(data);
 
   /// Decode the 20-byte binary packet described in work.md:
   /// byte0=header(0x41) byte1=EcuModel byte2=ECU status byte3=header2(0x42)
@@ -407,30 +404,13 @@ class BluetoothController extends GetxController {
       logger.d('Bluetooth Binary Packet Received: $data');
 
       // Byte 1: EcuModel ('0'..'3' => 0x30..0x33)
-      _handleEcuModelByte(data[1] - 0x30);
+      _handleEcuModelByte(EcuPacketDecoder.modelValue(data));
 
       // Byte 2: ECU connection status (0=Connected, 1=No response, 2=Connecting)
-      _handleEcuStatusByte(data[2] - 0x30);
+      _handleEcuStatusByte(EcuPacketDecoder.statusValue(data));
 
       // Byte 4-18: sensor values
-      final techo = (data[4] * 256) + data[5];
-      final igniti = (((data[12] * 256) + data[13]) - 640) / 10.0;
-
-      final values = <String, double>{
-        'TECHO': techo.toDouble(),
-        'SPEED': data[6].toDouble(),
-        'WATER': (data[7] - 40).toDouble(),
-        'AIR.T': (data[8] - 30).toDouble(),
-        'MAP': data[9].toDouble(),
-        'TPS': data[10].toDouble(),
-        'BATT': data[11] / 10.0,
-        'IGNITI': igniti,
-        'INJECT': data[14] / 10.0,
-        'AFR': data[15] / 10.0,
-        'S.TRIM': (data[16] - 128).toDouble(),
-        'L.TRIM': (data[17] - 128).toDouble(),
-        'IACV': data[18].toDouble(),
-      };
+      final values = EcuPacketDecoder.decodeSensors(data);
 
       try {
         Get.find<ECUDataController>().updateDataFromPacket(values);
@@ -444,7 +424,11 @@ class BluetoothController extends GetxController {
   }
 
   /// Handle the EcuModel byte embedded in every binary packet
-  void _handleEcuModelByte(int modelValue) {
+  void _handleEcuModelByte(int modelValue) => _applyEcuModelAck(modelValue);
+
+  /// Apply an EcuModel acknowledgement from the dongle (binary byte หรือ
+  /// ข้อความ "EcuModel=N" — เส้นทางเดียวกัน)
+  void _applyEcuModelAck(int modelValue) {
     _ecuModelTimeout?.cancel();
     isSettingEcuModel.value = false;
 
@@ -483,14 +467,18 @@ class BluetoothController extends GetxController {
   /// Handle the ECU connection status byte embedded in every binary packet
   /// 0=Connected, 1=No response, 2=Connecting
   void _handleEcuStatusByte(int statusValue) {
-    final newStatus = switch (statusValue) {
+    _applyEcuStatus(switch (statusValue) {
       0 => EcuConnectionStatus.connected,
       2 => EcuConnectionStatus.connecting,
       _ => EcuConnectionStatus.noResponse,
-    };
+    });
+  }
 
-    // ถ้าสถานะปัจจุบันเป็น connected แล้ว ไม่ให้กลับไปเป็น connecting
-    // (ป้องกันการกระพริบ เพราะ Dongle อาจส่ง Connecting... สลับกับข้อมูล ECU)
+  /// Apply an ECU link status from either the binary byte or "ECU=..." text.
+  ///
+  /// ถ้าสถานะปัจจุบันเป็น connected แล้ว ไม่ให้กลับไปเป็น connecting
+  /// (ป้องกันการกระพริบ เพราะ Dongle อาจส่ง Connecting... สลับกับข้อมูล ECU)
+  void _applyEcuStatus(EcuConnectionStatus newStatus) {
     if (ecuConnectionStatus.value == EcuConnectionStatus.connected &&
         newStatus == EcuConnectionStatus.connecting) {
       logger.d('Ignoring Connecting status - already connected');
@@ -499,88 +487,6 @@ class BluetoothController extends GetxController {
 
     ecuConnectionStatus.value = newStatus;
     logger.i('ECU Connection Status: ${ecuConnectionStatus.value.rawValue}');
-  }
-
-  /// Handle EcuModel response from Dongle
-  /// Returns true if the data was an EcuModel response
-  bool _handleEcuModelResponse(String dataString) {
-    // ตรวจสอบรูปแบบ EcuModel=0, EcuModel=1, EcuModel=2, EcuModel=3
-    final ecuModelRegex = RegExp(r'^EcuModel=(\d)$', caseSensitive: false);
-    final match = ecuModelRegex.firstMatch(dataString.trim());
-
-    if (match != null) {
-      // ยกเลิก timeout และ loading state
-      _ecuModelTimeout?.cancel();
-      isSettingEcuModel.value = false;
-
-      final modelValue = int.tryParse(match.group(1) ?? '0') ?? 0;
-      final receivedModel = EcuModel.fromValue(modelValue);
-
-      // ถ้ากำลังรอ ack ของ model=0 และ Dongle ยืนยัน model=0 แล้ว
-      // ให้ยิง model ที่จำไว้ต่อเลย
-      if (_waitingForSimulationAck && receivedModel == EcuModel.simulation) {
-        _waitingForSimulationAck = false;
-        final savedModel = currentEcuModel.value;
-        logger.i('Simulation ack received, now sending saved model: ${savedModel.description}');
-        sendData('model=${savedModel.value}');
-        return true;
-      }
-
-      _waitingForSimulationAck = false;
-      currentEcuModel.value = receivedModel;
-      isEcuModelSynced.value = true;
-      _saveLastEcuModel(currentEcuModel.value);
-
-      // Reset ECU data buffer เพื่อให้ค่าใหม่จาก ECU ใหม่แสดงผล
-      try {
-        final ecuController = Get.find<ECUDataController>();
-        ecuController.resetData();
-        logger.i('ECU data buffer cleared for new ECU Model');
-      } catch (e) {
-        logger.w('ECUDataController not found for reset', error: e);
-      }
-
-      logger.i('ECU Model received from Dongle: ${currentEcuModel.value.description}');
-
-      // Get.snackbar(
-      //   'ECU Model',
-      //   'Dongle ตั้งค่าเป็น: ${currentEcuModel.value.description}',
-      //   snackPosition: SnackPosition.BOTTOM,
-      //   duration: const Duration(seconds: 2),
-      // );
-
-      return true;
-    }
-
-    return false;
-  }
-
-  /// Handle ECU Connection Status from Dongle
-  /// Returns true if the data was an ECU connection status
-  bool _handleEcuConnectionStatus(String dataString) {
-    // ตรวจสอบรูปแบบ ECU=Connected, ECU=No_response, ECU=Connecting...
-    final ecuStatusRegex = RegExp(r'^ECU=(.+)$', caseSensitive: false);
-    final match = ecuStatusRegex.firstMatch(dataString.trim());
-
-    if (match != null) {
-      final statusValue = match.group(1) ?? 'No_response';
-      final newStatus = EcuConnectionStatus.fromString(statusValue);
-
-      // ถ้าสถานะปัจจุบันเป็น connected แล้ว ไม่ให้กลับไปเป็น connecting
-      // (ป้องกันการกระพริบ เพราะ Dongle อาจส่ง Connecting... สลับกับข้อมูล ECU)
-      if (ecuConnectionStatus.value == EcuConnectionStatus.connected &&
-          newStatus == EcuConnectionStatus.connecting) {
-        logger.d('Ignoring Connecting status - already connected');
-        return true;
-      }
-
-      ecuConnectionStatus.value = newStatus;
-      logger.i('ECU Connection Status: ${ecuConnectionStatus.value.rawValue}');
-
-      return true;
-    }
-
-    return false;
   }
 
   void _handleDisconnection() {
