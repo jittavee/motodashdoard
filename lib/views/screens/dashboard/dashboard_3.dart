@@ -11,7 +11,6 @@ import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
 import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
-import '../../widgets/raw_data_overlay.dart';
 
 class TemplateThreeScreen extends StatefulWidget {
   const TemplateThreeScreen({super.key});
@@ -263,13 +262,6 @@ class _TemplateThreeScreenState extends State<TemplateThreeScreen> with WidgetsB
           right: 10,
           child: SettingsButton(),
         ),
-        // Raw Data Overlay (Bottom Right)
-        const Positioned(
-          bottom: 40,
-          right: 10,
-          child: RawDataOverlay(),
-        ),
-
         // Performance Test Indicator (Bottom Right)
         const Positioned(
           bottom: 10,

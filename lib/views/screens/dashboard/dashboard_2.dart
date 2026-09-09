@@ -10,7 +10,6 @@ import '../../widgets/ecu_status_indicator.dart';
 import '../../widgets/history_button.dart';
 import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
-import '../../widgets/raw_data_overlay.dart';
 
 class TemplateTwoScreen extends StatefulWidget {
   const TemplateTwoScreen({super.key});
@@ -305,13 +304,6 @@ class _TemplateTwoScreenState extends State<TemplateTwoScreen>
                           left: bgWidth * 0.02,
                           child: const EcuStatusIndicator(),
                         ),
-                        // Raw Data Overlay (Bottom Right)
-                        Positioned(
-                          bottom: bgHeight * 0.12,
-                          right: bgWidth * 0.02,
-                          child: const RawDataOverlay(),
-                        ),
-
                         // Performance Test Indicator (Bottom Right)
                         Positioned(
                           bottom: bgHeight * 0.02,

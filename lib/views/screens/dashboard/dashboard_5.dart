@@ -9,7 +9,6 @@ import '../../widgets/animated_gauge_needle.dart';
 import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
 import '../../widgets/performance_test_indicator.dart';
-import '../../widgets/raw_data_overlay.dart';
 
 class TemplateFiveScreen extends StatefulWidget {
   const TemplateFiveScreen({super.key});
@@ -269,13 +268,6 @@ class _TemplateFiveScreenState extends State<TemplateFiveScreen> with WidgetsBin
                   bottom: 10,
                   left: 10,
                   child: EcuStatusIndicator(),
-                ),
-
-                // Raw Data Overlay (Bottom Right)
-                const Positioned(
-                  bottom: 40,
-                  right: 10,
-                  child: RawDataOverlay(),
                 ),
 
                 // Performance Test Indicator (Bottom Right)

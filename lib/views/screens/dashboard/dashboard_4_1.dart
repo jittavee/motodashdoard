@@ -9,7 +9,6 @@ import '../../widgets/recording_indicator.dart';
 import '../../widgets/ecu_status_indicator.dart';
 import '../../widgets/playback_timeline.dart';
 import '../../widgets/performance_test_indicator.dart';
-import '../../widgets/raw_data_overlay.dart';
 import '../../widgets/speed_arc_gauge.dart';
 import '../../widgets/afr_bar_gauge.dart';
 
@@ -225,7 +224,6 @@ class _TemplateFourOneScreenState extends State<TemplateFourOneScreen>
               child: Center(child: RecordingIndicator()),
             ),
             const Positioned(bottom: 10, left: 10, child: EcuStatusIndicator()),
-            const Positioned(bottom: 40, right: 10, child: RawDataOverlay()),
             const Positioned(bottom: 10, right: 10, child: PerformanceTestIndicator()),
             const Positioned(
               bottom: 0, left: 0, right: 0,
